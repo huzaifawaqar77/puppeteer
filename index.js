@@ -66,6 +66,7 @@ const authRoutes = require("./routes/auth");
 const pdfRoutes = require("./routes/pdf");
 const subscriptionRoutes = require("./routes/subscription");
 const aiRoutes = require("./routes/ai");
+const apiKeysRoutes = require("./routes/apiKeys");
 
 // --- Health Check ---
 app.get("/health", (req, res) => {
@@ -82,6 +83,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/pdf", pdfRoutes);
 app.use("/api/subscription", subscriptionRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/keys", apiKeysRoutes);
 
 // --- Landing Page Route ---
 app.get("/", (req, res) => {

@@ -54,6 +54,11 @@ function setupEventListeners() {
     .getElementById("urlPdfForm")
     .addEventListener("submit", generatePdfFromUrl);
 
+  // Preview HTML button
+  document
+    .getElementById("previewHtmlBtn")
+    .addEventListener("click", previewHtml);
+
   // AI Template form
   document
     .getElementById("aiTemplateForm")
@@ -264,20 +269,32 @@ function renderApiKeys(apiKeys) {
         <div class="api-key-item">
             <div class="api-key-header">
                 <span class="api-key-name">${key.name || "API Key"}</span>
-                <span class="api-key-status ${
-                  key.is_active ? "active" : "inactive"
-                }">
-                    ${key.is_active ? "Active" : "Inactive"}
-                </span>
+                <div class="api-key-controls">
+                    <label class="toggle-switch">
+                        <input
+                            type="checkbox"
+                            ${key.is_active ? "checked" : ""}
+                            onchange="toggleApiKey(${key.id}, this.checked)"
+                        />
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="api-key-status ${
+                      key.is_active ? "active" : "inactive"
+                    }">
+                        ${key.is_active ? "Active" : "Inactive"}
+                    </span>
+                </div>
             </div>
             <div class="api-key-value">
                 <div class="api-key-text">${key.api_key}</div>
                 <button class="btn-copy" onclick="copyToClipboard('${
                   key.api_key
-                }')">Copy</button>
+                }')">
+                    <i class="fas fa-copy"></i> Copy
+                </button>
             </div>
             <div class="api-key-meta">
-                Last used: ${
+                <i class="fas fa-clock"></i> Last used: ${
                   key.last_used_at
                     ? new Date(key.last_used_at).toLocaleString()
                     : "Never"
@@ -289,15 +306,50 @@ function renderApiKeys(apiKeys) {
     .join("");
 }
 
+// Toggle API key active/inactive
+async function toggleApiKey(keyId, isActive) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/keys/${keyId}/toggle`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ is_active: isActive }),
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      showNotification(
+        `API key ${isActive ? "activated" : "deactivated"} successfully`,
+        "success"
+      );
+      // Reload API keys to reflect changes
+      loadApiKeys();
+    } else {
+      showNotification(data.message || "Failed to toggle API key", "error");
+      // Reload to revert the toggle
+      loadApiKeys();
+    }
+  } catch (error) {
+    console.error("Error toggling API key:", error);
+    showNotification("Failed to toggle API key", "error");
+    // Reload to revert the toggle
+    loadApiKeys();
+  }
+}
+
 // Copy to clipboard
 function copyToClipboard(text) {
   navigator.clipboard
     .writeText(text)
     .then(() => {
-      alert("API key copied to clipboard!");
+      showNotification("API key copied to clipboard!", "success");
     })
     .catch((err) => {
       console.error("Failed to copy:", err);
+      showNotification("Failed to copy API key", "error");
     });
 }
 
@@ -331,6 +383,26 @@ function switchGenTab(tabName) {
     content.classList.remove("active");
   });
   document.getElementById(`${tabName}-gen`).classList.add("active");
+}
+
+// Preview HTML in new tab
+function previewHtml() {
+  const html = document.getElementById("htmlContent").value;
+
+  if (!html.trim()) {
+    showNotification("Please enter HTML content to preview", "error");
+    return;
+  }
+
+  // Open new window with HTML content
+  const previewWindow = window.open("", "_blank");
+  if (previewWindow) {
+    previewWindow.document.open();
+    previewWindow.document.write(html);
+    previewWindow.document.close();
+  } else {
+    showNotification("Please allow pop-ups to preview HTML", "error");
+  }
 }
 
 // Generate PDF from HTML

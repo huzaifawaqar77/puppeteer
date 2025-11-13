@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>Dashboard - PDF Generation SaaS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -300,9 +302,24 @@
                 </div>
               </div>
 
-              <button type="submit" class="btn" id="htmlSubmitBtn">
-                Generate PDF
-              </button>
+              <div style="display: flex; gap: 10px">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  id="previewHtmlBtn"
+                  style="flex: 1"
+                >
+                  <i class="fas fa-eye"></i> Preview HTML
+                </button>
+                <button
+                  type="submit"
+                  class="btn"
+                  id="htmlSubmitBtn"
+                  style="flex: 2"
+                >
+                  <i class="fas fa-file-pdf"></i> Generate PDF
+                </button>
+              </div>
             </form>
           </div>
 

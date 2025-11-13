@@ -97,21 +97,41 @@ async function generateTemplate(req, res) {
     const apiKey = process.env.GEMINI_API_KEY;
 
     // Create prompt for HTML generation
-    const prompt = `You are an expert HTML/CSS developer. Generate a complete, professional HTML template based on the following description. The HTML should be production-ready, well-structured, and include inline CSS for styling.
+    const prompt = `You are an expert HTML/CSS developer specializing in PDF-ready templates. Generate a complete, professional HTML template that will be converted to PDF using Puppeteer.
 
 Description: ${description}
 
-Requirements:
-1. Generate ONLY the HTML code, no explanations
-2. Include complete HTML structure with <!DOCTYPE html>, <html>, <head>, and <body> tags
-3. Use inline CSS or <style> tags for all styling
-4. Make it responsive and professional-looking
-5. Include proper semantic HTML5 tags
-6. Ensure the design is print-friendly for PDF generation
-7. Use modern, clean design principles
-8. Include appropriate fonts, colors, and spacing
+CRITICAL REQUIREMENTS FOR PDF GENERATION:
+1. Generate ONLY the HTML code, no explanations or markdown
+2. Include complete HTML structure: <!DOCTYPE html>, <html>, <head>, and <body> tags
+3. Use ONLY inline CSS within <style> tags in the <head> - NO external stylesheets
+4. NO external resources (images, fonts, scripts) - use only web-safe fonts or inline data URIs
+5. Use print-friendly CSS with proper page sizing (A4: 210mm x 297mm or Letter: 8.5in x 11in)
+6. Set proper margins for printing (e.g., margin: 20mm)
+7. Use @page CSS rules for page setup if needed
+8. Avoid page breaks in the middle of important content (use page-break-inside: avoid)
+9. Use web-safe fonts: Arial, Helvetica, Times New Roman, Georgia, Courier, Verdana
+10. Test-friendly colors that work in print (avoid pure white backgrounds, use #fafafa instead)
 
-Generate the HTML template now:`;
+DESIGN REQUIREMENTS:
+1. Professional, clean, and modern design
+2. Proper semantic HTML5 tags (header, main, section, article, footer)
+3. Responsive layout that works well on standard paper sizes
+4. Clear typography with good contrast (minimum 12px font size)
+5. Proper spacing and alignment for readability
+6. Tables should have borders and proper cell padding
+7. Use flexbox or CSS Grid for layouts (avoid floats)
+8. Include proper document title in <title> tag
+
+PUPPETEER OPTIMIZATION:
+1. All styles must be inline or in <style> tags - Puppeteer will render immediately
+2. No JavaScript dependencies - static HTML/CSS only
+3. No external font loading - use system fonts only
+4. Images must be inline base64 data URIs or omitted
+5. Content should fit standard paper sizes without overflow
+6. Use CSS to control page breaks: page-break-before, page-break-after, page-break-inside
+
+Generate the complete, PDF-ready HTML template now:`;
 
     // Make direct API call to Gemini
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent`;
