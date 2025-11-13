@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- SEO Meta Tags -->
+    <title>
+      PDF Generation API - Convert HTML to PDF with Puppeteer | Fast & Reliable
+    </title>
+    <meta
+      name="description"
+      content="Professional HTML to PDF conversion API powered by Puppeteer. Convert web pages and HTML content to high-quality PDFs instantly. Free trial available."
+    />
+    <meta
+      name="keywords"
+      content="PDF API, HTML to PDF, Puppeteer API, PDF generation, web to PDF, document conversion, PDF service"
+    />
+    <meta name="author" content="UIFlexer" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://pdf.uiflexer.com/" />
+    <meta
+      property="og:title"
+      content="PDF Generation API - Convert HTML to PDF"
+    />
+    <meta
+      property="og:description"
+      content="Professional HTML to PDF conversion API powered by Puppeteer. Free trial available."
+    />
+    <meta property="og:image" content="https://pdf.uiflexer.com/og-image.png" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://pdf.uiflexer.com/" />
+    <meta
+      property="twitter:title"
+      content="PDF Generation API - Convert HTML to PDF"
+    />
+    <meta
+      property="twitter:description"
+      content="Professional HTML to PDF conversion API powered by Puppeteer. Free trial available."
+    />
+    <meta
+      property="twitter:image"
+      content="https://pdf.uiflexer.com/og-image.png"
+    />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/favicon.png" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Font Awesome Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary: #667eea;
+        --primary-dark: #5568d3;
+        --secondary: #764ba2;
+        --text-dark: #1a202c;
+        --text-light: #718096;
+        --bg-light: #f7fafc;
+        --success: #48bb78;
+        --warning: #ed8936;
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        line-height: 1.6;
+        color: var(--text-dark);
+        overflow-x: hidden;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+      }
+
+      /* Header */
+      header {
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--secondary) 100%
+        );
+        color: white;
+        padding: 1rem 0;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .logo {
+        font-size: 1.5rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        list-style: none;
+      }
+
+      .nav-links a {
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+        transition: opacity 0.3s;
+      }
+
+      .nav-links a:hover {
+        opacity: 0.8;
+      }
+
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s;
+        border: none;
+        cursor: pointer;
+        display: inline-block;
+      }
+
+      .btn-primary {
+        background: white;
+        color: var(--primary);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .btn-secondary {
+        background: var(--primary);
+        color: white;
+      }
+
+      .btn-secondary:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      /* Hero Section */
+      .hero {
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--secondary) 100%
+        );
+        color: white;
+        padding: 6rem 0;
+        text-align: center;
+      }
+
+      .hero h1 {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        line-height: 1.2;
+      }
+
+      .hero p {
+        font-size: 1.25rem;
+        margin-bottom: 2rem;
+        opacity: 0.95;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .hero-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .code-example {
+        background: rgba(0, 0, 0, 0.2);
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin-top: 3rem;
+        text-align: left;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        backdrop-filter: blur(10px);
+      }
+
+      .code-example pre {
+        overflow-x: auto;
+        color: #e2e8f0;
+        font-size: 0.9rem;
+      }
+
+      /* Features Section */
+      .features {
+        padding: 5rem 0;
+        background: var(--bg-light);
+      }
+
+      .section-title {
+        text-align: center;
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 3rem;
+        color: var(--text-dark);
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+      }
+
+      .feature-card {
+        background: white;
+        padding: 2.5rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+        transition: transform 0.3s, box-shadow 0.3s;
+        text-align: center;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+      }
+
+      .feature-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1.5rem;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .feature-icon::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: inherit;
+        opacity: 0.1;
+        z-index: 0;
+      }
+
+      .feature-icon i {
+        position: relative;
+        z-index: 1;
+        color: white;
+        font-size: 2rem;
+      }
+
+      .feature-card h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: var(--text-dark);
+        font-weight: 700;
+      }
+
+      .feature-card p {
+        color: var(--text-light);
+        line-height: 1.7;
+      }
+
+      /* Pricing Section */
+      .pricing {
+        padding: 5rem 0;
+      }
+
+      .pricing-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        margin-top: 3rem;
+      }
+
+      .pricing-card {
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s;
+        position: relative;
+      }
+
+      .pricing-card.featured {
+        border-color: var(--primary);
+        transform: scale(1.05);
+        box-shadow: 0 12px 24px rgba(102, 126, 234, 0.2);
+      }
+
+      .pricing-badge {
+        position: absolute;
+        top: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--primary);
+        color: white;
+        padding: 0.25rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+      }
+
+      .pricing-card h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: var(--text-dark);
+      }
+
+      .pricing-price {
+        font-size: 3rem;
+        font-weight: 800;
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+      }
+
+      .pricing-price span {
+        font-size: 1.25rem;
+        color: var(--text-light);
+      }
+
+      .pricing-features {
+        list-style: none;
+        margin: 2rem 0;
+        text-align: left;
+      }
+
+      .pricing-features li {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #e2e8f0;
+        color: var(--text-light);
+      }
+
+      .pricing-features li:before {
+        content: "✓ ";
+        color: var(--success);
+        font-weight: bold;
+        margin-right: 0.5rem;
+      }
+
+      /* CTA Section */
+      .cta {
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--secondary) 100%
+        );
+        color: white;
+        padding: 5rem 0;
+        text-align: center;
+      }
+
+      .cta h2 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .cta p {
+        font-size: 1.25rem;
+        margin-bottom: 2rem;
+        opacity: 0.95;
+      }
+
+      /* Footer */
+      footer {
+        background: var(--text-dark);
+        color: white;
+        padding: 3rem 0 1rem;
+      }
+
+      .footer-content {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .footer-section h4 {
+        margin-bottom: 1rem;
+        font-size: 1.25rem;
+      }
+
+      .footer-section ul {
+        list-style: none;
+      }
+
+      .footer-section a {
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        display: block;
+        padding: 0.25rem 0;
+        transition: color 0.3s;
+      }
+
+      .footer-section a:hover {
+        color: white;
+      }
+
+      .footer-bottom {
+        text-align: center;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.7);
+      }
+
+      @media (max-width: 768px) {
+        .hero h1 {
+          font-size: 2.5rem;
+        }
+
+        .nav-links {
+          display: none;
+        }
+
+        .pricing-card.featured {
+          transform: scale(1);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <header>
+      <nav class="container">
+        <div class="logo">📄 PDF SaaS</div>
+        <ul class="nav-links">
+          <li><a href="#features">Features</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+          <li><a href="/API_DOCUMENTATION.md" target="_blank">Docs</a></li>
+          <li><a href="/login.html">Login</a></li>
+        </ul>
+        <a href="/register.html" class="btn btn-primary">Get Started</a>
+      </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="container">
+        <h1>Convert HTML to PDF<br />with Lightning Speed</h1>
+        <p>
+          Professional PDF generation API powered by Puppeteer. Transform any
+          HTML content or web page into high-quality PDFs in seconds.
+        </p>
+        <div class="hero-buttons">
+          <a href="/register.html" class="btn btn-primary">Start Free Trial</a>
+          <a
+            href="/API_DOCUMENTATION.md"
+            target="_blank"
+            class="btn btn-secondary"
+            >View Documentation</a
+          >
+        </div>
+
+        <div class="code-example">
+          <pre><code>curl -X POST https://pdf.uiflexer.com/api/pdf/generate \
+  -H "X-API-Key: your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{"html": "&lt;h1&gt;Hello World&lt;/h1&gt;"}'</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+      <div class="container">
+        <h2 class="section-title">Why Choose Our PDF API?</h2>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div
+              class="feature-icon"
+              style="
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              "
+            >
+              <i class="fas fa-bolt"></i>
+            </div>
+            <h3>Lightning Fast</h3>
+            <p>
+              Generate PDFs in milliseconds with our optimized Puppeteer
+              infrastructure running on high-performance servers.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div
+              class="feature-icon"
+              style="
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+              "
+            >
+              <i class="fas fa-palette"></i>
+            </div>
+            <h3>Pixel Perfect</h3>
+            <p>
+              Preserve your HTML styling, fonts, and layouts with 100% accuracy.
+              What you see is what you get.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div
+              class="feature-icon"
+              style="
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+              "
+            >
+              <i class="fas fa-lock"></i>
+            </div>
+            <h3>Secure & Reliable</h3>
+            <p>
+              Enterprise-grade security with encrypted connections and isolated
+              rendering environments for each request.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div
+              class="feature-icon"
+              style="
+                background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+              "
+            >
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <h3>Usage Analytics</h3>
+            <p>
+              Track your API usage with detailed analytics and insights. Monitor
+              conversions and optimize your workflow.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div
+              class="feature-icon"
+              style="
+                background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+              "
+            >
+              <i class="fas fa-globe"></i>
+            </div>
+            <h3>URL to PDF</h3>
+            <p>
+              Convert any web page to PDF by simply providing the URL. Perfect
+              for archiving and documentation.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div
+              class="feature-icon"
+              style="
+                background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+              "
+            >
+              <i class="fas fa-cog"></i>
+            </div>
+            <h3>Customizable</h3>
+            <p>
+              Control page size, margins, headers, footers, and more. Full
+              control over your PDF output.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="pricing">
+      <div class="container">
+        <h2 class="section-title">Simple, Transparent Pricing</h2>
+        <div class="pricing-grid">
+          <div class="pricing-card">
+            <h3>Trial</h3>
+            <div class="pricing-price">$0<span>/month</span></div>
+            <ul class="pricing-features">
+              <li>10 PDF conversions/month</li>
+              <li>Basic support</li>
+              <li>Standard quality</li>
+              <li>14-day trial period</li>
+            </ul>
+            <a href="#" class="btn btn-secondary">Start Free Trial</a>
+          </div>
+
+          <div class="pricing-card">
+            <h3>Starter</h3>
+            <div class="pricing-price">$9.99<span>/month</span></div>
+            <ul class="pricing-features">
+              <li>100 PDF conversions/month</li>
+              <li>Email support</li>
+              <li>High quality output</li>
+              <li>API access</li>
+            </ul>
+            <a href="#" class="btn btn-secondary">Get Started</a>
+          </div>
+
+          <div class="pricing-card featured">
+            <div class="pricing-badge">Most Popular</div>
+            <h3>Professional</h3>
+            <div class="pricing-price">$29.99<span>/month</span></div>
+            <ul class="pricing-features">
+              <li>1,000 PDF conversions/month</li>
+              <li>Priority support</li>
+              <li>High quality output</li>
+              <li>API access</li>
+              <li>Custom headers/footers</li>
+            </ul>
+            <a href="#" class="btn btn-secondary">Get Started</a>
+          </div>
+
+          <div class="pricing-card">
+            <h3>Business</h3>
+            <div class="pricing-price">$99.99<span>/month</span></div>
+            <ul class="pricing-features">
+              <li>10,000 PDF conversions/month</li>
+              <li>Priority support</li>
+              <li>Premium quality</li>
+              <li>API access</li>
+              <li>Custom branding</li>
+              <li>SLA guarantee</li>
+            </ul>
+            <a href="#" class="btn btn-secondary">Get Started</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+      <div class="container">
+        <h2>Ready to Get Started?</h2>
+        <p>
+          Join hundreds of developers using our PDF API. Start your free trial
+          today!
+        </p>
+        <a href="#pricing" class="btn btn-primary">Start Free Trial</a>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-section">
+            <h4>Product</h4>
+            <ul>
+              <li><a href="#features">Features</a></li>
+              <li><a href="#pricing">Pricing</a></li>
+              <li><a href="#docs">Documentation</a></li>
+              <li><a href="#api">API Reference</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-section">
+            <h4>Company</h4>
+            <ul>
+              <li><a href="#about">About Us</a></li>
+              <li><a href="#contact">Contact</a></li>
+              <li><a href="#privacy">Privacy Policy</a></li>
+              <li><a href="#terms">Terms of Service</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-section">
+            <h4>Support</h4>
+            <ul>
+              <li><a href="mailto:no-reply@uiflexer.com">Email Support</a></li>
+              <li><a href="#faq">FAQ</a></li>
+              <li><a href="#status">Status</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-section">
+            <h4>Connect</h4>
+            <ul>
+              <li><a href="#">Twitter</a></li>
+              <li><a href="#">GitHub</a></li>
+              <li><a href="#">LinkedIn</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <p>&copy; 2024 UIFlexer PDF SaaS. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

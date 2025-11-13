@@ -1,0 +1,40 @@
+{
+  "name": "pdf-saas-platform",
+  "version": "2.0.0",
+  "description": "Complete SaaS platform for HTML to PDF conversion with authentication and subscription management",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "NODE_ENV=development node index.js",
+    "prod": "NODE_ENV=production node index.js",
+    "seed": "node database/seeder.js"
+  },
+  "keywords": [
+    "pdf",
+    "html-to-pdf",
+    "puppeteer",
+    "saas",
+    "api"
+  ],
+  "author": "UIFlexer",
+  "license": "MIT",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^4.18.2",
+    "express-rate-limit": "^8.2.1",
+    "express-validator": "^7.3.0",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.15.3",
+    "nodemailer": "^7.0.10",
+    "puppeteer-core": "^21.0.0",
+    "uuid": "^13.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

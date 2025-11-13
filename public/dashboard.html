@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - PDF Generation SaaS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link rel="stylesheet" href="/css/dashboard.css" />
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-brand">
+          <h1><i class="fas fa-file-pdf"></i> PDF SaaS</h1>
+        </div>
+        <button class="mobile-menu-btn" id="mobileMenuBtn">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div class="nav-menu" id="navMenu">
+          <a href="#overview" class="nav-link active" data-tab="overview"
+            >Overview</a
+          >
+          <a href="#generate" class="nav-link" data-tab="generate"
+            >Generate PDF</a
+          >
+          <a href="#api-keys" class="nav-link" data-tab="api-keys">API Keys</a>
+          <a href="#profile" class="nav-link" data-tab="profile">Profile</a>
+          <button class="btn-logout" id="logoutBtn">Logout</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+      <!-- Overview Tab -->
+      <div class="tab-content active" id="overview">
+        <h2>Dashboard Overview</h2>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div
+              class="stat-icon"
+              style="
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              "
+            >
+              <i class="fas fa-chart-bar"></i>
+            </div>
+            <div class="stat-info">
+              <h3 id="usageCount">-</h3>
+              <p>PDFs Generated This Month</p>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div
+              class="stat-icon"
+              style="
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+              "
+            >
+              <i class="fas fa-bullseye"></i>
+            </div>
+            <div class="stat-info">
+              <h3 id="usageLimit">-</h3>
+              <p>Monthly Limit</p>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div
+              class="stat-icon"
+              style="
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+              "
+            >
+              <i class="fas fa-gem"></i>
+            </div>
+            <div class="stat-info">
+              <h3 id="planName">-</h3>
+              <p>Current Plan</p>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div
+              class="stat-icon"
+              style="
+                background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+              "
+            >
+              <i class="fas fa-key"></i>
+            </div>
+            <div class="stat-info">
+              <h3 id="apiKeyCount">-</h3>
+              <p>Active API Keys</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Usage Progress -->
+        <div class="card">
+          <h3>Monthly Usage</h3>
+          <div class="usage-info">
+            <div class="usage-text">
+              <span id="usageText">0 / 0 conversions used</span>
+              <span id="usagePercentage" class="usage-percentage">0%</span>
+            </div>
+            <div class="progress-bar">
+              <div
+                class="progress-fill"
+                id="progressFill"
+                style="width: 0%"
+              ></div>
+            </div>
+          </div>
+          <div id="limitWarning" class="limit-warning" style="display: none">
+            ⚠️ You're approaching your monthly limit. Consider upgrading your
+            plan.
+          </div>
+          <div id="limitExceeded" class="limit-exceeded" style="display: none">
+            🚫 Monthly limit exceeded! Please upgrade your plan to continue
+            generating PDFs.
+          </div>
+        </div>
+
+        <!-- Subscription Info -->
+        <div class="card">
+          <h3>Subscription Details</h3>
+          <div class="subscription-info">
+            <div class="sub-row">
+              <span class="sub-label">Plan:</span>
+              <span class="sub-value" id="subPlan">-</span>
+            </div>
+            <div class="sub-row">
+              <span class="sub-label">Status:</span>
+              <span class="sub-value" id="subStatus">-</span>
+            </div>
+            <div class="sub-row">
+              <span class="sub-label">Price:</span>
+              <span class="sub-value" id="subPrice">-</span>
+            </div>
+            <div class="sub-row">
+              <span class="sub-label">Renewal Date:</span>
+              <span class="sub-value" id="subRenewal">-</span>
+            </div>
+          </div>
+          <button class="btn btn-secondary" id="upgradePlanBtn">
+            Upgrade Plan
+          </button>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card">
+          <h3>Quick Actions</h3>
+          <div class="quick-actions">
+            <button class="action-btn" onclick="switchTab('generate')">
+              <span class="action-icon"><i class="fas fa-file-pdf"></i></span>
+              <span>Generate PDF</span>
+            </button>
+            <button class="action-btn" onclick="switchTab('api-keys')">
+              <span class="action-icon"><i class="fas fa-key"></i></span>
+              <span>View API Keys</span>
+            </button>
+            <button
+              class="action-btn"
+              onclick="window.open('/API_DOCUMENTATION.md', '_blank')"
+            >
+              <span class="action-icon"><i class="fas fa-book"></i></span>
+              <span>API Docs</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Upgrade Plan Section (for Trial users) -->
+        <div class="card" id="upgradePlanSection" style="display: none">
+          <div class="upgrade-header">
+            <i class="fas fa-rocket"></i>
+            <div>
+              <h3>Upgrade Your Plan</h3>
+              <p>Unlock more features and higher limits with our paid plans</p>
+            </div>
+          </div>
+
+          <div class="plans-grid" id="plansGrid">
+            <!-- Plans will be loaded dynamically -->
+          </div>
+
+          <div class="plan-comparison">
+            <h4><i class="fas fa-chart-bar"></i> What You Get by Upgrading</h4>
+            <div class="comparison-table">
+              <div class="comparison-row">
+                <span class="comparison-feature">Monthly Conversions</span>
+                <span class="comparison-trial">10</span>
+                <span class="comparison-paid">100 - 10,000+</span>
+              </div>
+              <div class="comparison-row">
+                <span class="comparison-feature">Support</span>
+                <span class="comparison-trial">Basic</span>
+                <span class="comparison-paid">Priority</span>
+              </div>
+              <div class="comparison-row">
+                <span class="comparison-feature">Quality</span>
+                <span class="comparison-trial">Standard</span>
+                <span class="comparison-paid">High/Premium</span>
+              </div>
+              <div class="comparison-row">
+                <span class="comparison-feature">API Access</span>
+                <span class="comparison-trial"
+                  ><i class="fas fa-times" style="color: #ef4444"></i
+                ></span>
+                <span class="comparison-paid"
+                  ><i class="fas fa-check" style="color: #10b981"></i
+                ></span>
+              </div>
+              <div class="comparison-row">
+                <span class="comparison-feature">AI Template Generator</span>
+                <span class="comparison-trial"
+                  ><i class="fas fa-times" style="color: #ef4444"></i
+                ></span>
+                <span class="comparison-paid"
+                  ><i class="fas fa-check" style="color: #10b981"></i>
+                  (Pro+)</span
+                >
+              </div>
+              <div class="comparison-row">
+                <span class="comparison-feature">Custom Branding</span>
+                <span class="comparison-trial"
+                  ><i class="fas fa-times" style="color: #ef4444"></i
+                ></span>
+                <span class="comparison-paid"
+                  ><i class="fas fa-check" style="color: #10b981"></i>
+                  (Business)</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Generate PDF Tab -->
+      <div class="tab-content" id="generate">
+        <h2>Generate PDF</h2>
+
+        <div class="card">
+          <div class="tab-selector">
+            <button class="tab-btn active" data-gen-tab="html">
+              From HTML
+            </button>
+            <button class="tab-btn" data-gen-tab="url">From URL</button>
+            <button class="tab-btn" data-gen-tab="ai">
+              <i class="fas fa-magic"></i> AI Template
+            </button>
+          </div>
+
+          <!-- HTML to PDF -->
+          <div class="gen-tab-content active" id="html-gen">
+            <form id="htmlPdfForm">
+              <div class="form-group">
+                <label for="htmlContent">HTML Content</label>
+                <textarea
+                  id="htmlContent"
+                  rows="10"
+                  placeholder="<html><body><h1>Hello World</h1></body></html>"
+                  required
+                ></textarea>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="htmlFormat">Page Format</label>
+                  <select id="htmlFormat">
+                    <option value="A4">A4</option>
+                    <option value="Letter">Letter</option>
+                    <option value="Legal">Legal</option>
+                    <option value="A3">A3</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="htmlBackground" checked />
+                    Print Background
+                  </label>
+                </div>
+              </div>
+
+              <button type="submit" class="btn" id="htmlSubmitBtn">
+                Generate PDF
+              </button>
+            </form>
+          </div>
+
+          <!-- URL to PDF -->
+          <div class="gen-tab-content" id="url-gen">
+            <form id="urlPdfForm">
+              <div class="form-group">
+                <label for="urlContent">Website URL</label>
+                <input
+                  type="url"
+                  id="urlContent"
+                  placeholder="https://example.com"
+                  required
+                />
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="urlFormat">Page Format</label>
+                  <select id="urlFormat">
+                    <option value="A4">A4</option>
+                    <option value="Letter">Letter</option>
+                    <option value="Legal">Legal</option>
+                    <option value="A3">A3</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="urlBackground" checked />
+                    Print Background
+                  </label>
+                </div>
+              </div>
+
+              <button type="submit" class="btn" id="urlSubmitBtn">
+                Generate PDF
+              </button>
+            </form>
+          </div>
+
+          <!-- AI Template Generator -->
+          <div class="gen-tab-content" id="ai-gen">
+            <div class="ai-info-banner">
+              <i class="fas fa-sparkles"></i>
+              <div>
+                <h4>AI-Powered Template Generation</h4>
+                <p>
+                  Describe what you want and let AI create a professional HTML
+                  template for you!
+                </p>
+              </div>
+            </div>
+
+            <form id="aiTemplateForm">
+              <div class="form-group">
+                <label for="aiDescription">Describe Your Template</label>
+                <textarea
+                  id="aiDescription"
+                  rows="6"
+                  placeholder="Example: Create a professional invoice template with company logo at the top, itemized list of products with quantities and prices, subtotal, tax, and total amount. Include payment terms at the bottom."
+                  required
+                ></textarea>
+                <small class="form-hint"
+                  >Be specific about layout, sections, and content you want to
+                  include.</small
+                >
+              </div>
+
+              <div class="ai-examples">
+                <p><strong>Example prompts:</strong></p>
+                <div class="example-chips">
+                  <button
+                    type="button"
+                    class="example-chip"
+                    data-example="Create a modern resume template with sections for personal info, work experience, education, and skills. Use a clean, professional design with a sidebar for contact details."
+                  >
+                    <i class="fas fa-file-alt"></i> Resume
+                  </button>
+                  <button
+                    type="button"
+                    class="example-chip"
+                    data-example="Design a business invoice with company header, client details, itemized services table, subtotal, tax, and total. Include payment terms and thank you message."
+                  >
+                    <i class="fas fa-file-invoice"></i> Invoice
+                  </button>
+                  <button
+                    type="button"
+                    class="example-chip"
+                    data-example="Create a certificate of completion with decorative border, recipient name, course title, completion date, and signature line. Use elegant fonts and professional styling."
+                  >
+                    <i class="fas fa-certificate"></i> Certificate
+                  </button>
+                  <button
+                    type="button"
+                    class="example-chip"
+                    data-example="Design a product catalog page with grid layout showing 6 products, each with image placeholder, product name, description, and price. Include company branding at top."
+                  >
+                    <i class="fas fa-shopping-bag"></i> Catalog
+                  </button>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-ai" id="aiSubmitBtn">
+                <i class="fas fa-magic"></i> Generate Template with AI
+              </button>
+            </form>
+
+            <div id="aiResult" style="display: none; margin-top: 30px">
+              <h4>Generated Template</h4>
+              <div class="ai-result-actions">
+                <button
+                  type="button"
+                  class="btn btn-secondary btn-sm"
+                  id="aiPreviewBtn"
+                >
+                  <i class="fas fa-eye"></i> Preview
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-secondary btn-sm"
+                  id="aiCopyBtn"
+                >
+                  <i class="fas fa-copy"></i> Copy HTML
+                </button>
+                <button type="button" class="btn btn-sm" id="aiUsePdfBtn">
+                  <i class="fas fa-file-pdf"></i> Generate PDF
+                </button>
+              </div>
+              <textarea id="aiGeneratedHtml" rows="15" readonly></textarea>
+            </div>
+          </div>
+
+          <div
+            id="genAlert"
+            class="alert"
+            style="display: none; margin-top: 20px"
+          ></div>
+        </div>
+      </div>
+
+      <!-- API Keys Tab -->
+      <div class="tab-content" id="api-keys">
+        <h2>API Keys</h2>
+
+        <div class="card">
+          <p class="info-text">
+            Use these API keys to authenticate your requests. Keep them secure
+            and never share them publicly.
+          </p>
+
+          <div id="apiKeysList"></div>
+        </div>
+
+        <div class="card">
+          <h3>How to Use Your API Key</h3>
+          <p>Include your API key in the request header:</p>
+          <pre><code>curl -X POST https://yourdomain.com/api/pdf/generate \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"html": "&lt;h1&gt;Hello&lt;/h1&gt;"}'</code></pre>
+        </div>
+      </div>
+
+      <!-- Profile Tab -->
+      <div class="tab-content" id="profile">
+        <h2>Profile Settings</h2>
+
+        <div class="card">
+          <h3>Account Information</h3>
+          <div class="profile-info">
+            <div class="profile-row">
+              <span class="profile-label">Full Name:</span>
+              <span class="profile-value" id="profileName">-</span>
+            </div>
+            <div class="profile-row">
+              <span class="profile-label">Email:</span>
+              <span class="profile-value" id="profileEmail">-</span>
+            </div>
+            <div class="profile-row">
+              <span class="profile-label">Account Status:</span>
+              <span class="profile-value" id="profileStatus">-</span>
+            </div>
+            <div class="profile-row">
+              <span class="profile-label">Member Since:</span>
+              <span class="profile-value" id="profileCreated">-</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/js/dashboard.js"></script>
+  </body>
+</html>
