@@ -22,22 +22,32 @@ async function hasAIAccess(userId) {
     }
 
     const plan = rows[0];
-    const features = JSON.parse(plan.features || "[]");
 
-    console.log(features);
-    console.log(
-      features.some(
-        (feature) =>
-          feature.toLowerCase().includes("ai template") ||
-          plan.slug === "superadmin"
-      )
-    );
+    // SuperAdmin always has access
+    if (plan.slug === "superadmin") {
+      return true;
+    }
+
+    // Parse features safely
+    let features = [];
+    try {
+      // Handle both JSON string and already parsed array
+      if (typeof plan.features === "string") {
+        features = JSON.parse(plan.features);
+      } else if (Array.isArray(plan.features)) {
+        features = plan.features;
+      }
+    } catch (parseError) {
+      console.error("Error parsing features JSON:", parseError);
+      console.error("Features value:", plan.features);
+      return false;
+    }
 
     // Check if plan includes AI Template Generator
     return features.some(
       (feature) =>
-        feature.toLowerCase().includes("ai template") ||
-        plan.slug === "superadmin"
+        typeof feature === "string" &&
+        feature.toLowerCase().includes("ai template")
     );
   } catch (error) {
     console.error("Error checking AI access:", error);

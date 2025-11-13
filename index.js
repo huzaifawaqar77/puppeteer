@@ -15,6 +15,9 @@ const NODE_ENV = process.env.NODE_ENV || "development";
 console.log(`🚀 Starting PDF Generation SaaS in ${NODE_ENV} mode`);
 console.log(`📡 Port: ${PORT}`);
 
+// Trust proxy - Required when behind reverse proxy (Nginx, Coolify, etc.)
+app.set("trust proxy", 1);
+
 // --- Security Middleware ---
 app.use(
   helmet({
