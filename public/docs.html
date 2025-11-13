@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API Documentation - PDF SaaS</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <!-- Highlight.js for syntax highlighting -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary: #667eea;
+        --primary-dark: #5568d3;
+        --secondary: #764ba2;
+        --text-dark: #1a202c;
+        --text-light: #718096;
+        --bg-light: #f7fafc;
+        --success: #48bb78;
+        --warning: #ed8936;
+        --code-bg: #282c34;
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        line-height: 1.6;
+        color: var(--text-dark);
+        background: var(--bg-light);
+      }
+
+      /* Header */
+      header {
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--secondary) 100%
+        );
+        color: white;
+        padding: 1rem 0;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      nav {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .logo {
+        font-size: 1.5rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+        color: white;
+      }
+
+      .logo-icon {
+        width: 40px;
+        height: 40px;
+        background: white;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px;
+      }
+
+      .logo-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        list-style: none;
+      }
+
+      .nav-links a {
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+        transition: opacity 0.3s;
+      }
+
+      .nav-links a:hover {
+        opacity: 0.8;
+      }
+
+      /* Main Layout */
+      .docs-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 2rem;
+        padding: 2rem;
+        min-height: calc(100vh - 80px);
+      }
+
+      /* Sidebar */
+      .sidebar {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        height: fit-content;
+        position: sticky;
+        top: 100px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      }
+
+      .sidebar h3 {
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        color: var(--text-light);
+        margin-bottom: 1rem;
+        font-weight: 600;
+      }
+
+      .sidebar ul {
+        list-style: none;
+      }
+
+      .sidebar li {
+        margin-bottom: 0.5rem;
+      }
+
+      .sidebar a {
+        color: var(--text-dark);
+        text-decoration: none;
+        display: block;
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
+        transition: all 0.3s;
+        font-size: 0.95rem;
+      }
+
+      .sidebar a:hover,
+      .sidebar a.active {
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--secondary) 100%
+        );
+        color: white;
+        transform: translateX(5px);
+      }
+
+      /* Content */
+      .content {
+        background: white;
+        border-radius: 12px;
+        padding: 3rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      }
+
+      .content h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--secondary) 100%
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .content h2 {
+        font-size: 2rem;
+        margin-top: 3rem;
+        margin-bottom: 1rem;
+        color: var(--text-dark);
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--primary);
+      }
+
+      .content h3 {
+        font-size: 1.5rem;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        color: var(--primary);
+      }
+
+      .content h4 {
+        font-size: 1.25rem;
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+        color: var(--text-dark);
+      }
+
+      .content p {
+        margin-bottom: 1rem;
+        color: var(--text-light);
+        line-height: 1.8;
+      }
+
+      .content ul,
+      .content ol {
+        margin-bottom: 1rem;
+        padding-left: 2rem;
+        color: var(--text-light);
+      }
+
+      .content li {
+        margin-bottom: 0.5rem;
+      }
+
+      /* Code Blocks */
+      .code-block {
+        background: var(--code-bg);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        overflow-x: auto;
+        position: relative;
+      }
+
+      .code-block pre {
+        margin: 0;
+        font-family: "Fira Code", monospace;
+        font-size: 0.9rem;
+        line-height: 1.6;
+      }
+
+      .code-block code {
+        font-family: "Fira Code", monospace;
+      }
+
+      .code-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .code-language {
+        color: #61dafb;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+
+      .copy-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 0.4rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.875rem;
+        transition: all 0.3s;
+      }
+
+      .copy-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .copy-btn.copied {
+        background: var(--success);
+        border-color: var(--success);
+      }
+
+      /* Inline Code */
+      code {
+        background: #f1f5f9;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-family: "Fira Code", monospace;
+        font-size: 0.9em;
+        color: var(--primary);
+      }
+
+      pre code {
+        background: transparent;
+        padding: 0;
+        color: inherit;
+      }
+
+      /* Badges */
+      .badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-right: 0.5rem;
+      }
+
+      .badge.get {
+        background: #d1fae5;
+        color: #065f46;
+      }
+
+      .badge.post {
+        background: #dbeafe;
+        color: #1e40af;
+      }
+
+      .badge.put,
+      .badge.patch {
+        background: #fef3c7;
+        color: #92400e;
+      }
+
+      .badge.delete {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+
+      /* Endpoint Card */
+      .endpoint {
+        margin: 2rem 0;
+        padding: 2rem;
+        background: var(--bg-light);
+        border-radius: 12px;
+        border-left: 4px solid var(--primary);
+      }
+
+      .endpoint-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .endpoint-path {
+        font-family: "Fira Code", monospace;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+      }
+
+      /* Info Boxes */
+      .info-box {
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin: 1.5rem 0;
+        border-left: 4px solid;
+      }
+
+      .info-box.info {
+        background: #eff6ff;
+        border-color: #3b82f6;
+      }
+
+      .info-box.warning {
+        background: #fffbeb;
+        border-color: #f59e0b;
+      }
+
+      .info-box.success {
+        background: #f0fdf4;
+        border-color: #10b981;
+      }
+
+      .info-box.error {
+        background: #fef2f2;
+        border-color: #ef4444;
+      }
+
+      .info-box-title {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      /* Table */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1.5rem 0;
+      }
+
+      th,
+      td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      th {
+        background: var(--bg-light);
+        font-weight: 600;
+        color: var(--text-dark);
+      }
+
+      tr:hover {
+        background: var(--bg-light);
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .docs-container {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          position: static;
+        }
+
+        .content {
+          padding: 1.5rem;
+        }
+
+        nav {
+          flex-direction: column;
+          gap: 1rem;
+        }
+      }
+
+      /* Scroll to top button */
+      .scroll-top {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(
+          135deg,
+          var(--primary) 0%,
+          var(--secondary) 100%
+        );
+        color: white;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s;
+        z-index: 999;
+      }
+
+      .scroll-top:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .scroll-top.show {
+        display: flex;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <header>
+      <nav>
+        <a href="/" class="logo">
+          <div class="logo-icon">
+            <img src="/favicon.svg" alt="PDF SaaS Logo" />
+          </div>
+          <span>PDF SaaS</span>
+        </a>
+        <ul class="nav-links">
+          <li><a href="/#features">Features</a></li>
+          <li><a href="/#pricing">Pricing</a></li>
+          <li><a href="/docs.html" class="active">API Docs</a></li>
+          <li><a href="/dashboard.html">Dashboard</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <!-- Main Content -->
+    <div class="docs-container">
+      <!-- Sidebar Navigation -->
+      <aside class="sidebar">
+        <h3>Navigation</h3>
+        <ul id="sidebar-nav">
+          <li><a href="#introduction" class="active">Introduction</a></li>
+          <li><a href="#authentication">Authentication</a></li>
+          <li><a href="#response-format">Response Format</a></li>
+          <li><a href="#auth-endpoints">Auth Endpoints</a></li>
+          <li><a href="#pdf-endpoints">PDF Endpoints</a></li>
+          <li><a href="#subscription-endpoints">Subscription</a></li>
+          <li><a href="#api-key-endpoints">API Keys</a></li>
+          <li><a href="#ai-endpoints">AI Templates</a></li>
+          <li><a href="#rate-limiting">Rate Limiting</a></li>
+          <li><a href="#errors">Error Codes</a></li>
+        </ul>
+      </aside>
+
+      <!-- Content -->
+      <main class="content" id="docs-content">
+        <h1><i class="fas fa-book"></i> API Documentation</h1>
+        <p>
+          Complete API reference for the PDF Generation SaaS platform. This
+          documentation covers all available endpoints, authentication methods,
+          and usage examples.
+        </p>
+
+        <div class="info-box info">
+          <div class="info-box-title">
+            <i class="fas fa-info-circle"></i> Base URL
+          </div>
+          <p style="margin: 0">
+            <strong>Development:</strong> <code>http://localhost:3000</code
+            ><br />
+            <strong>Production:</strong> <code>https://pdf.yourdomain.com</code>
+          </p>
+        </div>
+
+        <!-- Authentication Section -->
+        <h2 id="authentication"><i class="fas fa-lock"></i> Authentication</h2>
+        <p>The API uses two authentication methods:</p>
+
+        <h3>1. JWT Tokens</h3>
+        <p>
+          Used for user account management endpoints. Include the JWT token in
+          the Authorization header:
+        </p>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-language">HTTP Header</span>
+            <button class="copy-btn" onclick="copyCode(this)">
+              <i class="fas fa-copy"></i> Copy
+            </button>
+          </div>
+          <pre><code>Authorization: Bearer &lt;your_jwt_token&gt;</code></pre>
+        </div>
+
+        <h3>2. API Keys</h3>
+        <p>
+          Used for PDF generation endpoints. Include the API key in the
+          X-API-Key header:
+        </p>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-language">HTTP Header</span>
+            <button class="copy-btn" onclick="copyCode(this)">
+              <i class="fas fa-copy"></i> Copy
+            </button>
+          </div>
+          <pre><code>X-API-Key: &lt;your_api_key&gt;</code></pre>
+        </div>
+
+        <!-- Response Format -->
+        <h2 id="response-format">
+          <i class="fas fa-code"></i> Response Format
+        </h2>
+        <p>All API responses follow a consistent JSON structure:</p>
+
+        <h3>Success Response</h3>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-language">JSON</span>
+            <button class="copy-btn" onclick="copyCode(this)">
+              <i class="fas fa-copy"></i> Copy
+            </button>
+          </div>
+          <pre><code class="language-json">{
+  "success": true,
+  "message": "Operation successful",
+  "data": { ... }
+}</code></pre>
+        </div>
+
+        <h3>Error Response</h3>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-language">JSON</span>
+            <button class="copy-btn" onclick="copyCode(this)">
+              <i class="fas fa-copy"></i> Copy
+            </button>
+          </div>
+          <pre><code class="language-json">{
+  "success": false,
+  "message": "Error description"
+}</code></pre>
+        </div>
+
+        <!-- Auth Endpoints -->
+        <h2 id="auth-endpoints">
+          <i class="fas fa-user-shield"></i> Authentication Endpoints
+        </h2>
+
+        <!-- Register -->
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="badge post">POST</span>
+            <span class="endpoint-path">/api/auth/register</span>
+          </div>
+          <p>Register a new user account.</p>
+
+          <h4>Request Body</h4>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-language">JSON</span>
+              <button class="copy-btn" onclick="copyCode(this)">
+                <i class="fas fa-copy"></i> Copy
+              </button>
+            </div>
+            <pre><code class="language-json">{
+  "email": "user@example.com",
+  "password": "SecurePass123",
+  "full_name": "John Doe"
+}</code></pre>
+          </div>
+
+          <h4>Response</h4>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-language">JSON</span>
+              <button class="copy-btn" onclick="copyCode(this)">
+                <i class="fas fa-copy"></i> Copy
+              </button>
+            </div>
+            <pre><code class="language-json">{
+  "success": true,
+  "message": "Registration successful! Please check your email.",
+  "data": {
+    "email": "user@example.com",
+    "full_name": "John Doe"
+  }
+}</code></pre>
+          </div>
+
+          <div class="info-box warning">
+            <div class="info-box-title">
+              <i class="fas fa-exclamation-triangle"></i> Validation
+            </div>
+            <ul style="margin: 0">
+              <li>Email must be valid and unique</li>
+              <li>Password minimum 8 characters</li>
+              <li>Full name is required</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Login -->
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="badge post">POST</span>
+            <span class="endpoint-path">/api/auth/login</span>
+          </div>
+          <p>Login with email and password.</p>
+
+          <h4>Request Body</h4>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-language">JSON</span>
+              <button class="copy-btn" onclick="copyCode(this)">
+                <i class="fas fa-copy"></i> Copy
+              </button>
+            </div>
+            <pre><code class="language-json">{
+  "email": "user@example.com",
+  "password": "SecurePass123"
+}</code></pre>
+          </div>
+
+          <h4>Response</h4>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-language">JSON</span>
+              <button class="copy-btn" onclick="copyCode(this)">
+                <i class="fas fa-copy"></i> Copy
+              </button>
+            </div>
+            <pre><code class="language-json">{
+  "success": true,
+  "message": "Login successful",
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": {
+      "id": 1,
+      "email": "user@example.com",
+      "full_name": "John Doe"
+    }
+  }
+}</code></pre>
+          </div>
+        </div>
+
+        <!-- PDF Endpoints -->
+        <h2 id="pdf-endpoints">
+          <i class="fas fa-file-pdf"></i> PDF Generation Endpoints
+        </h2>
+
+        <!-- Generate PDF -->
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="badge post">POST</span>
+            <span class="endpoint-path">/api/generate-pdf</span>
+          </div>
+          <p>
+            Generate a PDF from HTML content. Requires API Key authentication.
+          </p>
+
+          <h4>Headers</h4>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-language">HTTP Headers</span>
+              <button class="copy-btn" onclick="copyCode(this)">
+                <i class="fas fa-copy"></i> Copy
+              </button>
+            </div>
+            <pre><code>X-API-Key: your_api_key_here
+Content-Type: application/json</code></pre>
+          </div>
+
+          <h4>Request Body</h4>
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-language">JSON</span>
+              <button class="copy-btn" onclick="copyCode(this)">
+                <i class="fas fa-copy"></i> Copy
+              </button>
+            </div>
+            <pre><code class="language-json">{
+  "html": "&lt;html&gt;&lt;body&gt;&lt;h1&gt;Hello World&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;",
+  "options": {
+    "format": "A4",
+    "margin": {
+      "top": "20mm",
+      "right": "20mm",
+      "bottom": "20mm",
+      "left": "20mm"
+    }
+  }
+}</code></pre>
+          </div>
+
+          <h4>Response</h4>
+          <p>Returns PDF file as binary data with appropriate headers.</p>
+
+          <div class="info-box success">
+            <div class="info-box-title">
+              <i class="fas fa-check-circle"></i> cURL Example
+            </div>
+            <div class="code-block" style="margin: 0.5rem 0 0 0">
+              <div class="code-header">
+                <span class="code-language">bash</span>
+                <button class="copy-btn" onclick="copyCode(this)">
+                  <i class="fas fa-copy"></i> Copy
+                </button>
+              </div>
+              <pre><code>curl -X POST http://localhost:3000/api/generate-pdf \
+  -H "X-API-Key: your_api_key" \
+  -H "Content-Type: application/json" \
+  -d '{"html":"&lt;h1&gt;Test&lt;/h1&gt;"}' \
+  --output result.pdf</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rate Limiting -->
+        <h2 id="rate-limiting">
+          <i class="fas fa-tachometer-alt"></i> Rate Limiting
+        </h2>
+        <p>
+          API requests are rate-limited based on your subscription plan. Limits
+          are enforced per API key.
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Plan</th>
+              <th>Monthly Conversions</th>
+              <th>Rate Limit</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Trial</td>
+              <td>3</td>
+              <td>10 requests/minute</td>
+            </tr>
+            <tr>
+              <td>Starter</td>
+              <td>100</td>
+              <td>30 requests/minute</td>
+            </tr>
+            <tr>
+              <td>Professional</td>
+              <td>1,000</td>
+              <td>60 requests/minute</td>
+            </tr>
+            <tr>
+              <td>Business</td>
+              <td>10,000</td>
+              <td>120 requests/minute</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Error Codes -->
+        <h2 id="errors">
+          <i class="fas fa-exclamation-circle"></i> Error Codes
+        </h2>
+        <p>Common HTTP status codes and their meanings:</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Status Code</th>
+              <th>Meaning</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>200</code></td>
+              <td>OK</td>
+              <td>Request successful</td>
+            </tr>
+            <tr>
+              <td><code>400</code></td>
+              <td>Bad Request</td>
+              <td>Invalid request parameters</td>
+            </tr>
+            <tr>
+              <td><code>401</code></td>
+              <td>Unauthorized</td>
+              <td>Invalid or missing authentication</td>
+            </tr>
+            <tr>
+              <td><code>403</code></td>
+              <td>Forbidden</td>
+              <td>Insufficient permissions or quota exceeded</td>
+            </tr>
+            <tr>
+              <td><code>404</code></td>
+              <td>Not Found</td>
+              <td>Resource not found</td>
+            </tr>
+            <tr>
+              <td><code>429</code></td>
+              <td>Too Many Requests</td>
+              <td>Rate limit exceeded</td>
+            </tr>
+            <tr>
+              <td><code>500</code></td>
+              <td>Internal Server Error</td>
+              <td>Server error occurred</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="info-box info" style="margin-top: 3rem">
+          <div class="info-box-title">
+            <i class="fas fa-question-circle"></i> Need Help?
+          </div>
+          <p style="margin: 0">
+            For additional support or questions, please contact us at
+            <strong>support@pdfsaas.com</strong> or visit our
+            <a href="/dashboard.html">Dashboard</a> for more resources.
+          </p>
+        </div>
+      </main>
+    </div>
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-top" id="scrollTop" onclick="scrollToTop()">
+      <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- JavaScript -->
+    <script>
+      // Initialize syntax highlighting
+      hljs.highlightAll();
+
+      // Copy code functionality
+      function copyCode(button) {
+        const codeBlock = button
+          .closest(".code-block")
+          .querySelector("code").textContent;
+        navigator.clipboard.writeText(codeBlock).then(() => {
+          const originalHTML = button.innerHTML;
+          button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+          button.classList.add("copied");
+
+          setTimeout(() => {
+            button.innerHTML = originalHTML;
+            button.classList.remove("copied");
+          }, 2000);
+        });
+      }
+
+      // Smooth scrolling for sidebar links
+      document.querySelectorAll('.sidebar a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute("href"));
+          if (target) {
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
+
+            // Update active link
+            document
+              .querySelectorAll(".sidebar a")
+              .forEach((a) => a.classList.remove("active"));
+            this.classList.add("active");
+          }
+        });
+      });
+
+      // Scroll to top button
+      const scrollTopBtn = document.getElementById("scrollTop");
+
+      window.addEventListener("scroll", () => {
+        if (window.pageYOffset > 300) {
+          scrollTopBtn.classList.add("show");
+        } else {
+          scrollTopBtn.classList.remove("show");
+        }
+      });
+
+      function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      // Update active sidebar link on scroll
+      const sections = document.querySelectorAll("h2[id]");
+      const sidebarLinks = document.querySelectorAll('.sidebar a[href^="#"]');
+
+      window.addEventListener("scroll", () => {
+        let current = "";
+        sections.forEach((section) => {
+          const sectionTop = section.offsetTop;
+          const sectionHeight = section.clientHeight;
+          if (window.pageYOffset >= sectionTop - 100) {
+            current = section.getAttribute("id");
+          }
+        });
+
+        sidebarLinks.forEach((link) => {
+          link.classList.remove("active");
+          if (link.getAttribute("href") === `#${current}`) {
+            link.classList.add("active");
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -90,6 +90,11 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
+// --- API Documentation Route ---
+app.get("/API_DOCUMENTATION.md", (req, res) => {
+  res.sendFile(path.join(__dirname, "API_DOCUMENTATION.md"));
+});
+
 // --- 404 Handler ---
 app.use((req, res) => {
   res.status(404).json({

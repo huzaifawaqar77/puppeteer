@@ -45,10 +45,10 @@ async function seedDatabase() {
         name: "Trial",
         slug: "trial",
         description: "Free trial plan with limited conversions",
-        monthly_conversions: 10,
+        monthly_conversions: 3,
         price: 0.0,
         features: JSON.stringify([
-          "10 PDF conversions per month",
+          "3 PDF conversions per month",
           "Basic support",
           "Standard quality",
         ]),
