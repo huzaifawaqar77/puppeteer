@@ -21,10 +21,18 @@ Add to your `.env` file:
 
 ```env
 GEMINI_API_KEY=AIzaSy...your-actual-key-here
-GEMINI_MODEL=gemini-pro
+GEMINI_MODEL=gemini-1.5-flash
 GEMINI_MAX_TOKENS=2048
 GEMINI_TEMPERATURE=0.7
 ```
+
+**Available Models:**
+
+- `gemini-1.5-flash` - Fast and efficient (recommended)
+- `gemini-1.5-pro` - More capable, slower
+- `gemini-2.0-flash-exp` - Latest experimental model
+
+**Note:** The older `gemini-pro` model is deprecated. Use `gemini-1.5-flash` or newer.
 
 ### 3. Restart Server
 
@@ -66,6 +74,7 @@ curl -X POST http://localhost:3000/api/ai/generate-template \
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -79,36 +88,42 @@ curl -X POST http://localhost:3000/api/ai/generate-template \
 ## 💡 Example Prompts
 
 ### Invoice Template
+
 ```
 Design a business invoice with company header, client details, itemized services table,
 subtotal, tax, and total. Include payment terms and thank you message.
 ```
 
 ### Resume Template
+
 ```
 Create a modern resume template with sections for personal info, work experience,
 education, and skills. Use a clean, professional design with a sidebar for contact details.
 ```
 
 ### Certificate Template
+
 ```
 Create a certificate of completion with decorative border, recipient name, course title,
 completion date, and signature line. Use elegant fonts and professional styling.
 ```
 
 ### Product Catalog
+
 ```
 Design a product catalog page with grid layout showing 6 products, each with image
 placeholder, product name, description, and price. Include company branding at top.
 ```
 
 ### Event Ticket
+
 ```
 Create an event ticket template with event name, date, time, venue, seat number,
 barcode placeholder, and terms and conditions at the bottom.
 ```
 
 ### Report Template
+
 ```
 Design a business report template with cover page, table of contents, executive summary
 section, data tables, and charts placeholders. Use professional corporate styling.
@@ -126,6 +141,7 @@ section, data tables, and charts placeholders. Use professional corporate stylin
 4. **Consider Purpose**: Mention if it's for print, web, or PDF
 
 ### Good Prompt Example ✅
+
 ```
 Create a professional invoice template with:
 - Company logo and details at the top
@@ -138,6 +154,7 @@ Create a professional invoice template with:
 ```
 
 ### Poor Prompt Example ❌
+
 ```
 Make an invoice
 ```
@@ -148,17 +165,18 @@ Make an invoice
 
 ### Plan Requirements
 
-| Plan | AI Access | Notes |
-|------|-----------|-------|
-| Trial | ❌ | Upgrade required |
-| Starter | ❌ | Upgrade to Professional+ |
-| Professional | ✅ | Full access |
-| Business | ✅ | Priority access |
-| SuperAdmin | ✅ | Full access |
+| Plan         | AI Access | Notes                    |
+| ------------ | --------- | ------------------------ |
+| Trial        | ❌        | Upgrade required         |
+| Starter      | ❌        | Upgrade to Professional+ |
+| Professional | ✅        | Full access              |
+| Business     | ✅        | Priority access          |
+| SuperAdmin   | ✅        | Full access              |
 
 ### Error Messages
 
 **If user doesn't have access:**
+
 ```json
 {
   "success": false,
@@ -169,6 +187,7 @@ Make an invoice
 ```
 
 **If API key not configured:**
+
 ```json
 {
   "success": false,
@@ -183,25 +202,30 @@ Make an invoice
 ### AI Generation Fails
 
 **Problem**: "AI service is not configured"
+
 - **Solution**: Verify `GEMINI_API_KEY` is set in `.env` and server is restarted
 
 **Problem**: "Failed to generate template"
+
 - **Solution**: Check your API key is valid at Google AI Studio
 - **Solution**: Simplify your prompt and try again
 - **Solution**: Check server logs for specific error messages
 
 **Problem**: "AI Template Generator is only available on..."
+
 - **Solution**: User needs to upgrade to Professional or Business plan
 - **Solution**: Verify user's subscription status in database
 
 ### Generated Template Issues
 
 **Problem**: Template doesn't look right
+
 - **Solution**: Be more specific in your prompt
 - **Solution**: Mention styling preferences explicitly
 - **Solution**: Try regenerating with adjusted description
 
 **Problem**: Template missing elements
+
 - **Solution**: List all required components in prompt
 - **Solution**: Use example prompts as reference
 
@@ -212,8 +236,8 @@ Make an invoice
 AI template generation is logged in the `activity_logs` table:
 
 ```sql
-SELECT * FROM activity_logs 
-WHERE action = 'ai_template_generated' 
+SELECT * FROM activity_logs
+WHERE action = 'ai_template_generated'
 ORDER BY created_at DESC;
 ```
 
@@ -225,33 +249,33 @@ ORDER BY created_at DESC;
 
 ```javascript
 // 1. Generate template
-const templateResponse = await fetch('/api/ai/generate-template', {
-  method: 'POST',
+const templateResponse = await fetch("/api/ai/generate-template", {
+  method: "POST",
   headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
   },
   body: JSON.stringify({
-    description: 'Create an invoice template...'
-  })
+    description: "Create an invoice template...",
+  }),
 });
 
 const { html } = await templateResponse.json();
 
 // 2. Generate PDF from template
-const pdfResponse = await fetch('/api/pdf/generate', {
-  method: 'POST',
+const pdfResponse = await fetch("/api/pdf/generate", {
+  method: "POST",
   headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
   },
   body: JSON.stringify({
     html: html,
     options: {
-      format: 'A4',
-      printBackground: true
-    }
-  })
+      format: "A4",
+      printBackground: true,
+    },
+  }),
 });
 
 const pdfBlob = await pdfResponse.blob();
@@ -269,4 +293,3 @@ const pdfBlob = await pdfResponse.blob();
 ---
 
 **Happy template generating! 🎨**
-

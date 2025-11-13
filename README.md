@@ -120,7 +120,7 @@ EMAIL_FROM=no-reply@uiflexer.com
 
 # Google Gemini AI (Optional - for AI template generation)
 GEMINI_API_KEY=your-gemini-api-key-here
-GEMINI_MODEL=gemini-pro
+GEMINI_MODEL=gemini-1.5-flash
 GEMINI_MAX_TOKENS=2048
 GEMINI_TEMPERATURE=0.7
 ```
@@ -129,7 +129,10 @@ GEMINI_TEMPERATURE=0.7
 
 1. Get a free API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
 2. Add it to your `.env` file as `GEMINI_API_KEY`
-3. AI features will be available to users on Professional, Business, and SuperAdmin plans
+3. Use `gemini-1.5-flash` (recommended) or `gemini-1.5-pro` for the model
+4. AI features will be available to users on Professional, Business, and SuperAdmin plans
+
+**Available Models:** `gemini-1.5-flash` (fast), `gemini-1.5-pro` (advanced), `gemini-2.0-flash-exp` (experimental)
 
 ### 5. Seed the Database
 

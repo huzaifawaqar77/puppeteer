@@ -92,12 +92,9 @@ async function generateTemplate(req, res) {
       });
     }
 
-    // Import Gemini SDK
-    const { GoogleGenerativeAI } = require("@google/generative-ai");
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({
-      model: process.env.GEMINI_MODEL || "gemini-pro",
-    });
+    // Use direct API call instead of SDK for better compatibility
+    const modelName = process.env.GEMINI_MODEL || "gemini-2.0-flash-exp";
+    const apiKey = process.env.GEMINI_API_KEY;
 
     // Create prompt for HTML generation
     const prompt = `You are an expert HTML/CSS developer. Generate a complete, professional HTML template based on the following description. The HTML should be production-ready, well-structured, and include inline CSS for styling.
@@ -116,10 +113,52 @@ Requirements:
 
 Generate the HTML template now:`;
 
-    // Generate content
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    let htmlContent = response.text();
+    // Make direct API call to Gemini
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent`;
+
+    const requestBody = {
+      contents: [
+        {
+          parts: [
+            {
+              text: prompt,
+            },
+          ],
+        },
+      ],
+      generationConfig: {
+        temperature: parseFloat(process.env.GEMINI_TEMPERATURE) || 0.7,
+        maxOutputTokens: parseInt(process.env.GEMINI_MAX_TOKENS) || 2048,
+      },
+    };
+
+    const apiResponse = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": apiKey,
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!apiResponse.ok) {
+      const errorData = await apiResponse.json().catch(() => ({}));
+      throw new Error(
+        `Gemini API error: ${apiResponse.status} ${
+          apiResponse.statusText
+        } - ${JSON.stringify(errorData)}`
+      );
+    }
+
+    const data = await apiResponse.json();
+
+    // Extract text from response
+    let htmlContent = "";
+    if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+      htmlContent = data.candidates[0].content.parts[0].text;
+    } else {
+      throw new Error("Invalid response format from Gemini API");
+    }
 
     // Clean up the response - remove markdown code blocks if present
     htmlContent = htmlContent

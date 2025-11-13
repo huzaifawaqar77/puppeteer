@@ -5,6 +5,7 @@
 ### 1. Express Rate Limiter Error (X-Forwarded-For)
 
 **Error:**
+
 ```
 ValidationError: The 'X-Forwarded-For' header is set but the Express 'trust proxy' setting is false
 ```
@@ -16,6 +17,7 @@ Your application is behind a reverse proxy (Nginx, Coolify, etc.) but Express do
 ✅ **FIXED** - Added `app.set('trust proxy', 1)` to `index.js`
 
 This tells Express to trust the first proxy in front of it, which is necessary when deploying behind:
+
 - Coolify
 - Nginx
 - Apache
@@ -23,6 +25,7 @@ This tells Express to trust the first proxy in front of it, which is necessary w
 - Any reverse proxy
 
 **Verification:**
+
 ```bash
 # Check if the line exists in index.js
 grep "trust proxy" index.js
@@ -33,6 +36,7 @@ grep "trust proxy" index.js
 ### 2. AI Template Generation - JSON Parse Error
 
 **Error:**
+
 ```
 Error checking AI access: SyntaxError: Unexpected token 'U', "Unlimited "... is not valid JSON
 ```
@@ -43,16 +47,19 @@ The `features` column in the `subscription_plans` table contains invalid JSON da
 **Solution:**
 
 **Option 1: Run the fix script (Recommended)**
+
 ```bash
 node database/fix-features.js
 ```
 
 This script will:
+
 - Check all subscription plans
 - Identify invalid JSON in features column
 - Fix them with proper JSON arrays
 
 **Option 2: Re-seed the database**
+
 ```bash
 node database/seeder.js
 ```
@@ -60,27 +67,29 @@ node database/seeder.js
 This will clear all data and re-create everything with proper JSON.
 
 **Option 3: Manual SQL fix**
+
 ```sql
 -- Check current features
 SELECT id, slug, features FROM subscription_plans;
 
 -- Update Professional plan
-UPDATE subscription_plans 
+UPDATE subscription_plans
 SET features = '["1,000 PDF conversions per month","Priority support","High quality output","API access","Custom headers/footers","AI Template Generator"]'
 WHERE slug = 'professional';
 
 -- Update Business plan
-UPDATE subscription_plans 
+UPDATE subscription_plans
 SET features = '["10,000 PDF conversions per month","Priority support","Premium quality","API access","Custom branding","SLA guarantee","AI Template Generator","Priority AI access"]'
 WHERE slug = 'business';
 
 -- Update SuperAdmin plan
-UPDATE subscription_plans 
+UPDATE subscription_plans
 SET features = '["Unlimited PDF conversions","Full admin access","All features included","AI Template Generator"]'
 WHERE slug = 'superadmin';
 ```
 
 **Verification:**
+
 ```bash
 # Test AI access
 curl -X POST http://localhost:3000/api/ai/generate-template \
@@ -94,6 +103,7 @@ curl -X POST http://localhost:3000/api/ai/generate-template \
 ### 3. AI Template Generation - Access Denied
 
 **Error:**
+
 ```json
 {
   "success": false,
@@ -105,10 +115,12 @@ curl -X POST http://localhost:3000/api/ai/generate-template \
 User is on Trial or Starter plan which don't include AI features.
 
 **Solution:**
+
 1. Upgrade user to Professional or Business plan
 2. Or test with SuperAdmin account: `admin@uiflexer.com` / `SuperAdmin@123`
 
 **Manual upgrade via SQL:**
+
 ```sql
 -- Check user's current plan
 SELECT u.email, sp.name as plan_name, sp.slug
@@ -130,6 +142,7 @@ WHERE u.email = 'your-email@example.com';
 ### 4. AI Template Generation - API Key Not Configured
 
 **Error:**
+
 ```json
 {
   "success": false,
@@ -141,11 +154,12 @@ WHERE u.email = 'your-email@example.com';
 `GEMINI_API_KEY` is not set in `.env` file.
 
 **Solution:**
+
 1. Get API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
 2. Add to `.env`:
    ```env
    GEMINI_API_KEY=AIzaSy...your-key-here
-   GEMINI_MODEL=gemini-pro
+   GEMINI_MODEL=gemini-1.5-flash
    GEMINI_MAX_TOKENS=2048
    GEMINI_TEMPERATURE=0.7
    ```
@@ -155,6 +169,7 @@ WHERE u.email = 'your-email@example.com';
    ```
 
 **Verification:**
+
 ```bash
 # Check if env var is set
 echo $GEMINI_API_KEY  # Linux/Mac
@@ -164,14 +179,55 @@ $env:GEMINI_API_KEY    # Windows PowerShell
 
 ---
 
+### 4b. AI Template Generation - Model Not Found (404 Error)
+
+**Error:**
+
+```
+GoogleGenerativeAIFetchError: [404 Not Found] models/gemini-pro is not found for API version v1beta
+```
+
+**Cause:**
+The `gemini-pro` model has been deprecated. Google has moved to newer models.
+
+**Solution:**
+Update your `.env` file to use a supported model:
+
+```env
+# Use one of these models:
+GEMINI_MODEL=gemini-1.5-flash      # Recommended - Fast and efficient
+# GEMINI_MODEL=gemini-1.5-pro      # More capable, slower
+# GEMINI_MODEL=gemini-2.0-flash-exp # Latest experimental
+```
+
+**Available Models (as of 2024):**
+
+- ✅ `gemini-1.5-flash` - Fast, efficient, recommended for most use cases
+- ✅ `gemini-1.5-pro` - More advanced reasoning, slower
+- ✅ `gemini-2.0-flash-exp` - Latest experimental features
+- ❌ `gemini-pro` - **DEPRECATED** - No longer available
+
+**After updating:**
+
+```bash
+# Restart your server
+npm start
+
+# Or if using Docker/Coolify, redeploy with updated env var
+```
+
+---
+
 ### 5. Database Connection Issues
 
 **Error:**
+
 ```
 Error: connect ECONNREFUSED 127.0.0.1:3306
 ```
 
 **Solution:**
+
 1. Verify MySQL is running
 2. Check `.env` database credentials:
    ```env
@@ -191,11 +247,13 @@ Error: connect ECONNREFUSED 127.0.0.1:3306
 ### 6. Puppeteer/Chromium Issues
 
 **Error:**
+
 ```
 Error: Failed to launch the browser process
 ```
 
 **Solution for Docker/Coolify:**
+
 ```dockerfile
 # Dockerfile already includes:
 RUN apk add chromium chromium-chromedriver
@@ -204,6 +262,7 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 **Solution for local development:**
 Update `.env`:
+
 ```env
 # Windows
 PUPPETEER_EXECUTABLE_PATH=C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe
@@ -220,11 +279,13 @@ PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 ### 7. Email Not Sending
 
 **Error:**
+
 ```
 Error: Invalid login
 ```
 
 **Solution:**
+
 1. Verify Zoho SMTP credentials in `.env`
 2. Check if email account is active
 3. Test SMTP connection:
@@ -237,6 +298,7 @@ Error: Invalid login
 ### 8. JWT Token Errors
 
 **Error:**
+
 ```json
 {
   "success": false,
@@ -245,6 +307,7 @@ Error: Invalid login
 ```
 
 **Solution:**
+
 1. Check `JWT_SECRET` is set in `.env` (min 32 characters)
 2. Token might be expired (default: 7 days)
 3. Login again to get new token
@@ -254,6 +317,7 @@ Error: Invalid login
 ## Quick Diagnostic Commands
 
 ### Check Application Status
+
 ```bash
 # Check if server is running
 curl http://localhost:3000/health
@@ -263,6 +327,7 @@ curl http://localhost:3000/health
 ```
 
 ### Check Database
+
 ```bash
 # Connect to database
 mysql -h 141.147.45.160 -P 3006 -u root -p pdf_saas
@@ -278,6 +343,7 @@ SELECT id, email, is_verified, role FROM users;
 ```
 
 ### Check Environment Variables
+
 ```bash
 # View all env vars (be careful with sensitive data)
 cat .env
@@ -288,6 +354,7 @@ grep DB_HOST .env
 ```
 
 ### Check Logs
+
 ```bash
 # If using PM2
 pm2 logs
@@ -317,4 +384,3 @@ If you're still experiencing issues:
 ---
 
 **Last Updated:** 2024
-
