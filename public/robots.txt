@@ -1,0 +1,32 @@
+# robots.txt for UIFlexer PDF Tools
+# https://pdf.uiflexer.com/robots.txt
+
+User-agent: *
+Allow: /
+Disallow: /dashboard.html
+Disallow: /api/
+Disallow: /login.html
+Disallow: /admin/
+Disallow: /branding.html
+
+# Allow CSS and JS for better crawling
+Allow: /css/
+Allow: /js/
+Allow: /images/
+
+# Sitemap location
+Sitemap: https://pdf.uiflexer.com/sitemap.xml
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1
+
+# Specific bot rules
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
