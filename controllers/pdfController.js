@@ -108,8 +108,8 @@ async function applyBranding(userId, planSlug, options) {
         headerTemplate: options.headerTemplate || headerTemplate,
         footerTemplate: options.footerTemplate || footerTemplate,
         margin: options.margin || {
-          top: "80px",
-          bottom: "80px",
+          top: "20px",
+          bottom: "20px",
           left: "20px",
           right: "20px",
         },
@@ -237,10 +237,10 @@ async function generatePdf(req, res) {
       scale: qualitySettings.scale, // Apply plan-based quality
       preferCSSPageSize: qualitySettings.preferCSSPageSize, // Apply plan-based setting
       margin: brandedOptions.margin || {
-        top: "20px",
-        right: "20px",
-        bottom: "20px",
-        left: "20px",
+        top: "0px",
+        right: "0px",
+        bottom: "0px",
+        left: "0px",
       },
       ...brandedOptions,
     };
@@ -399,10 +399,10 @@ async function generatePdfFromUrl(req, res) {
       scale: qualitySettings.scale, // Apply plan-based quality
       preferCSSPageSize: qualitySettings.preferCSSPageSize, // Apply plan-based setting
       margin: brandedOptions.margin || {
-        top: "20px",
-        right: "20px",
-        bottom: "20px",
-        left: "20px",
+        top: "0px",
+        right: "0px",
+        bottom: "0px",
+        left: "0px",
       },
       ...brandedOptions,
     };
