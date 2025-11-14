@@ -53,6 +53,7 @@ function getQualitySettings(planSlug) {
 async function applyBranding(userId, planSlug, options) {
   // Only Business and SuperAdmin plans can use custom branding
   if (!["business", "superadmin"].includes(planSlug)) {
+    console.log("applyBranding: Plan not eligible for branding:", planSlug);
     return options;
   }
 
@@ -63,11 +64,19 @@ async function applyBranding(userId, planSlug, options) {
       [userId]
     );
 
+    console.log("applyBranding: User query result:", users[0]);
+
     if (!users[0] || !users[0].branding_settings) {
+      console.log("applyBranding: No branding settings found");
       return options;
     }
 
-    const branding = JSON.parse(users[0].branding_settings);
+    // MySQL automatically parses JSON columns, so check if it's already an object
+    let branding = users[0].branding_settings;
+    if (typeof branding === "string") {
+      branding = JSON.parse(branding);
+    }
+    console.log("applyBranding: Parsed branding:", branding);
 
     // If user has custom branding, apply it to headers/footers
     if (branding && branding.company_name) {
@@ -193,6 +202,16 @@ async function generatePdf(req, res) {
       req.subscription.plan_slug,
       options
     );
+
+    // Debug logging
+    console.log("=== BRANDING DEBUG ===");
+    console.log("User ID:", req.user.id);
+    console.log("Plan:", req.subscription.plan_slug);
+    console.log("Original options:", options);
+    console.log("Branded options:", brandedOptions);
+    console.log("Has displayHeaderFooter:", brandedOptions.displayHeaderFooter);
+    console.log("Has headerTemplate:", !!brandedOptions.headerTemplate);
+    console.log("Has footerTemplate:", !!brandedOptions.footerTemplate);
 
     // Launch browser
     browser = await puppeteer.launch({

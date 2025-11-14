@@ -21,9 +21,12 @@ router.get("/settings", verifyToken, async (req, res) => {
       });
     }
 
-    const brandingSettings = users[0].branding_settings
-      ? JSON.parse(users[0].branding_settings)
-      : null;
+    // MySQL automatically parses JSON columns, so check if it's already an object
+    let brandingSettings = users[0].branding_settings;
+
+    if (brandingSettings && typeof brandingSettings === "string") {
+      brandingSettings = JSON.parse(brandingSettings);
+    }
 
     res.json({
       success: true,
@@ -139,4 +142,3 @@ router.delete("/settings", verifyToken, async (req, res) => {
 });
 
 module.exports = router;
-
