@@ -30,11 +30,16 @@ function setupEventListeners() {
   // Tab navigation
   document.querySelectorAll(".nav-link").forEach((link) => {
     link.addEventListener("click", (e) => {
-      e.preventDefault();
       const tab = e.target.dataset.tab;
-      switchTab(tab);
-      // Close mobile menu
-      if (navMenu) navMenu.classList.remove("active");
+
+      // If link has a tab attribute, it's an internal tab - switch to it
+      if (tab) {
+        e.preventDefault();
+        switchTab(tab);
+        // Close mobile menu
+        if (navMenu) navMenu.classList.remove("active");
+      }
+      // Otherwise, it's an external link (like /branding.html) - let it navigate normally
     });
   });
 
@@ -157,6 +162,11 @@ function updateDashboard(data) {
       document.getElementById("limitWarning").style.display = "block";
       document.getElementById("limitExceeded").style.display = "none";
     }
+  }
+
+  // Show branding link for Business and SuperAdmin users
+  if (["business", "superadmin"].includes(subscription.plan_slug)) {
+    document.getElementById("brandingLink").style.display = "inline-block";
   }
 
   // Subscription info

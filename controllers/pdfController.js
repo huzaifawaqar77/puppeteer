@@ -2,6 +2,119 @@ const puppeteer = require("puppeteer-core");
 const db = require("../config/database");
 
 /**
+ * Get quality settings based on subscription plan
+ * @param {string} planSlug - The subscription plan slug (trial, starter, professional, business, superadmin)
+ * @returns {object} Quality settings for PDF generation
+ */
+function getQualitySettings(planSlug) {
+  const qualityMap = {
+    trial: {
+      scale: 0.8,
+      preferCSSPageSize: false,
+      quality: "standard",
+      description: "Standard quality (80% scale)",
+    },
+    starter: {
+      scale: 1.0,
+      preferCSSPageSize: true,
+      quality: "high",
+      description: "High quality (100% scale)",
+    },
+    professional: {
+      scale: 1.0,
+      preferCSSPageSize: true,
+      quality: "high",
+      description: "High quality (100% scale)",
+    },
+    business: {
+      scale: 1.2,
+      preferCSSPageSize: true,
+      quality: "premium",
+      description: "Premium quality (120% scale)",
+    },
+    superadmin: {
+      scale: 1.2,
+      preferCSSPageSize: true,
+      quality: "premium",
+      description: "Premium quality (120% scale)",
+    },
+  };
+
+  return qualityMap[planSlug] || qualityMap["trial"];
+}
+
+/**
+ * Get user's branding settings and apply to PDF options
+ * @param {number} userId - User ID
+ * @param {string} planSlug - Subscription plan slug
+ * @param {object} options - Current PDF options
+ * @returns {object} Updated PDF options with branding applied
+ */
+async function applyBranding(userId, planSlug, options) {
+  // Only Business and SuperAdmin plans can use custom branding
+  if (!["business", "superadmin"].includes(planSlug)) {
+    return options;
+  }
+
+  try {
+    // Get user's branding settings
+    const [users] = await db.execute(
+      "SELECT branding_settings FROM users WHERE id = ?",
+      [userId]
+    );
+
+    if (!users[0] || !users[0].branding_settings) {
+      return options;
+    }
+
+    const branding = JSON.parse(users[0].branding_settings);
+
+    // If user has custom branding, apply it to headers/footers
+    if (branding && branding.company_name) {
+      // Build branded header template
+      let headerTemplate =
+        '<div style="width: 100%; text-align: center; padding: 10px; font-size: 10px;">';
+
+      if (branding.logo_url) {
+        headerTemplate += `<img src="${branding.logo_url}" height="30px" style="margin-bottom: 5px;" />`;
+      }
+
+      headerTemplate += `<div style="color: ${
+        branding.primary_color || "#667eea"
+      }; font-weight: bold;">${branding.company_name}</div>`;
+      headerTemplate += "</div>";
+
+      // Build branded footer template
+      const footerTemplate = `
+        <div style="width: 100%; text-align: center; padding: 10px; font-size: 9px; color: #666;">
+          <div>© ${new Date().getFullYear()} ${branding.company_name}</div>
+          <div style="margin-top: 3px;">Page <span class="pageNumber"></span> of <span class="totalPages"></span></div>
+        </div>
+      `;
+
+      // Apply branding to options (only if user hasn't provided custom templates)
+      return {
+        ...options,
+        displayHeaderFooter: true,
+        headerTemplate: options.headerTemplate || headerTemplate,
+        footerTemplate: options.footerTemplate || footerTemplate,
+        margin: options.margin || {
+          top: "80px",
+          bottom: "80px",
+          left: "20px",
+          right: "20px",
+        },
+      };
+    }
+
+    return options;
+  } catch (error) {
+    console.error("Error applying branding:", error);
+    return options; // Return original options if branding fails
+  }
+}
+
+/**
  * Track API usage
  */
 async function trackUsage(userId, apiKeyId, endpoint) {
@@ -52,6 +165,35 @@ async function generatePdf(req, res) {
     // Track usage
     await trackUsage(req.user.id, req.apiKey.id, "/api/pdf/generate");
 
+    // Check if user is trying to use custom headers/footers
+    if (
+      (options.displayHeaderFooter ||
+        options.headerTemplate ||
+        options.footerTemplate) &&
+      !["professional", "business", "superadmin"].includes(
+        req.subscription.plan_slug
+      )
+    ) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Custom headers and footers are only available on Professional and Business plans. Please upgrade your plan to access this feature.",
+        requiresUpgrade: true,
+        availablePlans: ["professional", "business"],
+        currentPlan: req.subscription.plan_slug,
+      });
+    }
+
+    // Get quality settings based on user's subscription plan
+    const qualitySettings = getQualitySettings(req.subscription.plan_slug);
+
+    // Apply branding for Business plan users
+    const brandedOptions = await applyBranding(
+      req.user.id,
+      req.subscription.plan_slug,
+      options
+    );
+
     // Launch browser
     browser = await puppeteer.launch({
       executablePath:
@@ -69,17 +211,19 @@ async function generatePdf(req, res) {
       waitUntil: "networkidle0",
     });
 
-    // PDF options
+    // PDF options with quality settings and branding applied
     const pdfOptions = {
-      format: options.format || "A4",
-      printBackground: options.printBackground !== false,
-      margin: options.margin || {
+      format: brandedOptions.format || "A4",
+      printBackground: brandedOptions.printBackground !== false,
+      scale: qualitySettings.scale, // Apply plan-based quality
+      preferCSSPageSize: qualitySettings.preferCSSPageSize, // Apply plan-based setting
+      margin: brandedOptions.margin || {
         top: "20px",
         right: "20px",
         bottom: "20px",
         left: "20px",
       },
-      ...options,
+      ...brandedOptions,
     };
 
     // Generate PDF
@@ -93,7 +237,12 @@ async function generatePdf(req, res) {
       [
         req.user.id,
         "pdf_generated",
-        JSON.stringify({ format: pdfOptions.format }),
+        JSON.stringify({
+          format: pdfOptions.format,
+          quality: qualitySettings.quality,
+          scale: qualitySettings.scale,
+          plan: req.subscription.plan_slug,
+        }),
       ]
     );
 
@@ -134,6 +283,35 @@ async function generatePdfFromUrl(req, res) {
 
     // Track usage
     await trackUsage(req.user.id, req.apiKey.id, "/api/pdf/generate-from-url");
+
+    // Check if user is trying to use custom headers/footers
+    if (
+      (options.displayHeaderFooter ||
+        options.headerTemplate ||
+        options.footerTemplate) &&
+      !["professional", "business", "superadmin"].includes(
+        req.subscription.plan_slug
+      )
+    ) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Custom headers and footers are only available on Professional and Business plans. Please upgrade your plan to access this feature.",
+        requiresUpgrade: true,
+        availablePlans: ["professional", "business"],
+        currentPlan: req.subscription.plan_slug,
+      });
+    }
+
+    // Get quality settings based on user's subscription plan
+    const qualitySettings = getQualitySettings(req.subscription.plan_slug);
+
+    // Apply branding for Business plan users
+    const brandedOptions = await applyBranding(
+      req.user.id,
+      req.subscription.plan_slug,
+      options
+    );
 
     // Launch browser
     browser = await puppeteer.launch({
@@ -195,18 +373,19 @@ async function generatePdfFromUrl(req, res) {
       });
     });
 
-    // PDF options
+    // PDF options with quality settings and branding applied
     const pdfOptions = {
-      format: options.format || "A4",
-      printBackground: options.printBackground !== false,
-      margin: options.margin || {
+      format: brandedOptions.format || "A4",
+      printBackground: brandedOptions.printBackground !== false,
+      scale: qualitySettings.scale, // Apply plan-based quality
+      preferCSSPageSize: qualitySettings.preferCSSPageSize, // Apply plan-based setting
+      margin: brandedOptions.margin || {
         top: "20px",
         right: "20px",
         bottom: "20px",
         left: "20px",
       },
-      preferCSSPageSize: options.preferCSSPageSize || false,
-      ...options,
+      ...brandedOptions,
     };
 
     // Remove options that shouldn't be passed to pdf()
@@ -224,7 +403,13 @@ async function generatePdfFromUrl(req, res) {
       [
         req.user.id,
         "pdf_generated_from_url",
-        JSON.stringify({ url, format: pdfOptions.format }),
+        JSON.stringify({
+          url,
+          format: pdfOptions.format,
+          quality: qualitySettings.quality,
+          scale: qualitySettings.scale,
+          plan: req.subscription.plan_slug,
+        }),
       ]
     );
 

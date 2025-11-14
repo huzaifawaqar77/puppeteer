@@ -49,24 +49,14 @@ app.use("/api/", limiter);
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// --- Static Files ---
-app.use(express.static(path.join(__dirname, "public")));
-
-// --- Health Check Endpoint (for Docker/Coolify) ---
-app.get("/health", (req, res) => {
-  res.status(200).json({
-    status: "ok",
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-  });
-});
-
 // --- Import Routes ---
 const authRoutes = require("./routes/auth");
 const pdfRoutes = require("./routes/pdf");
 const subscriptionRoutes = require("./routes/subscription");
 const aiRoutes = require("./routes/ai");
 const apiKeysRoutes = require("./routes/apiKeys");
+const docsRoutes = require("./routes/docs");
+const brandingRoutes = require("./routes/branding");
 
 // --- Health Check ---
 app.get("/health", (req, res) => {
@@ -78,19 +68,32 @@ app.get("/health", (req, res) => {
   });
 });
 
+// --- Documentation Routes (Protected) - MUST BE BEFORE STATIC FILES ---
+app.use("/", docsRoutes);
+
 // --- API Routes ---
 app.use("/api/auth", authRoutes);
 app.use("/api/pdf", pdfRoutes);
 app.use("/api/subscription", subscriptionRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/keys", apiKeysRoutes);
+app.use("/api/branding", brandingRoutes);
+
+// --- Static Files (with exclusions for protected routes) ---
+app.use((req, res, next) => {
+  // Block direct access to docs.html - must go through protected route
+  if (req.path === "/docs.html" || req.path === "/docs-content.html") {
+    return next(); // Let the docs route handler deal with it
+  }
+  express.static(path.join(__dirname, "public"))(req, res, next);
+});
 
 // --- Landing Page Route ---
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// --- API Documentation Route ---
+// --- API Documentation Route (Legacy - Markdown) ---
 app.get("/API_DOCUMENTATION.md", (req, res) => {
   res.sendFile(path.join(__dirname, "API_DOCUMENTATION.md"));
 });

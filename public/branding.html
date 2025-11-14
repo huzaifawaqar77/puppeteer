@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Branding Settings - PDF Generation SaaS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link rel="stylesheet" href="/css/dashboard.css" />
+    <style>
+      .branding-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      .branding-header {
+        margin-bottom: 2rem;
+      }
+
+      .branding-header h1 {
+        font-size: 2rem;
+        color: #1a202c;
+        margin-bottom: 0.5rem;
+      }
+
+      .branding-header p {
+        color: #718096;
+        font-size: 1rem;
+      }
+
+      .plan-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        margin-bottom: 1rem;
+      }
+
+      .upgrade-notice {
+        background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+        border-left: 4px solid #f39c12;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+      }
+
+      .upgrade-notice h3 {
+        margin: 0 0 0.5rem 0;
+        color: #d35400;
+      }
+
+      .upgrade-notice p {
+        margin: 0 0 1rem 0;
+        color: #7f5539;
+      }
+
+      .branding-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .branding-form {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .branding-preview {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #2d3748;
+      }
+
+      .form-group input[type="text"],
+      .form-group input[type="url"] {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+      }
+
+      .form-group input[type="text"]:focus,
+      .form-group input[type="url"]:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      .color-input-group {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+      }
+
+      .color-input-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+      }
+
+      .color-input-wrapper input[type="color"] {
+        width: 60px;
+        height: 40px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+
+      .color-input-wrapper input[type="text"] {
+        flex: 1;
+      }
+
+      .logo-preview {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: #f7fafc;
+        border-radius: 8px;
+        text-align: center;
+        min-height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .logo-preview img {
+        max-width: 100%;
+        max-height: 80px;
+      }
+
+      .logo-preview .placeholder {
+        color: #a0aec0;
+        font-style: italic;
+      }
+
+      .preview-header {
+        background: #f7fafc;
+        border: 2px dashed #cbd5e0;
+        border-radius: 8px;
+        padding: 1.5rem;
+        text-align: center;
+        margin-bottom: 1rem;
+      }
+
+      .preview-header h3 {
+        margin: 0 0 1rem 0;
+        color: #2d3748;
+        font-size: 1.25rem;
+      }
+
+      .preview-pdf-header {
+        background: white;
+        border: 1px solid #e2e8f0;
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+        margin-bottom: 1rem;
+      }
+
+      .preview-pdf-header img {
+        max-height: 40px;
+        margin-bottom: 0.5rem;
+      }
+
+      .preview-pdf-header .company-name {
+        font-weight: bold;
+        font-size: 0.875rem;
+      }
+
+      .preview-pdf-footer {
+        background: white;
+        border: 1px solid #e2e8f0;
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 0.75rem;
+        color: #666;
+      }
+
+      .preview-pdf-footer .copyright {
+        margin-bottom: 0.25rem;
+      }
+
+      .btn-group {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+      }
+
+      .btn {
+        flex: 1;
+        padding: 0.875rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-danger {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+      }
+
+      .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(245, 87, 108, 0.4);
+      }
+
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+      }
+
+      .alert {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        display: none;
+      }
+
+      .alert.show {
+        display: block;
+      }
+
+      .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border-left: 4px solid #28a745;
+      }
+
+      .alert-error {
+        background: #f8d7da;
+        color: #721c24;
+        border-left: 4px solid #dc3545;
+      }
+
+      .loading {
+        display: none;
+        text-align: center;
+        padding: 2rem;
+      }
+
+      .loading.show {
+        display: block;
+      }
+
+      .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .branding-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-brand">
+          <h1><i class="fas fa-file-pdf"></i> PDF SaaS</h1>
+        </div>
+        <div class="nav-menu">
+          <a href="/dashboard.html" class="nav-link">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+          </a>
+          <button class="btn-logout" id="logoutBtn">Logout</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="branding-container">
+      <!-- Loading State -->
+      <div class="loading" id="loadingState">
+        <div class="spinner"></div>
+        <p style="margin-top: 1rem; color: #718096">
+          Loading branding settings...
+        </p>
+      </div>
+
+      <!-- Main Content (hidden until loaded) -->
+      <div id="mainContent" style="display: none">
+        <!-- Header -->
+        <div class="branding-header">
+          <span class="plan-badge" id="planBadge">
+            <i class="fas fa-crown"></i> Business Plan
+          </span>
+          <h1><i class="fas fa-palette"></i> Branding Settings</h1>
+          <p>Customize your PDF branding with your company logo and colors</p>
+        </div>
+
+        <!-- Alert Messages -->
+        <div class="alert alert-success" id="successAlert">
+          <i class="fas fa-check-circle"></i> <span id="successMessage"></span>
+        </div>
+        <div class="alert alert-error" id="errorAlert">
+          <i class="fas fa-exclamation-circle"></i>
+          <span id="errorMessage"></span>
+        </div>
+
+        <!-- Upgrade Notice (for non-Business users) -->
+        <div class="upgrade-notice" id="upgradeNotice" style="display: none">
+          <h3><i class="fas fa-lock"></i> Business Plan Required</h3>
+          <p>
+            Custom branding is only available on the Business plan. Upgrade to
+            add your company logo and colors to all generated PDFs.
+          </p>
+          <a
+            href="/dashboard.html#profile"
+            class="btn btn-primary"
+            style="display: inline-block; text-decoration: none"
+          >
+            <i class="fas fa-arrow-up"></i> Upgrade to Business Plan
+          </a>
+        </div>
+
+        <!-- Branding Form & Preview -->
+        <div class="branding-grid" id="brandingContent">
+          <!-- Form Section -->
+          <div class="branding-form">
+            <h2><i class="fas fa-edit"></i> Branding Details</h2>
+            <form id="brandingForm">
+              <!-- Company Name -->
+              <div class="form-group">
+                <label for="companyName">
+                  <i class="fas fa-building"></i> Company Name *
+                </label>
+                <input
+                  type="text"
+                  id="companyName"
+                  placeholder="e.g., Acme Corporation"
+                  required
+                />
+              </div>
+
+              <!-- Logo URL -->
+              <div class="form-group">
+                <label for="logoUrl">
+                  <i class="fas fa-image"></i> Logo URL
+                </label>
+                <input
+                  type="url"
+                  id="logoUrl"
+                  placeholder="https://example.com/logo.png"
+                />
+                <div class="logo-preview" id="logoPreview">
+                  <span class="placeholder">Logo preview will appear here</span>
+                </div>
+              </div>
+
+              <!-- Primary Color -->
+              <div class="form-group">
+                <label> <i class="fas fa-palette"></i> Primary Color </label>
+                <div class="color-input-wrapper">
+                  <input type="color" id="primaryColor" value="#667eea" />
+                  <input
+                    type="text"
+                    id="primaryColorText"
+                    value="#667eea"
+                    readonly
+                  />
+                </div>
+              </div>
+
+              <!-- Secondary Color -->
+              <div class="form-group">
+                <label> <i class="fas fa-palette"></i> Secondary Color </label>
+                <div class="color-input-wrapper">
+                  <input type="color" id="secondaryColor" value="#764ba2" />
+                  <input
+                    type="text"
+                    id="secondaryColorText"
+                    value="#764ba2"
+                    readonly
+                  />
+                </div>
+              </div>
+
+              <!-- Buttons -->
+              <div class="btn-group">
+                <button type="submit" class="btn btn-primary" id="saveBtn">
+                  <i class="fas fa-save"></i> Save Branding
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-danger"
+                  id="deleteBtn"
+                  style="display: none"
+                >
+                  <i class="fas fa-trash"></i> Remove Branding
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Preview Section -->
+          <div class="branding-preview">
+            <h2><i class="fas fa-eye"></i> PDF Preview</h2>
+            <p style="color: #718096; margin-bottom: 1.5rem">
+              This is how your branding will appear in generated PDFs
+            </p>
+
+            <!-- PDF Header Preview -->
+            <div class="preview-header">
+              <h3>PDF Header</h3>
+              <div class="preview-pdf-header" id="previewHeader">
+                <div id="previewLogo" style="display: none">
+                  <img id="previewLogoImg" src="" alt="Logo" />
+                </div>
+                <div
+                  class="company-name"
+                  id="previewCompanyName"
+                  style="color: #667eea"
+                >
+                  Your Company Name
+                </div>
+              </div>
+            </div>
+
+            <!-- PDF Footer Preview -->
+            <div class="preview-header">
+              <h3>PDF Footer</h3>
+              <div class="preview-pdf-footer" id="previewFooter">
+                <div class="copyright" id="previewCopyright">
+                  © 2025 Your Company Name
+                </div>
+                <div>Page 1 of 1</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_BASE = window.location.origin;
+      let currentBranding = null;
+      let userPlan = null;
+
+      // Check authentication
+      const token = localStorage.getItem("token");
+      if (!token) {
+        window.location.href = "/login.html";
+      }
+
+      // Logout handler
+      document.getElementById("logoutBtn").addEventListener("click", () => {
+        localStorage.removeItem("token");
+        window.location.href = "/login.html";
+      });
+
+      // Show alert
+      function showAlert(type, message) {
+        const alertId = type === "success" ? "successAlert" : "errorAlert";
+        const messageId =
+          type === "success" ? "successMessage" : "errorMessage";
+
+        document.getElementById(messageId).textContent = message;
+        document.getElementById(alertId).classList.add("show");
+
+        setTimeout(() => {
+          document.getElementById(alertId).classList.remove("show");
+        }, 5000);
+      }
+
+      // Update preview
+      function updatePreview() {
+        const companyName =
+          document.getElementById("companyName").value || "Your Company Name";
+        const logoUrl = document.getElementById("logoUrl").value;
+        const primaryColor = document.getElementById("primaryColor").value;
+
+        // Update company name in preview
+        document.getElementById("previewCompanyName").textContent = companyName;
+        document.getElementById("previewCompanyName").style.color =
+          primaryColor;
+        document.getElementById(
+          "previewCopyright"
+        ).textContent = `© 2025 ${companyName}`;
+
+        // Update logo preview
+        const logoPreview = document.getElementById("logoPreview");
+        const previewLogo = document.getElementById("previewLogo");
+        const previewLogoImg = document.getElementById("previewLogoImg");
+
+        if (logoUrl) {
+          logoPreview.innerHTML = `<img src="${logoUrl}" alt="Logo" onerror="this.parentElement.innerHTML='<span class=\\'placeholder\\'>Invalid logo URL</span>'">`;
+          previewLogoImg.src = logoUrl;
+          previewLogo.style.display = "block";
+        } else {
+          logoPreview.innerHTML =
+            '<span class="placeholder">Logo preview will appear here</span>';
+          previewLogo.style.display = "none";
+        }
+      }
+
+      // Color picker sync
+      document.getElementById("primaryColor").addEventListener("input", (e) => {
+        document.getElementById("primaryColorText").value = e.target.value;
+        updatePreview();
+      });
+
+      document
+        .getElementById("secondaryColor")
+        .addEventListener("input", (e) => {
+          document.getElementById("secondaryColorText").value = e.target.value;
+        });
+
+      // Live preview updates
+      document
+        .getElementById("companyName")
+        .addEventListener("input", updatePreview);
+      document
+        .getElementById("logoUrl")
+        .addEventListener("input", updatePreview);
+
+      // Load user subscription and branding
+      async function loadData() {
+        try {
+          // Get user subscription
+          const subResponse = await fetch(
+            `${API_BASE}/api/subscription/current`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (!subResponse.ok) {
+            throw new Error("Failed to load subscription");
+          }
+
+          const subData = await subResponse.json();
+          userPlan = subData.data.subscription.plan_slug;
+
+          // Debug logging
+          console.log("Subscription data:", subData);
+          console.log("User plan slug:", userPlan);
+
+          // Update plan badge
+          const planNames = {
+            trial: "Trial Plan",
+            starter: "Starter Plan",
+            professional: "Professional Plan",
+            business: "Business Plan",
+            superadmin: "Super Admin",
+          };
+          document.getElementById(
+            "planBadge"
+          ).innerHTML = `<i class="fas fa-crown"></i> ${
+            planNames[userPlan] || userPlan
+          }`;
+
+          // Check if user has Business or SuperAdmin plan
+          console.log("Checking plan access. User plan:", userPlan);
+          console.log(
+            "Is business or superadmin?",
+            ["business", "superadmin"].includes(userPlan)
+          );
+
+          if (!["business", "superadmin"].includes(userPlan)) {
+            document.getElementById("upgradeNotice").style.display = "block";
+            document.getElementById("brandingContent").style.display = "none";
+            document.getElementById("loadingState").classList.remove("show");
+            document.getElementById("mainContent").style.display = "block";
+            return;
+          }
+
+          // Load branding settings
+          const brandingResponse = await fetch(
+            `${API_BASE}/api/branding/settings`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (brandingResponse.ok) {
+            const brandingData = await brandingResponse.json();
+            if (brandingData.success && brandingData.data) {
+              currentBranding = brandingData.data;
+
+              // Populate form
+              document.getElementById("companyName").value =
+                currentBranding.company_name || "";
+              document.getElementById("logoUrl").value =
+                currentBranding.logo_url || "";
+              document.getElementById("primaryColor").value =
+                currentBranding.primary_color || "#667eea";
+              document.getElementById("primaryColorText").value =
+                currentBranding.primary_color || "#667eea";
+              document.getElementById("secondaryColor").value =
+                currentBranding.secondary_color || "#764ba2";
+              document.getElementById("secondaryColorText").value =
+                currentBranding.secondary_color || "#764ba2";
+
+              // Show delete button
+              document.getElementById("deleteBtn").style.display = "block";
+
+              // Update preview
+              updatePreview();
+            }
+          }
+
+          // Hide loading, show content
+          document.getElementById("loadingState").classList.remove("show");
+          document.getElementById("mainContent").style.display = "block";
+        } catch (error) {
+          console.error("Error loading data:", error);
+          showAlert(
+            "error",
+            "Failed to load branding settings. Please try again."
+          );
+          document.getElementById("loadingState").classList.remove("show");
+          document.getElementById("mainContent").style.display = "block";
+        }
+      }
+
+      // Save branding
+      document
+        .getElementById("brandingForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const saveBtn = document.getElementById("saveBtn");
+          saveBtn.disabled = true;
+          saveBtn.innerHTML =
+            '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+          try {
+            const brandingData = {
+              company_name: document.getElementById("companyName").value,
+              logo_url: document.getElementById("logoUrl").value || null,
+              primary_color: document.getElementById("primaryColor").value,
+              secondary_color: document.getElementById("secondaryColor").value,
+            };
+
+            const response = await fetch(`${API_BASE}/api/branding/settings`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify(brandingData),
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+              currentBranding = data.data;
+              showAlert("success", "Branding settings saved successfully!");
+              document.getElementById("deleteBtn").style.display = "block";
+            } else {
+              throw new Error(data.message || "Failed to save branding");
+            }
+          } catch (error) {
+            console.error("Error saving branding:", error);
+            showAlert(
+              "error",
+              error.message ||
+                "Failed to save branding settings. Please try again."
+            );
+          } finally {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Branding';
+          }
+        });
+
+      // Delete branding
+      document
+        .getElementById("deleteBtn")
+        .addEventListener("click", async () => {
+          if (
+            !confirm(
+              "Are you sure you want to remove your branding settings? This will affect all future PDF generations."
+            )
+          ) {
+            return;
+          }
+
+          const deleteBtn = document.getElementById("deleteBtn");
+          deleteBtn.disabled = true;
+          deleteBtn.innerHTML =
+            '<i class="fas fa-spinner fa-spin"></i> Removing...';
+
+          try {
+            const response = await fetch(`${API_BASE}/api/branding/settings`, {
+              method: "DELETE",
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+              currentBranding = null;
+              showAlert("success", "Branding settings removed successfully!");
+
+              // Reset form
+              document.getElementById("companyName").value = "";
+              document.getElementById("logoUrl").value = "";
+              document.getElementById("primaryColor").value = "#667eea";
+              document.getElementById("primaryColorText").value = "#667eea";
+              document.getElementById("secondaryColor").value = "#764ba2";
+              document.getElementById("secondaryColorText").value = "#764ba2";
+
+              // Hide delete button
+              deleteBtn.style.display = "none";
+
+              // Update preview
+              updatePreview();
+            } else {
+              throw new Error(data.message || "Failed to remove branding");
+            }
+          } catch (error) {
+            console.error("Error removing branding:", error);
+            showAlert(
+              "error",
+              error.message ||
+                "Failed to remove branding settings. Please try again."
+            );
+            deleteBtn.disabled = false;
+            deleteBtn.innerHTML =
+              '<i class="fas fa-trash"></i> Remove Branding';
+          }
+        });
+
+      // Load data on page load
+      document.getElementById("loadingState").classList.add("show");
+      loadData();
+    </script>
+  </body>
+</html>
