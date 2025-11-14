@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PDF Tools - PDF SaaS</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary: #667eea;
+        --primary-dark: #5568d3;
+        --secondary: #764ba2;
+        --success: #10b981;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --dark: #1f2937;
+        --light: #f9fafb;
+        --border: #e5e7eb;
+        --text: #374151;
+        --text-light: #6b7280;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      /* Header */
+      .header {
+        background: white;
+        border-radius: 16px;
+        padding: 24px 32px;
+        margin-bottom: 32px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+
+      .header h1 {
+        font-size: 28px;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-secondary {
+        background: white;
+        color: var(--primary);
+        border: 2px solid var(--primary);
+      }
+
+      .btn-secondary:hover {
+        background: var(--primary);
+        color: white;
+      }
+
+      /* Tools Grid */
+      .tools-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+        gap: 24px;
+        margin-bottom: 32px;
+      }
+
+      .tool-card {
+        background: white;
+        border-radius: 16px;
+        padding: 32px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .tool-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+      }
+
+      .tool-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+      }
+
+      .tool-card:hover::before {
+        transform: scaleX(1);
+      }
+
+      .tool-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+      }
+
+      .tool-card h3 {
+        font-size: 22px;
+        color: var(--dark);
+        margin-bottom: 12px;
+      }
+
+      .tool-card p {
+        color: var(--text-light);
+        margin-bottom: 24px;
+        line-height: 1.6;
+      }
+
+      /* Upload Area */
+      .upload-area {
+        border: 2px dashed var(--border);
+        border-radius: 12px;
+        padding: 32px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+        background: var(--light);
+      }
+
+      .upload-area:hover {
+        border-color: var(--primary);
+        background: #f3f4f6;
+      }
+
+      .upload-area.dragover {
+        border-color: var(--primary);
+        background: #ede9fe;
+      }
+
+      .upload-area i {
+        font-size: 48px;
+        color: var(--primary);
+        margin-bottom: 16px;
+      }
+
+      .upload-area p {
+        margin: 0;
+        color: var(--text);
+      }
+
+      .upload-area small {
+        color: var(--text-light);
+        display: block;
+        margin-top: 8px;
+      }
+
+      .file-input {
+        display: none;
+      }
+
+      /* File List */
+      .file-list {
+        margin-bottom: 20px;
+      }
+
+      .file-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        background: var(--light);
+        border-radius: 8px;
+        margin-bottom: 8px;
+      }
+
+      .file-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .file-info i {
+        color: var(--danger);
+        font-size: 20px;
+      }
+
+      .file-name {
+        font-weight: 500;
+        color: var(--dark);
+      }
+
+      .file-size {
+        color: var(--text-light);
+        font-size: 13px;
+      }
+
+      .remove-file {
+        background: none;
+        border: none;
+        color: var(--text-light);
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: all 0.2s;
+      }
+
+      .remove-file:hover {
+        background: var(--danger);
+        color: white;
+      }
+
+      /* Form Controls */
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: var(--dark);
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.3s;
+      }
+
+      .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      select.form-control {
+        cursor: pointer;
+      }
+
+      .range-group {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .range-group input[type="range"] {
+        flex: 1;
+      }
+
+      .range-value {
+        min-width: 50px;
+        text-align: center;
+        font-weight: 600;
+        color: var(--primary);
+      }
+
+      /* Buttons */
+      .btn-process {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .btn-process:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-process:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .btn-process.processing {
+        background: var(--text-light);
+      }
+
+      /* Loading Spinner */
+      .spinner {
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top: 3px solid white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Alert Messages */
+      .alert {
+        padding: 16px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: none;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .alert.show {
+        display: flex;
+      }
+
+      .alert-success {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #10b981;
+      }
+
+      .alert-error {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #ef4444;
+      }
+
+      .alert-warning {
+        background: #fef3c7;
+        color: #92400e;
+        border: 1px solid #f59e0b;
+      }
+
+      /* Plan Badge */
+      .plan-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .tools-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .header-actions {
+          width: 100%;
+          justify-content: space-between;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <h1>
+          <i class="fas fa-tools"></i>
+          PDF Tools
+        </h1>
+        <div class="header-actions">
+          <span class="plan-badge" id="planBadge">
+            <i class="fas fa-crown"></i>
+            <span id="planName">Loading...</span>
+          </span>
+          <a href="/dashboard.html" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i>
+            Back to Dashboard
+          </a>
+        </div>
+      </div>
+
+      <!-- Tools Grid -->
+      <div class="tools-grid">
+        <!-- Merge PDFs -->
+        <div class="tool-card" id="mergeTool">
+          <div class="tool-icon">
+            <i class="fas fa-object-group"></i>
+          </div>
+          <h3>Merge PDFs</h3>
+          <p>Combine multiple PDF files into a single document</p>
+
+          <div class="alert alert-error" id="mergeAlert"></div>
+
+          <div
+            class="upload-area"
+            id="mergeUploadArea"
+            onclick="document.getElementById('mergeFileInput').click()"
+          >
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p><strong>Click to upload</strong> or drag and drop</p>
+            <small>Upload 2 or more PDF files (max 50MB each)</small>
+          </div>
+
+          <input
+            type="file"
+            id="mergeFileInput"
+            class="file-input"
+            accept=".pdf"
+            multiple
+          />
+
+          <div class="file-list" id="mergeFileList"></div>
+
+          <button class="btn-process" id="mergeBtn" disabled>
+            <i class="fas fa-magic"></i>
+            Merge PDFs
+          </button>
+        </div>
+
+        <!-- Compress PDF -->
+        <div class="tool-card" id="compressTool">
+          <div class="tool-icon">
+            <i class="fas fa-compress-alt"></i>
+          </div>
+          <h3>Compress PDF</h3>
+          <p>Reduce PDF file size while maintaining quality</p>
+
+          <div class="alert alert-error" id="compressAlert"></div>
+
+          <div
+            class="upload-area"
+            id="compressUploadArea"
+            onclick="document.getElementById('compressFileInput').click()"
+          >
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p><strong>Click to upload</strong> or drag and drop</p>
+            <small>Upload a PDF file (max 50MB)</small>
+          </div>
+
+          <input
+            type="file"
+            id="compressFileInput"
+            class="file-input"
+            accept=".pdf"
+          />
+
+          <div class="file-list" id="compressFileList"></div>
+
+          <div class="form-group">
+            <label>Compression Level</label>
+            <select class="form-control" id="compressionLevel">
+              <option value="1">Low (Better Quality)</option>
+              <option value="2" selected>Medium (Balanced)</option>
+              <option value="3">High (Smaller Size)</option>
+            </select>
+          </div>
+
+          <button class="btn-process" id="compressBtn" disabled>
+            <i class="fas fa-compress"></i>
+            Compress PDF
+          </button>
+        </div>
+
+        <!-- PDF to Word -->
+        <div class="tool-card" id="pdfToWordTool">
+          <div class="tool-icon">
+            <i class="fas fa-file-word"></i>
+          </div>
+          <h3>PDF to Word</h3>
+          <p>Convert PDF documents to editable Word files</p>
+
+          <div class="alert alert-error" id="pdfToWordAlert"></div>
+
+          <div
+            class="upload-area"
+            id="pdfToWordUploadArea"
+            onclick="document.getElementById('pdfToWordFileInput').click()"
+          >
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p><strong>Click to upload</strong> or drag and drop</p>
+            <small>Upload a PDF file (max 50MB)</small>
+          </div>
+
+          <input
+            type="file"
+            id="pdfToWordFileInput"
+            class="file-input"
+            accept=".pdf"
+          />
+
+          <div class="file-list" id="pdfToWordFileList"></div>
+
+          <button class="btn-process" id="pdfToWordBtn" disabled>
+            <i class="fas fa-exchange-alt"></i>
+            Convert to Word
+          </button>
+        </div>
+
+        <!-- PDF to Image -->
+        <div class="tool-card" id="pdfToImageTool">
+          <div class="tool-icon">
+            <i class="fas fa-image"></i>
+          </div>
+          <h3>PDF to Image</h3>
+          <p>Extract pages from PDF as image files</p>
+
+          <div class="alert alert-error" id="pdfToImageAlert"></div>
+
+          <div
+            class="upload-area"
+            id="pdfToImageUploadArea"
+            onclick="document.getElementById('pdfToImageFileInput').click()"
+          >
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p><strong>Click to upload</strong> or drag and drop</p>
+            <small>Upload a PDF file (max 50MB)</small>
+          </div>
+
+          <input
+            type="file"
+            id="pdfToImageFileInput"
+            class="file-input"
+            accept=".pdf"
+          />
+
+          <div class="file-list" id="pdfToImageFileList"></div>
+
+          <div class="form-group">
+            <label>Image Format</label>
+            <select class="form-control" id="imageFormat">
+              <option value="png" selected>PNG (Best Quality)</option>
+              <option value="jpg">JPG (Smaller Size)</option>
+              <option value="gif">GIF</option>
+            </select>
+          </div>
+
+          <button class="btn-process" id="pdfToImageBtn" disabled>
+            <i class="fas fa-images"></i>
+            Convert to Images
+          </button>
+        </div>
+
+        <!-- Add Watermark -->
+        <div class="tool-card" id="watermarkTool">
+          <div class="tool-icon">
+            <i class="fas fa-stamp"></i>
+          </div>
+          <h3>Add Watermark</h3>
+          <p>Add text watermark to protect your PDF documents</p>
+
+          <div class="alert alert-error" id="watermarkAlert"></div>
+
+          <div
+            class="upload-area"
+            id="watermarkUploadArea"
+            onclick="document.getElementById('watermarkFileInput').click()"
+          >
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p><strong>Click to upload</strong> or drag and drop</p>
+            <small>Upload a PDF file (max 50MB)</small>
+          </div>
+
+          <input
+            type="file"
+            id="watermarkFileInput"
+            class="file-input"
+            accept=".pdf"
+          />
+
+          <div class="file-list" id="watermarkFileList"></div>
+
+          <div class="form-group">
+            <label>Watermark Text</label>
+            <input
+              type="text"
+              class="form-control"
+              id="watermarkText"
+              placeholder="CONFIDENTIAL"
+              value="CONFIDENTIAL"
+            />
+          </div>
+
+          <div class="form-group">
+            <label
+              >Opacity:
+              <span class="range-value" id="opacityValue">50%</span></label
+            >
+            <input
+              type="range"
+              class="form-control"
+              id="watermarkOpacity"
+              min="10"
+              max="100"
+              value="50"
+            />
+          </div>
+
+          <button class="btn-process" id="watermarkBtn" disabled>
+            <i class="fas fa-stamp"></i>
+            Add Watermark
+          </button>
+        </div>
+
+        <!-- Add Password -->
+        <div class="tool-card" id="passwordTool">
+          <div class="tool-icon">
+            <i class="fas fa-lock"></i>
+          </div>
+          <h3>Add Password</h3>
+          <p>Protect your PDF with password encryption</p>
+
+          <div class="alert alert-error" id="passwordAlert"></div>
+
+          <div
+            class="upload-area"
+            id="passwordUploadArea"
+            onclick="document.getElementById('passwordFileInput').click()"
+          >
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p><strong>Click to upload</strong> or drag and drop</p>
+            <small>Upload a PDF file (max 50MB)</small>
+          </div>
+
+          <input
+            type="file"
+            id="passwordFileInput"
+            class="file-input"
+            accept=".pdf"
+          />
+
+          <div class="file-list" id="passwordFileList"></div>
+
+          <div class="form-group">
+            <label>Password</label>
+            <input
+              type="password"
+              class="form-control"
+              id="pdfPassword"
+              placeholder="Enter password"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="canPrint" checked />
+              Allow Printing
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="canModify" checked />
+              Allow Modifications
+            </label>
+          </div>
+
+          <button class="btn-process" id="passwordBtn" disabled>
+            <i class="fas fa-shield-alt"></i>
+            Add Password
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Authentication check
+      const token = localStorage.getItem("token");
+      if (!token) {
+        window.location.href = "/login.html";
+      }
+
+      let userPlan = null;
+      let mergeFiles = [];
+      let compressFile = null;
+      let pdfToWordFile = null;
+      let pdfToImageFile = null;
+      let watermarkFile = null;
+      let passwordFile = null;
+
+      // Load user subscription
+      async function loadSubscription() {
+        try {
+          const response = await fetch("/api/subscription/current", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          const data = await response.json();
+          if (data.success) {
+            userPlan = data.data.subscription.plan_slug;
+            document.getElementById("planName").textContent =
+              data.data.subscription.plan_name;
+          }
+        } catch (error) {
+          console.error("Error loading subscription:", error);
+        }
+      }
+
+      // Format file size
+      function formatFileSize(bytes) {
+        if (bytes === 0) return "0 Bytes";
+        const k = 1024;
+        const sizes = ["Bytes", "KB", "MB", "GB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return (
+          Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i]
+        );
+      }
+
+      // Show alert
+      function showAlert(elementId, message, type = "error") {
+        const alert = document.getElementById(elementId);
+        alert.className = `alert alert-${type} show`;
+        alert.innerHTML = `<i class="fas fa-${
+          type === "error" ? "exclamation-circle" : "check-circle"
+        }"></i> ${message}`;
+        setTimeout(() => {
+          alert.classList.remove("show");
+        }, 5000);
+      }
+
+      // Download file
+      function downloadFile(blob, filename) {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }
+
+      // Initialize on page load
+      loadSubscription();
+    </script>
+
+    <!-- PDF Tools JavaScript -->
+    <script src="/js/pdf-tools.js"></script>
+  </body>
+</html>

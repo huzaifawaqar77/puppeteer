@@ -164,6 +164,15 @@ function updateDashboard(data) {
     }
   }
 
+  // Show PDF Tools link for Starter+ users
+  if (
+    ["starter", "professional", "business", "superadmin"].includes(
+      subscription.plan_slug
+    )
+  ) {
+    document.getElementById("pdfToolsLink").style.display = "inline-block";
+  }
+
   // Show branding link for Business and SuperAdmin users
   if (["business", "superadmin"].includes(subscription.plan_slug)) {
     document.getElementById("brandingLink").style.display = "inline-block";

@@ -428,9 +428,79 @@ async function requirePaidPlan(req, res, next) {
   }
 }
 
+/**
+ * Middleware to check subscription and attach to request
+ * Use this after verifyToken for routes that need subscription info
+ */
+async function checkSubscription(req, res, next) {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required.",
+      });
+    }
+
+    // Get user's active subscription
+    const [subscriptions] = await db.execute(
+      `SELECT us.*, sp.monthly_conversions, sp.slug as plan_slug, sp.name as plan_name
+       FROM user_subscriptions us
+       JOIN subscription_plans sp ON us.plan_id = sp.id
+       WHERE us.user_id = ? AND us.status IN ('trial', 'active')
+       ORDER BY us.created_at DESC LIMIT 1`,
+      [req.user.id]
+    );
+
+    if (subscriptions.length === 0) {
+      return res.status(403).json({
+        success: false,
+        message: "No active subscription found. Please subscribe to a plan.",
+      });
+    }
+
+    const subscription = subscriptions[0];
+
+    // Check if subscription is expired
+    const now = new Date();
+    if (
+      subscription.status === "trial" &&
+      subscription.trial_ends_at &&
+      new Date(subscription.trial_ends_at) < now
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "Your trial has expired. Please upgrade to a paid plan.",
+      });
+    }
+
+    if (
+      subscription.status === "active" &&
+      new Date(subscription.current_period_end) < now
+    ) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Your subscription has expired. Please renew your subscription.",
+      });
+    }
+
+    // Attach subscription info to request
+    req.subscription = subscription;
+
+    next();
+  } catch (error) {
+    console.error("Subscription check error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}
+
 module.exports = {
   verifyToken,
   verifyApiKey,
   requireRole,
   requirePaidPlan,
+  checkSubscription,
 };
