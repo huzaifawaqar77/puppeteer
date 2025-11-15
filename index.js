@@ -58,6 +58,7 @@ const apiKeysRoutes = require("./routes/apiKeys");
 const docsRoutes = require("./routes/docs");
 const brandingRoutes = require("./routes/branding");
 const stirlingRoutes = require("./routes/stirling");
+const supportRoutes = require("./routes/support");
 
 // --- Health Check ---
 app.get("/health", (req, res) => {
@@ -80,6 +81,7 @@ app.use("/api/ai", aiRoutes);
 app.use("/api/keys", apiKeysRoutes);
 app.use("/api/branding", brandingRoutes);
 app.use("/api/stirling", stirlingRoutes);
+app.use("/api/support", supportRoutes);
 
 // --- Static Files (with exclusions for protected routes) ---
 app.use((req, res, next) => {

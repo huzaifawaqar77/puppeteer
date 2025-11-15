@@ -11,7 +11,27 @@ if (!token) {
 document.addEventListener("DOMContentLoaded", () => {
   loadDashboardData();
   setupEventListeners();
+  initSupportEditor();
 });
+
+let supportQuill = null;
+
+function initSupportEditor() {
+  const editorContainer = document.getElementById('emailEditor');
+  if (!editorContainer) return;
+
+  supportQuill = new Quill('#emailEditor', {
+    theme: 'snow',
+    placeholder: 'Dear Support Team,\n\nI would like to upgrade my plan...',
+    modules: {
+      toolbar: [
+        ['bold', 'italic', 'underline'],
+        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+        ['link']
+      ]
+    }
+  });
+}
 
 // Setup event listeners
 function setupEventListeners() {
@@ -90,10 +110,89 @@ function setupEventListeners() {
 
   // Upgrade plan button
   document.getElementById("upgradePlanBtn").addEventListener("click", () => {
-    alert(
-      "Payment integration coming soon! Contact support to upgrade your plan."
-    );
+    // alert(
+    //   "Payment integration coming soon! Contact support to upgrade your plan."
+    // );
+    showSupportModal();
   });
+
+  // Support modal close button
+  document
+    .querySelector("#supportModal .close-button")
+    .addEventListener("click", hideSupportModal);
+
+  // Close modal when clicking outside
+  window.addEventListener("click", (event) => {
+    const supportModal = document.getElementById("supportModal");
+    if (event.target === supportModal) {
+      hideSupportModal();
+    }
+  });
+
+  // Support email form submission
+  document
+    .getElementById("supportEmailForm")
+    .addEventListener("submit", sendSupportEmail);
+}
+
+// Show support modal
+function showSupportModal() {
+  document.getElementById("supportModal").style.display = "flex";
+}
+
+// Hide support modal
+function hideSupportModal() {
+  document.getElementById("supportModal").style.display = "none";
+  document.getElementById("emailStatus").style.display = "none"; // Hide status message on close
+}
+
+// Send support email
+async function sendSupportEmail(e) {
+  e.preventDefault();
+
+  const form = e.target;
+  const subject = document.getElementById("emailSubject").value;
+  // Prefer Quill HTML when available, fallback to textarea value
+  const bodyHtml = supportQuill ? supportQuill.root.innerHTML : null;
+  const body = document.getElementById("emailBody").value;
+  const emailStatusDiv = document.getElementById("emailStatus");
+  const sendButton = form.querySelector("button[type='submit']");
+
+  emailStatusDiv.style.display = "none";
+  emailStatusDiv.className = "email-status";
+  sendButton.disabled = true;
+  sendButton.textContent = "Sending...";
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/support/send-email`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ subject, body, bodyHtml }),
+    });
+
+    const data = await response.json();
+
+      if (response.ok) {
+      emailStatusDiv.textContent = "Email sent successfully! We will get back to you shortly.";
+      emailStatusDiv.classList.add("success");
+        form.reset();
+        document.getElementById("emailSubject").value = "Plan Upgrade Request"; // Reset subject to default
+        if (supportQuill) supportQuill.setText('');
+    } else {
+      throw new Error(data.message || "Failed to send email.");
+    }
+  } catch (error) {
+    emailStatusDiv.textContent = error.message;
+    emailStatusDiv.classList.add("error");
+    console.error("Error sending support email:", error);
+  } finally {
+    emailStatusDiv.style.display = "block";
+    sendButton.disabled = false;
+    sendButton.textContent = "Send Email";
+  }
 }
 
 // Load dashboard data
