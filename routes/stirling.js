@@ -104,4 +104,126 @@ router.post(
   stirlingController.addPassword
 );
 
+/**
+ * Security + Misc PDF Operations
+ * These routes implement Stirling-backed operations added to the UI.
+ */
+
+// Auto redact (pattern-based)
+router.post(
+  "/auto-redact",
+  verifyToken,
+  checkSubscription,
+  upload.single("fileInput"),
+  stirlingController.autoRedact
+);
+
+// Manual redact (page numbers or selection)
+router.post(
+  "/redact",
+  verifyToken,
+  checkSubscription,
+  upload.single("fileInput"),
+  stirlingController.redact
+);
+
+// Sanitize PDF (remove metadata, scripts, attachments)
+router.post(
+  "/sanitize-pdf",
+  verifyToken,
+  checkSubscription,
+  upload.single("fileInput"),
+  stirlingController.sanitizePDF
+);
+
+// Update metadata
+router.post(
+  "/update-metadata",
+  verifyToken,
+  checkSubscription,
+  upload.single("fileInput"),
+  stirlingController.updateMetadata
+);
+
+// Unlock PDF forms
+router.post(
+  "/unlock-pdf-forms",
+  verifyToken,
+  checkSubscription,
+  upload.single("fileInput"),
+  stirlingController.unlockForms
+);
+
+// Extract/show embedded JavaScript
+router.post(
+  "/show-javascript",
+  verifyToken,
+  checkSubscription,
+  upload.single("fileInput"),
+  stirlingController.showJavascript
+);
+
+// Scanner effect (deskew/clean/scan look)
+router.post(
+  "/scanner-effect",
+  verifyToken,
+  checkSubscription,
+  upload.single("fileInput"),
+  stirlingController.scannerEffect
+);
+
+// Replace / invert processing
+router.post(
+  "/replace-invert-pdf",
+  verifyToken,
+  checkSubscription,
+  upload.single("fileInput"),
+  stirlingController.replaceInvertPdf
+);
+
+// Repair PDF
+router.post(
+  "/repair",
+  verifyToken,
+  checkSubscription,
+  upload.single("fileInput"),
+  stirlingController.repairPdf
+);
+
+// Remove blank pages
+router.post(
+  "/remove-blanks",
+  verifyToken,
+  checkSubscription,
+  upload.single("fileInput"),
+  stirlingController.removeBlanks
+);
+
+// OCR PDF
+router.post(
+  "/ocr-pdf",
+  verifyToken,
+  checkSubscription,
+  upload.single("fileInput"),
+  stirlingController.ocrPdf
+);
+
+// Flatten PDF (flatten forms/annotations)
+router.post(
+  "/flatten",
+  verifyToken,
+  checkSubscription,
+  upload.single("fileInput"),
+  stirlingController.flattenPdf
+);
+
+// Extract images from PDF
+router.post(
+  "/extract-images",
+  verifyToken,
+  checkSubscription,
+  upload.single("fileInput"),
+  stirlingController.extractImages
+);
+
 module.exports = router;

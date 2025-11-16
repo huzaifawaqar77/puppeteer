@@ -36,7 +36,10 @@
     />
     <link rel="stylesheet" href="/css/dashboard.css" />
     <!-- Quill Rich Text Editor -->
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <link
+      href="https://cdn.quilljs.com/1.3.6/quill.snow.css"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <!-- Navigation -->
@@ -567,11 +570,19 @@
         <div class="form-group">
           <label for="emailBody">Message:</label>
           <!-- Quill editor will be initialized into this container -->
-          <div id="emailEditor" style="height: 220px; background: #fff;
-            border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px;
-            overflow: auto;"></div>
+          <div
+            id="emailEditor"
+            style="
+              height: 220px;
+              background: #fff;
+              border: 1px solid #e5e7eb;
+              border-radius: 6px;
+              padding: 8px;
+              overflow: auto;
+            "
+          ></div>
           <!-- Hidden fallback textarea for non-JS or server fallback -->
-          <textarea id="emailBody" style="display:none"></textarea>
+          <textarea id="emailBody" style="display: none"></textarea>
         </div>
         <button type="submit" class="btn">Send Email</button>
       </form>

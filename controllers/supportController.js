@@ -42,15 +42,19 @@ const sendEmail = async (req, res) => {
         "li",
         "blockquote",
         "code",
-        "pre"
+        "pre",
       ],
       allowedAttributes: {
-        a: ["href", "name", "target", "rel"]
+        a: ["href", "name", "target", "rel"],
       },
       transformTags: {
-        'a': sanitizeHtml.simpleTransform('a', { target: '_blank', rel: 'noopener noreferrer' }, false)
+        a: sanitizeHtml.simpleTransform(
+          "a",
+          { target: "_blank", rel: "noopener noreferrer" },
+          false
+        ),
       },
-      allowedSchemes: ["http", "https", "mailto"]
+      allowedSchemes: ["http", "https", "mailto"],
     });
   }
 
@@ -79,7 +83,9 @@ const sendEmail = async (req, res) => {
           <strong>PDF SaaS Support</strong>
         </div>
         <div class="content">
-          <p><strong>From:</strong> ${user.full_name || user.email} (${user.email})</p>
+          <p><strong>From:</strong> ${user.full_name || user.email} (${
+    user.email
+  })</p>
           <p><strong>User ID:</strong> ${user.id}</p>
           <p><strong>Subject:</strong> ${subject}</p>
           <hr />

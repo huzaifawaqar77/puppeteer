@@ -81,6 +81,8 @@ app.use("/api/ai", aiRoutes);
 app.use("/api/keys", apiKeysRoutes);
 app.use("/api/branding", brandingRoutes);
 app.use("/api/stirling", stirlingRoutes);
+// Backwards-compatible mount so legacy frontend calls to /api/v1/misc/* work
+app.use("/api/v1/misc", stirlingRoutes);
 app.use("/api/support", supportRoutes);
 
 // --- Static Files (with exclusions for protected routes) ---

@@ -313,6 +313,455 @@ class StirlingPDFService {
       );
     }
   }
+
+  /**
+   * Auto redact (pattern based)
+   */
+  async autoRedact(file, options = {}) {
+    try {
+      const formData = new FormData();
+      formData.append("fileInput", file.buffer, {
+        filename: file.originalname,
+        contentType: "application/pdf",
+      });
+
+      // attach all options as strings
+      if (options.listOfText)
+        formData.append("listOfText", String(options.listOfText));
+      if (typeof options.useRegex !== "undefined")
+        formData.append("useRegex", String(options.useRegex));
+      if (typeof options.wholeWordSearch !== "undefined")
+        formData.append("wholeWordSearch", String(options.wholeWordSearch));
+      if (options.redactColor)
+        formData.append("redactColor", String(options.redactColor));
+      if (options.customPadding)
+        formData.append("customPadding", String(options.customPadding));
+      if (typeof options.convertPDFToImage !== "undefined")
+        formData.append("convertPDFToImage", String(options.convertPDFToImage));
+
+      const response = await axios.post(
+        `${this.baseURL}/api/v1/security/auto-redact`,
+        formData,
+        {
+          headers: {
+            "X-API-Key": this.apiKey,
+            ...formData.getHeaders(),
+          },
+          responseType: "arraybuffer",
+          timeout: 120000,
+        }
+      );
+
+      return Buffer.from(response.data);
+    } catch (error) {
+      console.error("Stirling auto redact error:", error.message);
+      throw new Error(
+        `Failed to auto redact: ${
+          error.response?.data?.message || error.message
+        }`
+      );
+    }
+  }
+
+  /**
+   * Manual redact (page numbers)
+   */
+  async redact(file, options = {}) {
+    try {
+      const formData = new FormData();
+      formData.append("fileInput", file.buffer, {
+        filename: file.originalname,
+        contentType: "application/pdf",
+      });
+      if (options.pageNumbers)
+        formData.append("pageNumbers", String(options.pageNumbers));
+      if (options.pageRedactionColor)
+        formData.append(
+          "pageRedactionColor",
+          String(options.pageRedactionColor)
+        );
+      if (typeof options.convertPDFToImage !== "undefined")
+        formData.append("convertPDFToImage", String(options.convertPDFToImage));
+
+      const response = await axios.post(
+        `${this.baseURL}/api/v1/security/redact`,
+        formData,
+        {
+          headers: {
+            "X-API-Key": this.apiKey,
+            ...formData.getHeaders(),
+          },
+          responseType: "arraybuffer",
+          timeout: 120000,
+        }
+      );
+
+      return Buffer.from(response.data);
+    } catch (error) {
+      console.error("Stirling manual redact error:", error.message);
+      throw new Error(
+        `Failed to redact: ${error.response?.data?.message || error.message}`
+      );
+    }
+  }
+
+  /**
+   * Sanitize PDF
+   */
+  async sanitizePDF(file, options = {}) {
+    try {
+      const formData = new FormData();
+      formData.append("fileInput", file.buffer, {
+        filename: file.originalname,
+        contentType: "application/pdf",
+      });
+      // Boolean flags
+      [
+        "removeJavaScript",
+        "removeEmbeddedFiles",
+        "removeXMPMetadata",
+        "removeMetadata",
+        "removeLinks",
+        "removeFonts",
+      ].forEach((k) => {
+        if (typeof options[k] !== "undefined")
+          formData.append(k, String(options[k]));
+      });
+
+      const response = await axios.post(
+        `${this.baseURL}/api/v1/security/sanitize-pdf`,
+        formData,
+        {
+          headers: {
+            "X-API-Key": this.apiKey,
+            ...formData.getHeaders(),
+          },
+          responseType: "arraybuffer",
+          timeout: 120000,
+        }
+      );
+
+      return Buffer.from(response.data);
+    } catch (error) {
+      console.error("Stirling sanitize error:", error.message);
+      throw new Error(
+        `Failed to sanitize PDF: ${
+          error.response?.data?.message || error.message
+        }`
+      );
+    }
+  }
+
+  /* ------------------ MISC Operations ------------------ */
+
+  async updateMetadata(file, options = {}) {
+    try {
+      const formData = new FormData();
+      formData.append("fileInput", file.buffer, {
+        filename: file.originalname,
+        contentType: "application/pdf",
+      });
+      if (typeof options.deleteAll !== "undefined")
+        formData.append("deleteAll", String(options.deleteAll));
+      if (options.author) formData.append("author", String(options.author));
+      if (options.title) formData.append("title", String(options.title));
+      if (options.subject) formData.append("subject", String(options.subject));
+      if (options.keywords)
+        formData.append("keywords", String(options.keywords));
+      if (options.allRequestParams)
+        formData.append("allRequestParams", String(options.allRequestParams));
+
+      const response = await axios.post(
+        `${this.baseURL}/api/v1/misc/update-metadata`,
+        formData,
+        {
+          headers: { "X-API-Key": this.apiKey, ...formData.getHeaders() },
+          responseType: "arraybuffer",
+          timeout: 120000,
+        }
+      );
+      return Buffer.from(response.data);
+    } catch (error) {
+      console.error("Stirling update metadata error:", error.message);
+      throw new Error(
+        `Failed to update metadata: ${
+          error.response?.data?.message || error.message
+        }`
+      );
+    }
+  }
+
+  async unlockForms(file) {
+    try {
+      const formData = new FormData();
+      formData.append("fileInput", file.buffer, {
+        filename: file.originalname,
+        contentType: "application/pdf",
+      });
+      const response = await axios.post(
+        `${this.baseURL}/api/v1/misc/unlock-pdf-forms`,
+        formData,
+        {
+          headers: { "X-API-Key": this.apiKey, ...formData.getHeaders() },
+          responseType: "arraybuffer",
+          timeout: 120000,
+        }
+      );
+      return Buffer.from(response.data);
+    } catch (error) {
+      console.error("Stirling unlock forms error:", error.message);
+      throw new Error(
+        `Failed to unlock forms: ${
+          error.response?.data?.message || error.message
+        }`
+      );
+    }
+  }
+
+  async showJavascript(file) {
+    try {
+      const formData = new FormData();
+      formData.append("fileInput", file.buffer, {
+        filename: file.originalname,
+        contentType: "application/pdf",
+      });
+      const response = await axios.post(
+        `${this.baseURL}/api/v1/misc/show-javascript`,
+        formData,
+        {
+          headers: { "X-API-Key": this.apiKey, ...formData.getHeaders() },
+          responseType: "arraybuffer",
+          timeout: 120000,
+        }
+      );
+      return Buffer.from(response.data);
+    } catch (error) {
+      console.error("Stirling show javascript error:", error.message);
+      throw new Error(
+        `Failed to extract javascript: ${
+          error.response?.data?.message || error.message
+        }`
+      );
+    }
+  }
+
+  async scannerEffect(file, options = {}) {
+    try {
+      const formData = new FormData();
+      formData.append("fileInput", file.buffer, {
+        filename: file.originalname,
+        contentType: "application/pdf",
+      });
+      if (options.quality) formData.append("quality", String(options.quality));
+      if (options.rotate) formData.append("rotate", String(options.rotate));
+      if (options.noise) formData.append("noise", String(options.noise));
+      const response = await axios.post(
+        `${this.baseURL}/api/v1/misc/scanner-effect`,
+        formData,
+        {
+          headers: { "X-API-Key": this.apiKey, ...formData.getHeaders() },
+          responseType: "arraybuffer",
+          timeout: 120000,
+        }
+      );
+      return Buffer.from(response.data);
+    } catch (error) {
+      console.error("Stirling scanner effect error:", error.message);
+      throw new Error(
+        `Failed to apply scanner effect: ${
+          error.response?.data?.message || error.message
+        }`
+      );
+    }
+  }
+
+  async replaceInvertPdf(file, options = {}) {
+    try {
+      const formData = new FormData();
+      formData.append("fileInput", file.buffer, {
+        filename: file.originalname,
+        contentType: "application/pdf",
+      });
+      if (options.replaceAndInvertOption)
+        formData.append(
+          "replaceAndInvertOption",
+          String(options.replaceAndInvertOption)
+        );
+      if (options.backGroundColor)
+        formData.append("backGroundColor", String(options.backGroundColor));
+      if (options.textColor)
+        formData.append("textColor", String(options.textColor));
+      const response = await axios.post(
+        `${this.baseURL}/api/v1/misc/replace-invert-pdf`,
+        formData,
+        {
+          headers: { "X-API-Key": this.apiKey, ...formData.getHeaders() },
+          responseType: "arraybuffer",
+          timeout: 120000,
+        }
+      );
+      return Buffer.from(response.data);
+    } catch (error) {
+      console.error("Stirling replace/invert error:", error.message);
+      throw new Error(
+        `Failed to process replace/invert: ${
+          error.response?.data?.message || error.message
+        }`
+      );
+    }
+  }
+
+  async repairPdf(file) {
+    try {
+      const formData = new FormData();
+      formData.append("fileInput", file.buffer, {
+        filename: file.originalname,
+        contentType: "application/pdf",
+      });
+      const response = await axios.post(
+        `${this.baseURL}/api/v1/misc/repair`,
+        formData,
+        {
+          headers: { "X-API-Key": this.apiKey, ...formData.getHeaders() },
+          responseType: "arraybuffer",
+          timeout: 120000,
+        }
+      );
+      return Buffer.from(response.data);
+    } catch (error) {
+      console.error("Stirling repair error:", error.message);
+      throw new Error(
+        `Failed to repair PDF: ${
+          error.response?.data?.message || error.message
+        }`
+      );
+    }
+  }
+
+  async removeBlanks(file, options = {}) {
+    try {
+      const formData = new FormData();
+      formData.append("fileInput", file.buffer, {
+        filename: file.originalname,
+        contentType: "application/pdf",
+      });
+      if (options.threshold)
+        formData.append("threshold", String(options.threshold));
+      if (options.whitePercent)
+        formData.append("whitePercent", String(options.whitePercent));
+      const response = await axios.post(
+        `${this.baseURL}/api/v1/misc/remove-blanks`,
+        formData,
+        {
+          headers: { "X-API-Key": this.apiKey, ...formData.getHeaders() },
+          responseType: "arraybuffer",
+          timeout: 120000,
+        }
+      );
+      return Buffer.from(response.data);
+    } catch (error) {
+      console.error("Stirling remove blanks error:", error.message);
+      throw new Error(
+        `Failed to remove blanks: ${
+          error.response?.data?.message || error.message
+        }`
+      );
+    }
+  }
+
+  async ocrPdf(file, options = {}) {
+    try {
+      const formData = new FormData();
+      formData.append("fileInput", file.buffer, {
+        filename: file.originalname,
+        contentType: "application/pdf",
+      });
+      if (options.languages)
+        formData.append("languages", String(options.languages));
+      if (typeof options.sidecar !== "undefined")
+        formData.append("sidecar", String(options.sidecar));
+      if (typeof options.deskew !== "undefined")
+        formData.append("deskew", String(options.deskew));
+      if (typeof options.clean !== "undefined")
+        formData.append("clean", String(options.clean));
+      if (typeof options.cleanFinal !== "undefined")
+        formData.append("cleanFinal", String(options.cleanFinal));
+      const response = await axios.post(
+        `${this.baseURL}/api/v1/misc/ocr-pdf`,
+        formData,
+        {
+          headers: { "X-API-Key": this.apiKey, ...formData.getHeaders() },
+          responseType: "arraybuffer",
+          timeout: 300000,
+        }
+      );
+      return Buffer.from(response.data);
+    } catch (error) {
+      console.error("Stirling OCR error:", error.message);
+      throw new Error(
+        `Failed to OCR PDF: ${error.response?.data?.message || error.message}`
+      );
+    }
+  }
+
+  async flattenPdf(file, options = {}) {
+    try {
+      const formData = new FormData();
+      formData.append("fileInput", file.buffer, {
+        filename: file.originalname,
+        contentType: "application/pdf",
+      });
+      if (typeof options.flattenOnlyForms !== "undefined")
+        formData.append("flattenOnlyForms", String(options.flattenOnlyForms));
+      const response = await axios.post(
+        `${this.baseURL}/api/v1/misc/flatten`,
+        formData,
+        {
+          headers: { "X-API-Key": this.apiKey, ...formData.getHeaders() },
+          responseType: "arraybuffer",
+          timeout: 120000,
+        }
+      );
+      return Buffer.from(response.data);
+    } catch (error) {
+      console.error("Stirling flatten error:", error.message);
+      throw new Error(
+        `Failed to flatten PDF: ${
+          error.response?.data?.message || error.message
+        }`
+      );
+    }
+  }
+
+  async extractImages(file, options = {}) {
+    try {
+      const formData = new FormData();
+      formData.append("fileInput", file.buffer, {
+        filename: file.originalname,
+        contentType: "application/pdf",
+      });
+      if (options.format) formData.append("format", String(options.format));
+      if (typeof options.allowDuplicates !== "undefined")
+        formData.append("allowDuplicates", String(options.allowDuplicates));
+      const response = await axios.post(
+        `${this.baseURL}/api/v1/misc/extract-images`,
+        formData,
+        {
+          headers: { "X-API-Key": this.apiKey, ...formData.getHeaders() },
+          responseType: "arraybuffer",
+          timeout: 120000,
+        }
+      );
+      return Buffer.from(response.data);
+    } catch (error) {
+      console.error("Stirling extract images error:", error.message);
+      throw new Error(
+        `Failed to extract images: ${
+          error.response?.data?.message || error.message
+        }`
+      );
+    }
+  }
 }
 
 module.exports = new StirlingPDFService();

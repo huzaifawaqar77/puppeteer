@@ -17,19 +17,19 @@ document.addEventListener("DOMContentLoaded", () => {
 let supportQuill = null;
 
 function initSupportEditor() {
-  const editorContainer = document.getElementById('emailEditor');
+  const editorContainer = document.getElementById("emailEditor");
   if (!editorContainer) return;
 
-  supportQuill = new Quill('#emailEditor', {
-    theme: 'snow',
-    placeholder: 'Dear Support Team,\n\nI would like to upgrade my plan...',
+  supportQuill = new Quill("#emailEditor", {
+    theme: "snow",
+    placeholder: "Dear Support Team,\n\nI would like to upgrade my plan...",
     modules: {
       toolbar: [
-        ['bold', 'italic', 'underline'],
-        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-        ['link']
-      ]
-    }
+        ["bold", "italic", "underline"],
+        [{ list: "ordered" }, { list: "bullet" }],
+        ["link"],
+      ],
+    },
   });
 }
 
@@ -175,12 +175,13 @@ async function sendSupportEmail(e) {
 
     const data = await response.json();
 
-      if (response.ok) {
-      emailStatusDiv.textContent = "Email sent successfully! We will get back to you shortly.";
+    if (response.ok) {
+      emailStatusDiv.textContent =
+        "Email sent successfully! We will get back to you shortly.";
       emailStatusDiv.classList.add("success");
-        form.reset();
-        document.getElementById("emailSubject").value = "Plan Upgrade Request"; // Reset subject to default
-        if (supportQuill) supportQuill.setText('');
+      form.reset();
+      document.getElementById("emailSubject").value = "Plan Upgrade Request"; // Reset subject to default
+      if (supportQuill) supportQuill.setText("");
     } else {
       throw new Error(data.message || "Failed to send email.");
     }

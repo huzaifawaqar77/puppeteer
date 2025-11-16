@@ -660,3 +660,761 @@ exports.addPassword = async (req, res) => {
     });
   }
 };
+
+/**
+ * Auto Redact
+ */
+exports.autoRedact = async (req, res) => {
+  const startTime = Date.now();
+  try {
+    if (!req.file)
+      return res.status(400).json({
+        success: false,
+        message: "Please upload a PDF file to redact",
+      });
+
+    const usage = await checkStirlingUsage(
+      req.user.id,
+      "watermark",
+      req.subscription.plan_slug
+    );
+    if (!usage.allowed) {
+      if (usage.limit === 0)
+        return res.status(403).json({
+          success: false,
+          message: "Auto-redact is not available on your plan.",
+          requiresUpgrade: true,
+        });
+      return res.status(403).json({
+        success: false,
+        message: `Monthly limit reached (${usage.limit}).`,
+        requiresUpgrade: true,
+        used: usage.used,
+        limit: usage.limit,
+      });
+    }
+
+    const options = {
+      listOfText: req.body.listOfText || req.body.listOfText,
+      useRegex: req.body.useRegex === "true" || req.body.useRegex === true,
+      wholeWordSearch:
+        req.body.wholeWordSearch === "true" ||
+        req.body.wholeWordSearch === true,
+      redactColor: req.body.redactColor || "#000000",
+      customPadding: req.body.customPadding || "",
+      convertPDFToImage:
+        req.body.convertPDFToImage === "true" ||
+        req.body.convertPDFToImage === true,
+    };
+
+    const result = await stirlingPdf.autoRedact(req.file, options);
+
+    const processingTime = Date.now() - startTime;
+    await logStirlingOperation(
+      req.user.id,
+      "auto_redact",
+      1,
+      req.file.size,
+      result.length,
+      processingTime,
+      "success",
+      null,
+      options
+    );
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", 'attachment; filename="redacted.pdf"');
+    res.send(result);
+  } catch (error) {
+    console.error("Auto redact error:", error);
+    await logStirlingOperation(
+      req.user.id,
+      "auto_redact",
+      1,
+      req.file?.size || 0,
+      0,
+      Date.now() - startTime,
+      "failed",
+      error.message
+    );
+    res.status(500).json({
+      success: false,
+      message: "Failed to auto redact PDF",
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Manual redact
+ */
+exports.redact = async (req, res) => {
+  const startTime = Date.now();
+  try {
+    if (!req.file)
+      return res.status(400).json({
+        success: false,
+        message: "Please upload a PDF file to redact",
+      });
+
+    const usage = await checkStirlingUsage(
+      req.user.id,
+      "watermark",
+      req.subscription.plan_slug
+    );
+    if (!usage.allowed) {
+      if (usage.limit === 0)
+        return res.status(403).json({
+          success: false,
+          message: "Redact is not available on your plan.",
+          requiresUpgrade: true,
+        });
+      return res.status(403).json({
+        success: false,
+        message: `Monthly limit reached (${usage.limit}).`,
+        requiresUpgrade: true,
+        used: usage.used,
+        limit: usage.limit,
+      });
+    }
+
+    const options = {
+      pageNumbers: req.body.pageNumbers || "",
+      pageRedactionColor: req.body.pageRedactionColor || "#000000",
+      convertPDFToImage:
+        req.body.convertPDFToImage === "true" ||
+        req.body.convertPDFToImage === true,
+    };
+
+    const result = await stirlingPdf.redact(req.file, options);
+
+    const processingTime = Date.now() - startTime;
+    await logStirlingOperation(
+      req.user.id,
+      "manual_redact",
+      1,
+      req.file.size,
+      result.length,
+      processingTime,
+      "success",
+      null,
+      options
+    );
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", 'attachment; filename="redacted.pdf"');
+    res.send(result);
+  } catch (error) {
+    console.error("Manual redact error:", error);
+    await logStirlingOperation(
+      req.user.id,
+      "manual_redact",
+      1,
+      req.file?.size || 0,
+      0,
+      Date.now() - startTime,
+      "failed",
+      error.message
+    );
+    res.status(500).json({
+      success: false,
+      message: "Failed to redact PDF",
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * Sanitize PDF
+ */
+exports.sanitizePDF = async (req, res) => {
+  const startTime = Date.now();
+  try {
+    if (!req.file)
+      return res.status(400).json({
+        success: false,
+        message: "Please upload a PDF file to sanitize",
+      });
+
+    const usage = await checkStirlingUsage(
+      req.user.id,
+      "watermark",
+      req.subscription.plan_slug
+    );
+    if (!usage.allowed) {
+      if (usage.limit === 0)
+        return res.status(403).json({
+          success: false,
+          message: "Sanitize is not available on your plan.",
+          requiresUpgrade: true,
+        });
+      return res.status(403).json({
+        success: false,
+        message: `Monthly limit reached (${usage.limit}).`,
+        requiresUpgrade: true,
+        used: usage.used,
+        limit: usage.limit,
+      });
+    }
+
+    const options = {
+      removeJavaScript:
+        req.body.removeJavaScript === "true" ||
+        req.body.removeJavaScript === true,
+      removeEmbeddedFiles:
+        req.body.removeEmbeddedFiles === "true" ||
+        req.body.removeEmbeddedFiles === true,
+      removeXMPMetadata:
+        req.body.removeXMPMetadata === "true" ||
+        req.body.removeXMPMetadata === true,
+      removeMetadata:
+        req.body.removeMetadata === "true" || req.body.removeMetadata === true,
+      removeLinks:
+        req.body.removeLinks === "true" || req.body.removeLinks === true,
+      removeFonts:
+        req.body.removeFonts === "true" || req.body.removeFonts === true,
+    };
+
+    const result = await stirlingPdf.sanitizePDF(req.file, options);
+
+    const processingTime = Date.now() - startTime;
+    await logStirlingOperation(
+      req.user.id,
+      "sanitize",
+      1,
+      req.file.size,
+      result.length,
+      processingTime,
+      "success",
+      null,
+      options
+    );
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      'attachment; filename="sanitized.pdf"'
+    );
+    res.send(result);
+  } catch (error) {
+    console.error("Sanitize PDF error:", error);
+    await logStirlingOperation(
+      req.user.id,
+      "sanitize",
+      1,
+      req.file?.size || 0,
+      0,
+      Date.now() - startTime,
+      "failed",
+      error.message
+    );
+    res.status(500).json({
+      success: false,
+      message: "Failed to sanitize PDF",
+      error: error.message,
+    });
+  }
+};
+
+// ---------------- MISC OPERATIONS ----------------
+
+exports.updateMetadata = async (req, res) => {
+  const startTime = Date.now();
+  try {
+    if (!req.file)
+      return res
+        .status(400)
+        .json({ success: false, message: "Please upload a PDF file" });
+
+    const usage = await checkStirlingUsage(
+      req.user.id,
+      "merge",
+      req.subscription.plan_slug
+    );
+    if (!usage.allowed) {
+      if (usage.limit === 0)
+        return res.status(403).json({
+          success: false,
+          message: "Operation not available on your plan.",
+          requiresUpgrade: true,
+        });
+      return res.status(403).json({
+        success: false,
+        message: `Monthly limit reached (${usage.limit}).`,
+        requiresUpgrade: true,
+      });
+    }
+
+    const options = {
+      deleteAll: req.body.deleteAll === "true" || req.body.deleteAll === true,
+      author: req.body.author || "",
+      title: req.body.title || "",
+      subject: req.body.subject || "",
+      keywords: req.body.keywords || "",
+      allRequestParams: req.body.allRequestParams || "",
+    };
+
+    const result = await stirlingPdf.updateMetadata(req.file, options);
+
+    const processingTime = Date.now() - startTime;
+    await logStirlingOperation(
+      req.user.id,
+      "update_metadata",
+      1,
+      req.file.size,
+      result.length,
+      processingTime,
+      "success",
+      null,
+      options
+    );
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      'attachment; filename="metadata-updated.pdf"'
+    );
+    res.send(result);
+  } catch (error) {
+    console.error("Update metadata error:", error);
+    await logStirlingOperation(
+      req.user.id,
+      "update_metadata",
+      1,
+      req.file?.size || 0,
+      0,
+      Date.now() - startTime,
+      "failed",
+      error.message
+    );
+    res.status(500).json({
+      success: false,
+      message: "Failed to update metadata",
+      error: error.message,
+    });
+  }
+};
+
+exports.unlockForms = async (req, res) => {
+  const startTime = Date.now();
+  try {
+    if (!req.file)
+      return res
+        .status(400)
+        .json({ success: false, message: "Please upload a PDF file" });
+    const options = {};
+    const result = await stirlingPdf.unlockForms(req.file, options);
+    const processingTime = Date.now() - startTime;
+    await logStirlingOperation(
+      req.user.id,
+      "unlock_forms",
+      1,
+      req.file.size,
+      result.length,
+      processingTime,
+      "success"
+    );
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", 'attachment; filename="unlocked.pdf"');
+    res.send(result);
+  } catch (error) {
+    console.error("Unlock forms error:", error);
+    await logStirlingOperation(
+      req.user.id,
+      "unlock_forms",
+      1,
+      req.file?.size || 0,
+      0,
+      Date.now() - startTime,
+      "failed",
+      error.message
+    );
+    res.status(500).json({
+      success: false,
+      message: "Failed to unlock forms",
+      error: error.message,
+    });
+  }
+};
+
+exports.showJavascript = async (req, res) => {
+  const startTime = Date.now();
+  try {
+    if (!req.file)
+      return res
+        .status(400)
+        .json({ success: false, message: "Please upload a PDF file" });
+    const result = await stirlingPdf.showJavascript(req.file);
+    const processingTime = Date.now() - startTime;
+    await logStirlingOperation(
+      req.user.id,
+      "show_javascript",
+      1,
+      req.file.size,
+      result.length,
+      processingTime,
+      "success"
+    );
+    res.setHeader("Content-Type", "application/octet-stream");
+    res.setHeader(
+      "Content-Disposition",
+      'attachment; filename="javascript.txt"'
+    );
+    res.send(result);
+  } catch (error) {
+    console.error("Show javascript error:", error);
+    await logStirlingOperation(
+      req.user.id,
+      "show_javascript",
+      1,
+      req.file?.size || 0,
+      0,
+      Date.now() - startTime,
+      "failed",
+      error.message
+    );
+    res.status(500).json({
+      success: false,
+      message: "Failed to extract javascript",
+      error: error.message,
+    });
+  }
+};
+
+exports.scannerEffect = async (req, res) => {
+  const startTime = Date.now();
+  try {
+    if (!req.file)
+      return res
+        .status(400)
+        .json({ success: false, message: "Please upload a PDF file" });
+    const options = {
+      quality: req.body.quality,
+      rotate: req.body.rotate,
+      noise: req.body.noise,
+    };
+    const result = await stirlingPdf.scannerEffect(req.file, options);
+    const processingTime = Date.now() - startTime;
+    await logStirlingOperation(
+      req.user.id,
+      "scanner_effect",
+      1,
+      req.file.size,
+      result.length,
+      processingTime,
+      "success",
+      null,
+      options
+    );
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", 'attachment; filename="scanned.pdf"');
+    res.send(result);
+  } catch (error) {
+    console.error("Scanner effect error:", error);
+    await logStirlingOperation(
+      req.user.id,
+      "scanner_effect",
+      1,
+      req.file?.size || 0,
+      0,
+      Date.now() - startTime,
+      "failed",
+      error.message
+    );
+    res.status(500).json({
+      success: false,
+      message: "Failed to apply scanner effect",
+      error: error.message,
+    });
+  }
+};
+
+exports.replaceInvertPdf = async (req, res) => {
+  const startTime = Date.now();
+  try {
+    if (!req.file)
+      return res
+        .status(400)
+        .json({ success: false, message: "Please upload a PDF file" });
+    const options = {
+      replaceAndInvertOption: req.body.replaceAndInvertOption,
+      backGroundColor: req.body.backGroundColor,
+      textColor: req.body.textColor,
+    };
+    const result = await stirlingPdf.replaceInvertPdf(req.file, options);
+    const processingTime = Date.now() - startTime;
+    await logStirlingOperation(
+      req.user.id,
+      "replace_invert",
+      1,
+      req.file.size,
+      result.length,
+      processingTime,
+      "success",
+      null,
+      options
+    );
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      'attachment; filename="replace-invert.pdf"'
+    );
+    res.send(result);
+  } catch (error) {
+    console.error("Replace/Invert error:", error);
+    await logStirlingOperation(
+      req.user.id,
+      "replace_invert",
+      1,
+      req.file?.size || 0,
+      0,
+      Date.now() - startTime,
+      "failed",
+      error.message
+    );
+    res.status(500).json({
+      success: false,
+      message: "Failed to process replace/invert",
+      error: error.message,
+    });
+  }
+};
+
+exports.repairPdf = async (req, res) => {
+  const startTime = Date.now();
+  try {
+    if (!req.file)
+      return res
+        .status(400)
+        .json({ success: false, message: "Please upload a PDF file" });
+    const result = await stirlingPdf.repairPdf(req.file);
+    const processingTime = Date.now() - startTime;
+    await logStirlingOperation(
+      req.user.id,
+      "repair",
+      1,
+      req.file.size,
+      result.length,
+      processingTime,
+      "success"
+    );
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", 'attachment; filename="repaired.pdf"');
+    res.send(result);
+  } catch (error) {
+    console.error("Repair PDF error:", error);
+    await logStirlingOperation(
+      req.user.id,
+      "repair",
+      1,
+      req.file?.size || 0,
+      0,
+      Date.now() - startTime,
+      "failed",
+      error.message
+    );
+    res.status(500).json({
+      success: false,
+      message: "Failed to repair PDF",
+      error: error.message,
+    });
+  }
+};
+
+exports.removeBlanks = async (req, res) => {
+  const startTime = Date.now();
+  try {
+    if (!req.file)
+      return res
+        .status(400)
+        .json({ success: false, message: "Please upload a PDF file" });
+    const options = {
+      threshold: req.body.threshold,
+      whitePercent: req.body.whitePercent,
+    };
+    const result = await stirlingPdf.removeBlanks(req.file, options);
+    const processingTime = Date.now() - startTime;
+    await logStirlingOperation(
+      req.user.id,
+      "remove_blanks",
+      1,
+      req.file.size,
+      result.length,
+      processingTime,
+      "success",
+      null,
+      options
+    );
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", 'attachment; filename="cleaned.pdf"');
+    res.send(result);
+  } catch (error) {
+    console.error("Remove blanks error:", error);
+    await logStirlingOperation(
+      req.user.id,
+      "remove_blanks",
+      1,
+      req.file?.size || 0,
+      0,
+      Date.now() - startTime,
+      "failed",
+      error.message
+    );
+    res.status(500).json({
+      success: false,
+      message: "Failed to remove blank pages",
+      error: error.message,
+    });
+  }
+};
+
+exports.ocrPdf = async (req, res) => {
+  const startTime = Date.now();
+  try {
+    if (!req.file)
+      return res
+        .status(400)
+        .json({ success: false, message: "Please upload a PDF file" });
+    const options = {
+      languages: req.body.languages,
+      sidecar: req.body.sidecar === "true" || req.body.sidecar === true,
+      deskew: req.body.deskew === "true" || req.body.deskew === true,
+      clean: req.body.clean === "true" || req.body.clean === true,
+      cleanFinal:
+        req.body.cleanFinal === "true" || req.body.cleanFinal === true,
+    };
+    const result = await stirlingPdf.ocrPdf(req.file, options);
+    const processingTime = Date.now() - startTime;
+    await logStirlingOperation(
+      req.user.id,
+      "ocr",
+      1,
+      req.file.size,
+      result.length,
+      processingTime,
+      "success",
+      null,
+      options
+    );
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", 'attachment; filename="ocr.pdf"');
+    res.send(result);
+  } catch (error) {
+    console.error("OCR PDF error:", error);
+    await logStirlingOperation(
+      req.user.id,
+      "ocr",
+      1,
+      req.file?.size || 0,
+      0,
+      Date.now() - startTime,
+      "failed",
+      error.message
+    );
+    res.status(500).json({
+      success: false,
+      message: "Failed to OCR PDF",
+      error: error.message,
+    });
+  }
+};
+
+exports.flattenPdf = async (req, res) => {
+  const startTime = Date.now();
+  try {
+    if (!req.file)
+      return res
+        .status(400)
+        .json({ success: false, message: "Please upload a PDF file" });
+    const options = {
+      flattenOnlyForms:
+        req.body.flattenOnlyForms === "true" ||
+        req.body.flattenOnlyForms === true,
+    };
+    const result = await stirlingPdf.flattenPdf(req.file, options);
+    const processingTime = Date.now() - startTime;
+    await logStirlingOperation(
+      req.user.id,
+      "flatten",
+      1,
+      req.file.size,
+      result.length,
+      processingTime,
+      "success",
+      null,
+      options
+    );
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      'attachment; filename="flattened.pdf"'
+    );
+    res.send(result);
+  } catch (error) {
+    console.error("Flatten PDF error:", error);
+    await logStirlingOperation(
+      req.user.id,
+      "flatten",
+      1,
+      req.file?.size || 0,
+      0,
+      Date.now() - startTime,
+      "failed",
+      error.message
+    );
+    res.status(500).json({
+      success: false,
+      message: "Failed to flatten PDF",
+      error: error.message,
+    });
+  }
+};
+
+exports.extractImages = async (req, res) => {
+  const startTime = Date.now();
+  try {
+    if (!req.file)
+      return res
+        .status(400)
+        .json({ success: false, message: "Please upload a PDF file" });
+    const options = {
+      format: req.body.format,
+      allowDuplicates:
+        req.body.allowDuplicates === "true" ||
+        req.body.allowDuplicates === true,
+    };
+    const result = await stirlingPdf.extractImages(req.file, options);
+    const processingTime = Date.now() - startTime;
+    await logStirlingOperation(
+      req.user.id,
+      "extract_images",
+      1,
+      req.file.size,
+      result.length,
+      processingTime,
+      "success",
+      null,
+      options
+    );
+    res.setHeader("Content-Type", "application/zip");
+    res.setHeader("Content-Disposition", 'attachment; filename="images.zip"');
+    res.send(result);
+  } catch (error) {
+    console.error("Extract images error:", error);
+    await logStirlingOperation(
+      req.user.id,
+      "extract_images",
+      1,
+      req.file?.size || 0,
+      0,
+      Date.now() - startTime,
+      "failed",
+      error.message
+    );
+    res.status(500).json({
+      success: false,
+      message: "Failed to extract images",
+      error: error.message,
+    });
+  }
+};
