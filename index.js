@@ -106,10 +106,16 @@ app.get("/API_DOCUMENTATION.md", (req, res) => {
 
 // --- 404 Handler ---
 app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: "Endpoint not found",
-  });
+  // If it's an API request, return JSON
+  if (req.path.startsWith("/api/")) {
+    return res.status(404).json({
+      success: false,
+      message: "Endpoint not found",
+    });
+  }
+
+  // Otherwise serve the beautiful 404 HTML page
+  res.status(404).sendFile(path.join(__dirname, "public", "404.html"));
 });
 
 // --- Error Handler ---
