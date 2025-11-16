@@ -42,87 +42,254 @@
 
       body {
         font-family: "Inter", sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         min-height: 100vh;
+        display: flex;
+        background: #f8f9fa;
+      }
+
+      .register-wrapper {
+        display: flex;
+        width: 100%;
+        min-height: 100vh;
+      }
+
+      /* Left Side - Image Section */
+      .left-section {
+        flex: 1;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 20px;
+        padding: 60px;
+        position: relative;
+        overflow: hidden;
       }
 
-      .container {
+      .left-section::before {
+        content: "";
+        position: absolute;
+        width: 500px;
+        height: 500px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        top: -200px;
+        left: -200px;
+      }
+
+      .left-section::after {
+        content: "";
+        position: absolute;
+        width: 400px;
+        height: 400px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50%;
+        bottom: -150px;
+        right: -150px;
+      }
+
+      .image-content {
+        text-align: center;
+        color: white;
+        z-index: 1;
+        max-width: 500px;
+      }
+
+      .image-content .icon {
+        font-size: 120px;
+        margin-bottom: 30px;
+        opacity: 0.95;
+        animation: float 3s ease-in-out infinite;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-20px);
+        }
+      }
+
+      .image-content h2 {
+        font-size: 42px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        line-height: 1.2;
+      }
+
+      .image-content p {
+        font-size: 18px;
+        opacity: 0.95;
+        line-height: 1.6;
+      }
+
+      .feature-list {
+        margin-top: 40px;
+        text-align: left;
+      }
+
+      .feature-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        font-size: 16px;
+      }
+
+      .feature-item i {
+        margin-right: 15px;
+        font-size: 24px;
+        color: rgba(255, 255, 255, 0.9);
+      }
+
+      /* Right Section - Form Section */
+      .right-section {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 60px;
         background: white;
-        border-radius: 20px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        max-width: 450px;
+        overflow-y: auto;
+      }
+
+      .form-container {
+        max-width: 460px;
         width: 100%;
-        padding: 40px;
       }
 
       .logo {
-        text-align: center;
-        margin-bottom: 30px;
+        margin-bottom: 40px;
       }
 
       .logo h1 {
-        font-size: 28px;
+        font-size: 32px;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
+        font-weight: 700;
       }
 
       .logo p {
-        color: #666;
+        color: #6c757d;
+        font-size: 16px;
+      }
+
+      .alert {
+        padding: 14px 18px;
+        border-radius: 12px;
+        margin-bottom: 24px;
         font-size: 14px;
+        display: none;
+        animation: slideIn 0.3s ease-out;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .alert.success {
+        background: #d4edda;
+        color: #155724;
+        border-left: 4px solid #28a745;
+      }
+
+      .alert.error {
+        background: #f8d7da;
+        color: #721c24;
+        border-left: 4px solid #dc3545;
+      }
+
+      .alert.show {
+        display: block;
       }
 
       .form-group {
-        margin-bottom: 20px;
+        margin-bottom: 24px;
       }
 
       label {
         display: block;
-        margin-bottom: 8px;
-        color: #333;
-        font-weight: 500;
+        margin-bottom: 10px;
+        color: #212529;
+        font-weight: 600;
         font-size: 14px;
+      }
+
+      .input-wrapper {
+        position: relative;
+      }
+
+      .input-wrapper i {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        font-size: 16px;
       }
 
       input {
         width: 100%;
-        padding: 12px 16px;
-        border: 2px solid #e0e0e0;
-        border-radius: 10px;
-        font-size: 14px;
-        transition: all 0.3s;
+        padding: 14px 16px 14px 46px;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        font-size: 15px;
+        transition: all 0.3s ease;
         font-family: "Inter", sans-serif;
+        background: #f8f9fa;
       }
 
       input:focus {
         outline: none;
         border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        background: white;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+      }
+
+      input::placeholder {
+        color: #adb5bd;
+      }
+
+      .password-requirements {
+        font-size: 12px;
+        color: #6c757d;
+        margin-top: 8px;
+        padding-left: 46px;
+        line-height: 1.5;
       }
 
       .btn {
         width: 100%;
-        padding: 14px;
+        padding: 16px;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         border: none;
-        border-radius: 10px;
+        border-radius: 12px;
         font-size: 16px;
         font-weight: 600;
         cursor: pointer;
-        transition: transform 0.2s, box-shadow 0.2s;
+        transition: all 0.3s ease;
         margin-top: 10px;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
       }
 
       .btn:hover {
         transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn:active {
+        transform: translateY(0);
       }
 
       .btn:disabled {
@@ -131,117 +298,195 @@
         transform: none;
       }
 
-      .alert {
-        padding: 12px 16px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        font-size: 14px;
-        display: none;
-      }
-
-      .alert.success {
-        background: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-      }
-
-      .alert.error {
-        background: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-      }
-
-      .alert.show {
-        display: block;
-      }
-
       .footer-links {
         text-align: center;
-        margin-top: 20px;
-        font-size: 14px;
-        color: #666;
+        margin-top: 32px;
+        font-size: 15px;
+        color: #6c757d;
       }
 
       .footer-links a {
         color: #667eea;
         text-decoration: none;
-        font-weight: 500;
+        font-weight: 600;
+        transition: color 0.2s;
       }
 
       .footer-links a:hover {
+        color: #764ba2;
         text-decoration: underline;
       }
 
-      .password-requirements {
-        font-size: 12px;
-        color: #666;
-        margin-top: 5px;
+      .footer-links .back-link {
+        display: inline-block;
+        margin-top: 12px;
+        color: #6c757d;
+        font-weight: 500;
+      }
+
+      .footer-links .back-link:hover {
+        color: #667eea;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 968px) {
+        .left-section {
+          display: none;
+        }
+
+        .right-section {
+          flex: 1;
+          padding: 40px 30px;
+        }
+
+        body {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .right-section {
+          background: white;
+          border-radius: 20px;
+          margin: 20px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .right-section {
+          padding: 30px 20px;
+        }
+
+        .image-content h2 {
+          font-size: 32px;
+        }
+
+        .logo h1 {
+          font-size: 28px;
+        }
+
+        .form-group {
+          margin-bottom: 20px;
+        }
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <div class="logo">
-        <h1>📄 PDF SaaS</h1>
-        <p>Create your account</p>
-      </div>
+    <div class="register-wrapper">
+      <!-- Left Section - Image/Illustration -->
+      <div class="left-section">
+        <div class="image-content">
+          <div class="icon">
+            <img
+              src="./outer-space.svg"
+              height="300px"
+              width="300px"
+              alt="our space rocket image"
+            />
+          </div>
+          <h2>Start Your Journey</h2>
+          <p>
+            Join thousands of users creating professional PDF documents with our
+            powerful generation platform.
+          </p>
 
-      <div id="alert" class="alert"></div>
-
-      <form id="registerForm">
-        <div class="form-group">
-          <label for="fullName">Full Name</label>
-          <input
-            type="text"
-            id="fullName"
-            name="fullName"
-            required
-            placeholder="John Doe"
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="email">Email Address</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            required
-            placeholder="you@example.com"
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            required
-            placeholder="••••••••"
-          />
-          <div class="password-requirements">
-            Minimum 8 characters, include uppercase, lowercase, and numbers
+          <div class="feature-list">
+            <div class="feature-item">
+              <i class="fas fa-check-circle"></i>
+              <span>Affordable Pricing Plans</span>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-check-circle"></i>
+              <span>Developer API & Documentation</span>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-check-circle"></i>
+              <span>Advanced PDF Operations</span>
+            </div>
           </div>
         </div>
+      </div>
 
-        <div class="form-group">
-          <label for="confirmPassword">Confirm Password</label>
-          <input
-            type="password"
-            id="confirmPassword"
-            name="confirmPassword"
-            required
-            placeholder="••••••••"
-          />
+      <!-- Right Section - Registration Form -->
+      <div class="right-section">
+        <div class="form-container">
+          <div class="logo">
+            <h1>PDF SaaS</h1>
+            <p>Create your account</p>
+          </div>
+
+          <div id="alert" class="alert"></div>
+
+          <form id="registerForm">
+            <div class="form-group">
+              <label for="fullName">Full Name</label>
+              <div class="input-wrapper">
+                <i class="fas fa-user"></i>
+                <input
+                  type="text"
+                  id="fullName"
+                  name="fullName"
+                  required
+                  placeholder="John Doe"
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email Address</label>
+              <div class="input-wrapper">
+                <i class="fas fa-envelope"></i>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  required
+                  placeholder="you@example.com"
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="password">Password</label>
+              <div class="input-wrapper">
+                <i class="fas fa-lock"></i>
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  required
+                  placeholder="••••••••"
+                />
+              </div>
+              <div class="password-requirements">
+                Minimum 8 characters, include uppercase, lowercase, and numbers
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="confirmPassword">Confirm Password</label>
+              <div class="input-wrapper">
+                <i class="fas fa-lock"></i>
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  required
+                  placeholder="••••••••"
+                />
+              </div>
+            </div>
+
+            <button type="submit" class="btn" id="submitBtn">
+              Create Account
+            </button>
+          </form>
+
+          <div class="footer-links">
+            Already have an account? <a href="/login.html">Sign In</a><br />
+            <a href="/" class="back-link"
+              ><i class="fas fa-arrow-left"></i> Back to Home</a
+            >
+          </div>
         </div>
-
-        <button type="submit" class="btn" id="submitBtn">Create Account</button>
-      </form>
-
-      <div class="footer-links">
-        Already have an account? <a href="/login.html">Sign In</a><br />
-        <a href="/">← Back to Home</a>
       </div>
     </div>
 

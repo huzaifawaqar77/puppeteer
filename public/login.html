@@ -42,134 +42,203 @@
 
       body {
         font-family: "Inter", sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         min-height: 100vh;
+        display: flex;
+        background: #f8f9fa;
+      }
+
+      .login-wrapper {
+        display: flex;
+        width: 100%;
+        min-height: 100vh;
+      }
+
+      /* Left Side - Image Section */
+      .left-section {
+        flex: 1;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 20px;
+        padding: 60px;
+        position: relative;
+        overflow: hidden;
       }
 
-      .container {
+      .left-section::before {
+        content: "";
+        position: absolute;
+        width: 500px;
+        height: 500px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        top: -200px;
+        left: -200px;
+      }
+
+      .left-section::after {
+        content: "";
+        position: absolute;
+        width: 400px;
+        height: 400px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50%;
+        bottom: -150px;
+        right: -150px;
+      }
+
+      .image-content {
+        text-align: center;
+        color: white;
+        z-index: 1;
+        max-width: 500px;
+      }
+
+      .image-content .icon {
+        font-size: 120px;
+        margin-bottom: 30px;
+        opacity: 0.95;
+        animation: float 3s ease-in-out infinite;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-20px);
+        }
+      }
+
+      .image-content h2 {
+        font-size: 42px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        line-height: 1.2;
+      }
+
+      .image-content p {
+        font-size: 18px;
+        opacity: 0.95;
+        line-height: 1.6;
+      }
+
+      /* Right Side - Form Section */
+      .right-section {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 60px;
         background: white;
-        border-radius: 20px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        max-width: 450px;
+      }
+
+      .form-container {
+        max-width: 460px;
         width: 100%;
-        padding: 40px;
       }
 
       .logo {
-        text-align: center;
-        margin-bottom: 30px;
+        margin-bottom: 40px;
       }
 
       .logo h1 {
-        font-size: 28px;
+        font-size: 32px;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
+        font-weight: 700;
       }
 
       .logo p {
-        color: #666;
-        font-size: 14px;
-      }
-
-      .form-group {
-        margin-bottom: 20px;
-      }
-
-      label {
-        display: block;
-        margin-bottom: 8px;
-        color: #333;
-        font-weight: 500;
-        font-size: 14px;
-      }
-
-      input {
-        width: 100%;
-        padding: 12px 16px;
-        border: 2px solid #e0e0e0;
-        border-radius: 10px;
-        font-size: 14px;
-        transition: all 0.3s;
-        font-family: "Inter", sans-serif;
-      }
-
-      input:focus {
-        outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-      }
-
-      .btn {
-        width: 100%;
-        padding: 14px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-        border-radius: 10px;
+        color: #6c757d;
         font-size: 16px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: transform 0.2s, box-shadow 0.2s;
-        margin-top: 10px;
-      }
-
-      .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-      }
-
-      .btn:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-        transform: none;
       }
 
       .alert {
-        padding: 12px 16px;
-        border-radius: 10px;
-        margin-bottom: 20px;
+        padding: 14px 18px;
+        border-radius: 12px;
+        margin-bottom: 24px;
         font-size: 14px;
         display: none;
+        animation: slideIn 0.3s ease-out;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
 
       .alert.success {
         background: #d4edda;
         color: #155724;
-        border: 1px solid #c3e6cb;
+        border-left: 4px solid #28a745;
       }
 
       .alert.error {
         background: #f8d7da;
         color: #721c24;
-        border: 1px solid #f5c6cb;
+        border-left: 4px solid #dc3545;
       }
 
       .alert.show {
         display: block;
       }
 
-      .footer-links {
-        text-align: center;
-        margin-top: 20px;
+      .form-group {
+        margin-bottom: 24px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 10px;
+        color: #212529;
+        font-weight: 600;
         font-size: 14px;
-        color: #666;
       }
 
-      .footer-links a {
-        color: #667eea;
-        text-decoration: none;
-        font-weight: 500;
+      .input-wrapper {
+        position: relative;
       }
 
-      .footer-links a:hover {
-        text-decoration: underline;
+      .input-wrapper i {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        font-size: 16px;
+      }
+
+      input {
+        width: 100%;
+        padding: 14px 16px 14px 46px;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        font-size: 15px;
+        transition: all 0.3s ease;
+        font-family: "Inter", sans-serif;
+        background: #f8f9fa;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: #667eea;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+      }
+
+      input::placeholder {
+        color: #adb5bd;
       }
 
       .forgot-password {
@@ -180,51 +249,206 @@
       .forgot-password a {
         color: #667eea;
         text-decoration: none;
-        font-size: 13px;
+        font-size: 14px;
+        font-weight: 500;
+        transition: color 0.2s;
+      }
+
+      .forgot-password a:hover {
+        color: #764ba2;
+        text-decoration: underline;
+      }
+
+      .btn {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 10px;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn:active {
+        transform: translateY(0);
+      }
+
+      .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .divider {
+        display: flex;
+        align-items: center;
+        margin: 30px 0;
+        color: #6c757d;
+        font-size: 14px;
+      }
+
+      .divider::before,
+      .divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: #e9ecef;
+      }
+
+      .divider span {
+        padding: 0 15px;
+      }
+
+      .footer-links {
+        text-align: center;
+        margin-top: 32px;
+        font-size: 15px;
+        color: #6c757d;
+      }
+
+      .footer-links a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.2s;
+      }
+
+      .footer-links a:hover {
+        color: #764ba2;
+        text-decoration: underline;
+      }
+
+      .footer-links .back-link {
+        display: inline-block;
+        margin-top: 12px;
+        color: #6c757d;
+        font-weight: 500;
+      }
+
+      .footer-links .back-link:hover {
+        color: #667eea;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 968px) {
+        .left-section {
+          display: none;
+        }
+
+        .right-section {
+          flex: 1;
+          padding: 40px 30px;
+        }
+
+        body {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .right-section {
+          background: white;
+          border-radius: 20px;
+          margin: 20px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .right-section {
+          padding: 30px 20px;
+        }
+
+        .image-content h2 {
+          font-size: 32px;
+        }
+
+        .logo h1 {
+          font-size: 28px;
+        }
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <div class="logo">
-        <h1>📄 PDF SaaS</h1>
-        <p>Sign in to your account</p>
+    <div class="login-wrapper">
+      <!-- Left Section - Image/Illustration -->
+      <div class="left-section">
+        <div class="image-content">
+          <div class="icon">
+            <img
+              src="./pdf.svg"
+              height="300px"
+              width="300px"
+              alt="pdf login page image"
+            />
+          </div>
+          <h2>Welcome Back!</h2>
+          <p>
+            Sign in to access your PDF generation dashboard and continue
+            creating amazing documents.
+          </p>
+        </div>
       </div>
 
-      <div id="alert" class="alert"></div>
+      <!-- Right Section - Login Form -->
+      <div class="right-section">
+        <div class="form-container">
+          <div class="logo">
+            <h1>PDF SaaS</h1>
+            <p>Sign in to your account</p>
+          </div>
 
-      <form id="loginForm">
-        <div class="form-group">
-          <label for="email">Email Address</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            required
-            placeholder="you@example.com"
-          />
-        </div>
+          <div id="alert" class="alert"></div>
 
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            required
-            placeholder="••••••••"
-          />
-          <div class="forgot-password">
-            <a href="/forgot-password.html">Forgot password?</a>
+          <form id="loginForm">
+            <div class="form-group">
+              <label for="email">Email Address</label>
+              <div class="input-wrapper">
+                <i class="fas fa-envelope"></i>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  required
+                  placeholder="you@example.com"
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="password">Password</label>
+              <div class="input-wrapper">
+                <i class="fas fa-lock"></i>
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  required
+                  placeholder="••••••••"
+                />
+              </div>
+              <div class="forgot-password">
+                <a href="/forgot-password.html">Forgot password?</a>
+              </div>
+            </div>
+
+            <button type="submit" class="btn" id="submitBtn">Sign In</button>
+          </form>
+
+          <div class="footer-links">
+            Don't have an account? <a href="/register.html">Sign Up</a><br />
+            <a href="/" class="back-link"
+              ><i class="fas fa-arrow-left"></i> Back to Home</a
+            >
           </div>
         </div>
-
-        <button type="submit" class="btn" id="submitBtn">Sign In</button>
-      </form>
-
-      <div class="footer-links">
-        Don't have an account? <a href="/register.html">Sign Up</a><br />
-        <a href="/">← Back to Home</a>
       </div>
     </div>
 
