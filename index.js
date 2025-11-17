@@ -99,6 +99,11 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
+// --- Blogs Route ---
+app.get("/blogs", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "blogs.html"));
+});
+
 // --- API Documentation Route (Legacy - Markdown) ---
 app.get("/API_DOCUMENTATION.md", (req, res) => {
   res.sendFile(path.join(__dirname, "API_DOCUMENTATION.md"));
