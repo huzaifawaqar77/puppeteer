@@ -6,46 +6,43 @@
 
   <!-- Homepage - Highest Priority -->
   <url>
-    <loc>https://pdf.uiflexer.com/</loc>
-    <lastmod>2025-11-14</lastmod>
+    <loc>https://puppeteer.uiflexer.com/</loc>
+    <lastmod>2025-11-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
   <!-- PDF Tools - High Priority -->
   <url>
-    <loc>https://pdf.uiflexer.com/pdf-tools.html</loc>
-    <lastmod>2025-11-14</lastmod>
+    <loc>https://puppeteer.uiflexer.com/pdf-tools.html</loc>
+    <lastmod>2025-11-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
-  <!-- Pricing Page -->
+  <!-- Blog -->
   <url>
-    <loc>https://pdf.uiflexer.com/pricing.html</loc>
-    <lastmod>2025-11-14</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <loc>https://puppeteer.uiflexer.com/blogs.html</loc>
+    <lastmod>2025-11-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
   </url>
 
   <!-- Documentation -->
   <url>
-    <loc>https://pdf.uiflexer.com/docs.html</loc>
-    <lastmod>2025-11-14</lastmod>
+    <loc>https://puppeteer.uiflexer.com/docs.html</loc>
+    <lastmod>2025-11-18</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
   </url>
 
   <!-- Register Page -->
   <url>
-    <loc>https://pdf.uiflexer.com/register.html</loc>
-    <lastmod>2025-11-14</lastmod>
+    <loc>https://puppeteer.uiflexer.com/register.html</loc>
+    <lastmod>2025-11-18</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.7</priority>
   </url>
-
-  <!-- Add more URLs as you create content pages -->
-  <!-- Blog posts, tutorials, etc. -->
 
 </urlset>
 

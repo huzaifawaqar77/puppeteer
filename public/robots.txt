@@ -1,5 +1,5 @@
-# robots.txt for UIFlexer PDF Tools
-# https://pdf.uiflexer.com/robots.txt
+# robots.txt for PDFSaaS
+# https://puppeteer.uiflexer.com/robots.txt
 
 User-agent: *
 Allow: /
@@ -15,7 +15,7 @@ Allow: /js/
 Allow: /images/
 
 # Sitemap location
-Sitemap: https://pdf.uiflexer.com/sitemap.xml
+Sitemap: https://puppeteer.uiflexer.com/sitemap.xml
 
 # Crawl-delay for polite crawling
 Crawl-delay: 1

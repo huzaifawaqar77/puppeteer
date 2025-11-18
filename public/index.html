@@ -4,11 +4,46 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>PDFSaaS - Generate PDFs at Scale</title>
+    <title>PDFSaaS - Professional PDF Generation API for Developers</title>
     <meta
       name="description"
-      content="Professional PDF generation API built for developers. Convert HTML to PDF in milliseconds with enterprise-grade reliability."
+      content="Modern PDF generation API for developers. Convert HTML to PDF, generate documents at scale with enterprise-grade reliability and security. Trusted by leading companies worldwide."
     />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://puppeteer.uiflexer.com/" />
+    <meta
+      property="og:title"
+      content="PDFSaaS - Professional PDF Generation API for Developers"
+    />
+    <meta
+      property="og:description"
+      content="Modern PDF generation API for developers. Convert HTML to PDF, generate documents at scale with enterprise-grade reliability and security."
+    />
+    <meta
+      property="og:image"
+      content="https://puppeteer.uiflexer.com/og-image.png"
+    />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://puppeteer.uiflexer.com/" />
+    <meta
+      property="twitter:title"
+      content="PDFSaaS - Professional PDF Generation API for Developers"
+    />
+    <meta
+      property="twitter:description"
+      content="Modern PDF generation API for developers. Convert HTML to PDF, generate documents at scale with enterprise-grade reliability and security."
+    />
+    <meta
+      property="twitter:image"
+      content="https://puppeteer.uiflexer.com/og-image.png"
+    />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://puppeteer.uiflexer.com/" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -164,6 +199,14 @@
         display: flex;
         gap: 1.5rem;
         align-items: center;
+      }
+
+      .btn-text {
+        display: inline;
+      }
+
+      .btn-icon {
+        display: none;
       }
 
       .btn {
@@ -762,6 +805,25 @@
           display: none;
         }
 
+        .nav-right {
+          gap: 0.75rem;
+        }
+
+        .btn {
+          padding: 0.65rem 0.85rem;
+          min-width: auto;
+          justify-content: center;
+        }
+
+        .btn-text {
+          display: none;
+        }
+
+        .btn-icon {
+          display: inline-flex;
+          font-size: 1.1rem;
+        }
+
         .hero-cta {
           flex-direction: column;
         }
@@ -812,8 +874,18 @@
           <li><a href="/docs.html">Docs</a></li>
         </ul>
         <div class="nav-right">
-          <a href="/login.html" class="btn btn-secondary">Sign In</a>
-          <a href="/register.html" class="btn btn-primary">Start Free Trial</a>
+          <a href="/login.html" class="btn btn-secondary" title="Sign In">
+            <i class="fas fa-user btn-icon"></i>
+            <span class="btn-text">Sign In</span>
+          </a>
+          <a
+            href="/register.html"
+            class="btn btn-primary"
+            title="Start Free Trial"
+          >
+            <i class="fas fa-rocket btn-icon"></i>
+            <span class="btn-text">Start Free Trial</span>
+          </a>
         </div>
       </nav>
     </header>

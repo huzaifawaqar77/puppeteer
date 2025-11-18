@@ -1,119 +1,128 @@
 /**
- * SEO Configuration for PDF SaaS Platform
+ * SEO Configuration for PDFSaaS Platform
  * Centralized SEO metadata for all pages
  */
 
 const SEO_CONFIG = {
-  siteName: "UIFlexer PDF Tools",
-  siteUrl: "https://pdf.uiflexer.com",
-  defaultImage: "https://pdf.uiflexer.com/og-image.png",
-  twitterHandle: "@uiflexer", // Update with your actual Twitter handle
-  
+  siteName: "PDFSaaS",
+  siteUrl: "https://puppeteer.uiflexer.com",
+  defaultImage: "https://puppeteer.uiflexer.com/og-image.png",
+  twitterHandle: "@pdfsaas",
+
   pages: {
     home: {
-      title: "Free Online PDF Tools - Convert, Merge, Compress PDFs | UIFlexer",
-      description: "Free online PDF tools to convert HTML to PDF, merge PDFs, compress files, add watermarks & more. Powered by AI. No installation required. Try free now!",
-      keywords: "free pdf tools, html to pdf converter, merge pdf online, compress pdf, pdf to word, pdf watermark, online pdf editor, pdf converter free",
-      canonical: "https://pdf.uiflexer.com/",
-      ogType: "website"
+      title: "PDFSaaS - Professional PDF Generation API for Developers",
+      description:
+        "Modern PDF generation API for developers. Convert HTML to PDF, generate documents at scale with enterprise-grade reliability and security. Trusted by leading companies worldwide.",
+      keywords:
+        "pdf generation api, html to pdf api, pdf converter api, puppeteer api, headless browser pdf, document generation api, pdf as a service",
+      canonical: "https://puppeteer.uiflexer.com/",
+      ogType: "website",
     },
-    
+
     pdfTools: {
-      title: "PDF Tools - Merge, Compress, Convert & Edit PDFs Online | UIFlexer",
-      description: "Professional PDF tools: merge multiple PDFs, compress files, convert PDF to Word/Image, add watermarks & password protection. Fast, secure & easy to use.",
-      keywords: "pdf tools, merge pdf, compress pdf, pdf to word, pdf to image, pdf watermark, pdf password, pdf converter",
-      canonical: "https://pdf.uiflexer.com/pdf-tools.html",
-      ogType: "website"
+      title: "PDF Tools - Convert, Merge & Edit PDFs | PDFSaaS",
+      description:
+        "Professional PDF tools: convert HTML to PDF, merge documents, compress files, add watermarks. Fast, secure & enterprise-grade.",
+      keywords:
+        "pdf tools, html to pdf, merge pdf, compress pdf, pdf converter, pdf api",
+      canonical: "https://puppeteer.uiflexer.com/pdf-tools.html",
+      ogType: "website",
     },
-    
+
+    blogs: {
+      title: "Blog - HTML to PDF Conversion Guides & Tutorials | PDFSaaS",
+      description:
+        "Expert guides on HTML to PDF conversion, document generation, and API integration. Learn best practices for PDF generation at scale.",
+      keywords:
+        "html to pdf tutorial, pdf generation guide, pdf api tutorials, document conversion",
+      canonical: "https://puppeteer.uiflexer.com/blogs.html",
+      ogType: "website",
+    },
+
     dashboard: {
-      title: "Dashboard - Manage Your PDF Projects | UIFlexer",
-      description: "Access your PDF dashboard to manage conversions, view usage statistics, and control your PDF generation projects.",
-      keywords: "pdf dashboard, pdf management, pdf api dashboard",
-      canonical: "https://pdf.uiflexer.com/dashboard.html",
+      title: "Dashboard - Manage Your PDF API | PDFSaaS",
+      description:
+        "Access your PDFSaaS dashboard to manage API keys, view usage statistics, and control your PDF generation projects.",
+      keywords: "pdf api dashboard, pdf management, api key management",
+      canonical: "https://puppeteer.uiflexer.com/dashboard.html",
       ogType: "website",
-      robots: "noindex, nofollow" // Private page
+      robots: "noindex, nofollow",
     },
-    
-    pricing: {
-      title: "Pricing Plans - Affordable PDF API & Tools | UIFlexer",
-      description: "Flexible pricing for PDF conversion API and tools. Start free, upgrade as you grow. Plans for individuals, businesses & enterprises. No hidden fees.",
-      keywords: "pdf api pricing, pdf tools pricing, pdf converter cost, html to pdf pricing, pdf api plans",
-      canonical: "https://pdf.uiflexer.com/pricing.html",
-      ogType: "website"
-    },
-    
+
     docs: {
-      title: "API Documentation - PDF Generation API Guide | UIFlexer",
-      description: "Complete API documentation for HTML to PDF conversion. Code examples, authentication guide, and integration tutorials for developers.",
-      keywords: "pdf api documentation, html to pdf api, pdf generation api docs, puppeteer api guide",
-      canonical: "https://pdf.uiflexer.com/docs.html",
-      ogType: "article"
+      title: "API Documentation - PDF Generation API Guide | PDFSaaS",
+      description:
+        "Complete API documentation for HTML to PDF conversion. Code examples, authentication guide, and integration tutorials for developers.",
+      keywords:
+        "pdf api documentation, html to pdf api docs, pdf generation api guide, puppeteer api documentation",
+      canonical: "https://puppeteer.uiflexer.com/docs.html",
+      ogType: "article",
     },
-    
+
     login: {
-      title: "Login - Access Your PDF Tools Account | UIFlexer",
-      description: "Login to your UIFlexer account to access PDF tools, API keys, and manage your subscription.",
-      keywords: "pdf tools login, pdf api login",
-      canonical: "https://pdf.uiflexer.com/login.html",
+      title: "Login - Access Your PDFSaaS Account",
+      description:
+        "Login to your PDFSaaS account to access API keys, usage dashboard, and manage your subscription.",
+      keywords: "pdf api login, pdfsaas login",
+      canonical: "https://puppeteer.uiflexer.com/login.html",
       ogType: "website",
-      robots: "noindex, nofollow" // Auth page
+      robots: "noindex, nofollow",
     },
-    
+
     register: {
-      title: "Sign Up Free - Start Using PDF Tools Today | UIFlexer",
-      description: "Create your free account and get instant access to powerful PDF tools. No credit card required. Start converting, merging & editing PDFs now!",
-      keywords: "pdf tools signup, free pdf account, pdf api registration",
-      canonical: "https://pdf.uiflexer.com/register.html",
-      ogType: "website"
-    }
+      title: "Sign Up Free - Start Generating PDFs Today | PDFSaaS",
+      description:
+        "Create your free account and get instant access to powerful PDF generation API. No credit card required. Start converting HTML to PDF now!",
+      keywords: "pdf api signup, free pdf api, pdf generation registration",
+      canonical: "https://puppeteer.uiflexer.com/register.html",
+      ogType: "website",
+    },
   },
-  
+
   // Structured Data (JSON-LD) for rich snippets
   structuredData: {
     organization: {
       "@context": "https://schema.org",
       "@type": "Organization",
-      "name": "UIFlexer",
-      "url": "https://pdf.uiflexer.com",
-      "logo": "https://pdf.uiflexer.com/logo.png",
-      "description": "Professional online PDF tools and API for converting, merging, compressing and editing PDF files.",
-      "sameAs": [
-        "https://twitter.com/uiflexer",
-        "https://github.com/uiflexer"
-      ]
+      name: "PDFSaaS",
+      url: "https://puppeteer.uiflexer.com",
+      logo: "https://puppeteer.uiflexer.com/logo.png",
+      description:
+        "Professional PDF generation API for developers. Convert HTML to PDF at scale with enterprise-grade reliability.",
+      sameAs: ["https://twitter.com/pdfsaas", "https://github.com/pdfsaas"],
     },
-    
+
     website: {
       "@context": "https://schema.org",
       "@type": "WebSite",
-      "name": "UIFlexer PDF Tools",
-      "url": "https://pdf.uiflexer.com",
-      "potentialAction": {
+      name: "PDFSaaS",
+      url: "https://puppeteer.uiflexer.com",
+      potentialAction: {
         "@type": "SearchAction",
-        "target": "https://pdf.uiflexer.com/search?q={search_term_string}",
-        "query-input": "required name=search_term_string"
-      }
+        target: "https://puppeteer.uiflexer.com/search?q={search_term_string}",
+        "query-input": "required name=search_term_string",
+      },
     },
-    
+
     softwareApplication: {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
-      "name": "UIFlexer PDF Tools",
-      "applicationCategory": "BusinessApplication",
-      "offers": {
+      name: "PDFSaaS",
+      applicationCategory: "DeveloperApplication",
+      offers: {
         "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
+        price: "0",
+        priceCurrency: "USD",
       },
-      "operatingSystem": "Web Browser",
-      "description": "Online PDF tools for converting, merging, compressing and editing PDF files"
-    }
-  }
+      operatingSystem: "Any",
+      description:
+        "Professional PDF generation API for developers. Convert HTML to PDF at scale.",
+    },
+  },
 };
 
 // Export for use in HTML pages
-if (typeof module !== 'undefined' && module.exports) {
+if (typeof module !== "undefined" && module.exports) {
   module.exports = SEO_CONFIG;
 }
-
