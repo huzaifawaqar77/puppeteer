@@ -1,65 +1,140 @@
-import Image from "next/image";
+"use client";
+
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
+import { ArrowRight, Shield, Zap, Layers } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function Home() {
+  const heroRef = useRef(null);
+  const titleRef = useRef(null);
+  const subtitleRef = useRef(null);
+  const ctaRef = useRef(null);
+
+  useEffect(() => {
+    const tl = gsap.timeline();
+    
+    tl.fromTo(
+      titleRef.current,
+      { y: 50, opacity: 0 },
+      { y: 0, opacity: 1, duration: 1, ease: "power4.out" }
+    )
+    .fromTo(
+      subtitleRef.current,
+      { y: 30, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" },
+      "-=0.5"
+    )
+    .fromTo(
+      ctaRef.current,
+      { y: 20, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.6, ease: "back.out(1.7)" },
+      "-=0.4"
+    );
+
+    // Feature cards animation
+    gsap.from(".feature-card", {
+      scrollTrigger: {
+        trigger: ".features-grid",
+        start: "top 80%",
+      },
+      y: 50,
+      opacity: 0,
+      duration: 0.8,
+      stagger: 0.2,
+      ease: "power2.out",
+    });
+  }, []);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="min-h-screen bg-background text-foreground overflow-hidden">
+      <Navbar />
+      
+      {/* Hero Section */}
+      <section ref={heroRef} className="relative pt-32 pb-20 lg:pt-48 lg:pb-32">
+        <div className="absolute inset-0 -z-10 overflow-hidden">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-primary/20 rounded-full blur-[120px] opacity-50" />
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 
+            ref={titleRef}
+            className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60"
+          >
+            Master Your PDFs with <br />
+            <span className="text-primary">Enterprise Power</span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          
+          <p 
+            ref={subtitleRef}
+            className="text-xl md:text-2xl text-gray-400 mb-10 max-w-3xl mx-auto"
+          >
+            Secure, fast, and private PDF processing. Merge, split, compress, and convert files without leaving your browser.
           </p>
+          
+          <div ref={ctaRef} className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white bg-primary rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/25 hover:shadow-primary/40"
+            >
+              Start Processing <ArrowRight className="ml-2 h-5 w-5" />
+            </Link>
+            <Link
+              href="/tools"
+              className="inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-gray-300 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all"
+            >
+              View Tools
+            </Link>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+      </section>
+
+      {/* Features Section */}
+      <section className="py-24 bg-secondary/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold text-white mb-4">Why PDF Flex?</h2>
+            <p className="text-gray-400">Built for professionals who demand quality and security.</p>
+          </div>
+          
+          <div className="features-grid grid md:grid-cols-3 gap-8">
+            <FeatureCard 
+              icon={<Shield className="h-8 w-8 text-accent" />}
+              title="Privacy First"
+              description="Your files are processed securely and automatically deleted. We never mine your data."
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <FeatureCard 
+              icon={<Zap className="h-8 w-8 text-primary" />}
+              title="Lightning Fast"
+              description="Powered by high-performance servers to process even the largest documents in seconds."
+            />
+            <FeatureCard 
+              icon={<Layers className="h-8 w-8 text-indigo-400" />}
+              title="Developer API"
+              description="Integrate our powerful PDF engine directly into your applications with our REST API."
+            />
+          </div>
         </div>
-      </main>
+      </section>
+
+      <Footer />
+    </div>
+  );
+}
+
+function FeatureCard({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) {
+  return (
+    <div className="feature-card p-8 rounded-2xl bg-white/5 border border-white/10 hover:border-primary/50 transition-colors">
+      <div className="mb-4 p-3 bg-white/5 rounded-lg w-fit">
+        {icon}
+      </div>
+      <h3 className="text-xl font-semibold text-white mb-2">{title}</h3>
+      <p className="text-gray-400 leading-relaxed">{description}</p>
     </div>
   );
 }
