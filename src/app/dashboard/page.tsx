@@ -27,7 +27,11 @@ import {
   ShieldAlert,
   ScanText,
   Table,
-  SunMedium
+  SunMedium,
+  Type,
+  Info,
+  FileX,
+  Zap
 } from "lucide-react";
 import Link from "next/link";
 
@@ -248,6 +252,41 @@ const quickTools = [
     icon: Split,
     href: "/tools/auto-split",
     color: "from-pink-500 to-rose-500",
+  },
+  {
+    name: "Add Image",
+    description: "Add image to PDF",
+    icon: ImageIcon,
+    href: "/tools/add-image",
+    color: "from-blue-500 to-cyan-500",
+  },
+  {
+    name: "Add Text",
+    description: "Add text to PDF",
+    icon: Type,
+    href: "/tools/add-text",
+    color: "from-green-500 to-emerald-500",
+  },
+  {
+    name: "Get PDF Info",
+    description: "View PDF metadata",
+    icon: Info,
+    href: "/tools/get-info",
+    color: "from-purple-500 to-violet-500",
+  },
+  {
+    name: "Detect Blank Pages",
+    description: "Find blank pages",
+    icon: FileX,
+    href: "/tools/detect-blank-pages",
+    color: "from-red-500 to-orange-500",
+  },
+  {
+    name: "Linearize PDF",
+    description: "Optimize for web",
+    icon: Zap,
+    href: "/tools/linearize",
+    color: "from-yellow-500 to-amber-500",
   },
 ];
 
