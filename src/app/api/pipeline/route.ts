@@ -25,9 +25,10 @@ export async function POST(request: NextRequest) {
       ID.unique(),
       {
         userId: userId || "anonymous",
-        operationType: "PIPELINE",
+        operationType: "MERGE",
         status: "PROCESSING",
         startedAt: new Date().toISOString(),
+        inputFileIds: "[]",
       }
     );
 

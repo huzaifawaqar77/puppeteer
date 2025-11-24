@@ -38,9 +38,16 @@ export function FileUploader({
     const validFiles: File[] = [];
     
     for (const file of filesArray) {
-      // Check file type
-      if (!accept.includes(file.type) && !accept.includes("*/*")) {
-        setError(`File type ${file.type} is not supported`);
+      // Check file type - handle both extensions (.pdf) and MIME types (application/pdf)
+      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+      const isValidType = accept.includes("*/*") || 
+                         accept.includes(file.type) || 
+                         accept.some(acceptedType => 
+                           acceptedType.startsWith('.') && acceptedType.toLowerCase() === fileExtension
+                         );
+      
+      if (!isValidType) {
+        setError(`File type ${file.type} is not supported. Accepted types: ${accept.join(', ')}`);
         continue;
       }
       
@@ -122,7 +129,7 @@ export function FileUploader({
           Drop files here or click to browse
         </p>
         <p className="mt-2 text-xs text-gray-500">
-          {accept.includes("application/pdf") ? "PDF" : "Files"} up to {maxSize}MB
+          {accept.includes("application/pdf") || accept.includes(".pdf") ? "PDF" : "Files"} up to {maxSize}MB
         </p>
       </div>
 

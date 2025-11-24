@@ -16,14 +16,18 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Get file from Appwrite Storage
-    const fileResponse = await storage.getFileDownload(
+    const fileUrl = storage.getFileDownload(
       appwriteConfig.buckets.input,
       fileId
     );
+    
+    // Fetch the actual file content from the URL
+    const fileDownloadResponse = await fetch(fileUrl.toString());
+    const arrayBuffer = await fileDownloadResponse.arrayBuffer();
 
     // 2. Create FormData for Stirling PDF
     const formData = new FormData();
-    const blob = new Blob([fileResponse]);
+    const blob = new Blob([arrayBuffer], { type: "application/pdf" });
     formData.append("fileInput", blob, "input.pdf");
     formData.append("angle", angle.toString());
 
@@ -35,6 +39,12 @@ export async function POST(req: NextRequest) {
       throw new Error("Stirling PDF URL not configured");
     }
 
+    console.log("Calling Stirling PDF API:");
+    console.log("  URL:", `${stirlingUrl}/api/v1/general/rotate-pdf`);
+    console.log("  File size:", blob.size, "bytes");
+    console.log("  Angle:", angle);
+    console.log("  API Key present:", !!stirlingApiKey);
+
     const response = await fetch(`${stirlingUrl}/api/v1/general/rotate-pdf`, {
       method: "POST",
       headers: {
@@ -45,8 +55,11 @@ export async function POST(req: NextRequest) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Stirling PDF Error:", errorText);
-      throw new Error(`Stirling PDF API failed: ${response.statusText}`);
+      console.error("Stirling PDF Error Details:");
+      console.error("  Status:", response.status, response.statusText);
+      console.error("  URL:", `${stirlingUrl}/api/v1/general/rotate-pdf`);
+      console.error("  Response:", errorText);
+      throw new Error(`Stirling PDF API failed: ${response.statusText} - ${errorText}`);
     }
 
     // 4. Upload processed file to Appwrite
