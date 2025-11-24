@@ -6,7 +6,7 @@ import { storage, databases } from "@/lib/appwrite";
 import { appwriteConfig } from "@/lib/config";
 import { ID } from "appwrite";
 import { FileUploader } from "@/components/FileUploader";
-import { Loader2, Download, FileText } from "lucide-react";
+import { Loader2, Download, FileEdit } from "lucide-react";
 
 export default function MetadataToolPage() {
   const { user } = useAuth();
@@ -14,23 +14,17 @@ export default function MetadataToolPage() {
   const [processing, setProcessing] = useState(false);
   const [result, setResult] = useState<{ url: string; filename: string } | null>(null);
   const [error, setError] = useState<string>("");
-  
   const [metadata, setMetadata] = useState({
     title: "",
     author: "",
     subject: "",
     keywords: "",
-    creator: "",
-    producer: "",
   });
 
   const handleFilesSelected = (files: File[]) => {
     setFile(files[0] ?? null);
-  };
-
-  const handleMetadataChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setMetadata((prev) => ({ ...prev, [name]: value }));
+    setError("");
+    setResult(null);
   };
 
   async function handleUpdateMetadata() {
@@ -56,7 +50,7 @@ export default function MetadataToolPage() {
         ID.unique(),
         {
           userId: user?.$id,
-          operationType: "UPDATE_METADATA",
+          operationType: "METADATA",
           status: "PENDING",
           inputFileIds: JSON.stringify([uploadedFile.$id]),
           startedAt: new Date().toISOString(),
@@ -90,127 +84,138 @@ export default function MetadataToolPage() {
   return (
     <div className="container mx-auto max-w-4xl py-8 px-4">
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Change Metadata</h1>
-          <p className="mt-2 text-gray-400">Update the metadata properties of your PDF document.</p>
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">Edit PDF Metadata</h1>
+          <p className="text-secondary">
+            Update title, author, subject, and keywords of your PDF
+          </p>
         </div>
 
-        <FileUploader
-          onFilesSelected={handleFilesSelected}
-          accept={[".pdf"]}
-          maxSize={30 * 1024 * 1024}
-        />
+        {/* Main Card */}
+        <div className="bg-card border border-border rounded-xl p-6 shadow-card">
+          {/* File Upload */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Select PDF File
+            </label>
+            <FileUploader
+              onFilesSelected={handleFilesSelected}
+              accept={[".pdf"]}
+              maxSize={30 * 1024 * 1024}
+            />
+          </div>
 
-        {file && (
-          <div className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-4">
-            <h3 className="text-lg font-semibold text-white mb-4">Metadata Fields</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Metadata Fields */}
+          {file && (
+            <div className="mb-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Title</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Title
+                </label>
                 <input
                   type="text"
-                  name="title"
                   value={metadata.title}
-                  onChange={handleMetadataChange}
-                  className="w-full px-4 py-2 border border-white/10 bg-white/5 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  onChange={(e) => setMetadata({ ...metadata, title: e.target.value })}
                   placeholder="Document Title"
+                  className="w-full px-4 py-3 border border-border bg-card text-foreground rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Author</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Author
+                </label>
                 <input
                   type="text"
-                  name="author"
                   value={metadata.author}
-                  onChange={handleMetadataChange}
-                  className="w-full px-4 py-2 border border-white/10 bg-white/5 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  onChange={(e) => setMetadata({ ...metadata, author: e.target.value })}
                   placeholder="Author Name"
+                  className="w-full px-4 py-3 border border-border bg-card text-foreground rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Subject</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Subject
+                </label>
                 <input
                   type="text"
-                  name="subject"
                   value={metadata.subject}
-                  onChange={handleMetadataChange}
-                  className="w-full px-4 py-2 border border-white/10 bg-white/5 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="Subject"
+                  onChange={(e) => setMetadata({ ...metadata, subject: e.target.value })}
+                  placeholder="Document Subject"
+                  className="w-full px-4 py-3 border border-border bg-card text-foreground rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Keywords</label>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Keywords
+                </label>
                 <input
                   type="text"
-                  name="keywords"
                   value={metadata.keywords}
-                  onChange={handleMetadataChange}
-                  className="w-full px-4 py-2 border border-white/10 bg-white/5 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="Keywords (comma separated)"
+                  onChange={(e) => setMetadata({ ...metadata, keywords: e.target.value })}
+                  placeholder="keyword1, keyword2, keyword3"
+                  className="w-full px-4 py-3 border border-border bg-card text-foreground rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Creator</label>
-                <input
-                  type="text"
-                  name="creator"
-                  value={metadata.creator}
-                  onChange={handleMetadataChange}
-                  className="w-full px-4 py-2 border border-white/10 bg-white/5 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="Creator Application"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Producer</label>
-                <input
-                  type="text"
-                  name="producer"
-                  value={metadata.producer}
-                  onChange={handleMetadataChange}
-                  className="w-full px-4 py-2 border border-white/10 bg-white/5 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="PDF Producer"
-                />
+                <p className="mt-1 text-xs text-secondary">
+                  Separate keywords with commas
+                </p>
               </div>
             </div>
-          </div>
-        )}
-
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4">
-            <p className="text-sm text-red-400">{error}</p>
-          </div>
-        )}
-
-        {result && (
-          <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-green-400 mb-4">
-              Metadata Updated!
-            </h3>
-            <a
-              href={result.url}
-              download={result.filename}
-              className="flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors"
-            >
-              <Download className="h-4 w-4" />
-              <span>Download {result.filename}</span>
-            </a>
-          </div>
-        )}
-
-        <button
-          onClick={handleUpdateMetadata}
-          disabled={!file || processing}
-          className="w-full bg-primary hover:bg-primary/90 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
-        >
-          {processing ? (
-            <>
-              <Loader2 className="h-5 w-5 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            "Update Metadata"
           )}
-        </button>
+
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
+
+          {/* Success Result */}
+          {result && (
+            <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-green-900 mb-4">
+                Metadata Updated Successfully!
+              </h3>
+              <a
+                href={result.url}
+                download={result.filename}
+                className="inline-flex items-center gap-2 text-green-700 hover:text-green-800 font-medium transition-colors"
+              >
+                <Download className="h-4 w-4" />
+                <span>Download {result.filename}</span>
+              </a>
+            </div>
+          )}
+
+          {/* Update Button */}
+          <button
+            onClick={handleUpdateMetadata}
+            disabled={!file || processing}
+            className="w-full bg-primary hover:bg-primary/90 disabled:bg-secondary/30 disabled:cursor-not-allowed text-white font-semibold py-3.5 px-6 rounded-lg transition-all hover:shadow-glow-orange flex items-center justify-center gap-2"
+          >
+            {processing ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Updating Metadata...
+              </>
+            ) : (
+              <>
+                <FileEdit className="h-5 w-5" />
+                Update Metadata
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Info Card */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <p className="text-sm text-blue-900">
+            <strong>Tip:</strong> Metadata helps organize and identify your PDFs. It's also displayed in PDF readers and search results.
+          </p>
+        </div>
       </div>
     </div>
   );

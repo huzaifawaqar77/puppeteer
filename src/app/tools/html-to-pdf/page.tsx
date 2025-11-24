@@ -5,23 +5,18 @@ import { useAuth } from "@/contexts/AuthContext";
 import { storage, databases } from "@/lib/appwrite";
 import { appwriteConfig } from "@/lib/config";
 import { ID } from "appwrite";
-import { FileUploader } from "@/components/FileUploader";
-import { Loader2, Download, FileCode } from "lucide-react";
+import { Loader2, Download, Globe } from "lucide-react";
 
 export default function HtmlToPdfToolPage() {
   const { user } = useAuth();
-  const [file, setFile] = useState<File | null>(null);
+  const [htmlContent, setHtmlContent] = useState<string>("");
   const [processing, setProcessing] = useState(false);
   const [result, setResult] = useState<{ url: string; filename: string } | null>(null);
   const [error, setError] = useState<string>("");
 
-  const handleFilesSelected = (files: File[]) => {
-    setFile(files[0] ?? null);
-  };
-
   async function handleConvert() {
-    if (!file || !user) {
-      setError("Please select an HTML file");
+    if (!htmlContent || !user) {
+      setError("Please enter HTML content");
       return;
     }
 
@@ -30,12 +25,6 @@ export default function HtmlToPdfToolPage() {
     setResult(null);
 
     try {
-      const uploadedFile = await storage.createFile(
-        appwriteConfig.buckets.input,
-        ID.unique(),
-        file
-      );
-
       const job = await databases.createDocument(
         appwriteConfig.databaseId,
         appwriteConfig.collections.processingJobs,
@@ -44,7 +33,7 @@ export default function HtmlToPdfToolPage() {
           userId: user?.$id,
           operationType: "HTML_TO_PDF",
           status: "PENDING",
-          inputFileIds: JSON.stringify([uploadedFile.$id]),
+          inputFileIds: JSON.stringify([]),
           startedAt: new Date().toISOString(),
         }
       );
@@ -53,7 +42,7 @@ export default function HtmlToPdfToolPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fileId: uploadedFile.$id,
+          htmlContent,
           jobId: job.$id,
         }),
       });
@@ -75,53 +64,91 @@ export default function HtmlToPdfToolPage() {
   return (
     <div className="container mx-auto max-w-4xl py-8 px-4">
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-white">HTML to PDF</h1>
-          <p className="mt-2 text-gray-400">Convert HTML files to PDF documents.</p>
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">HTML to PDF</h1>
+          <p className="text-secondary">
+            Convert HTML code to a PDF document
+          </p>
         </div>
 
-        <FileUploader
-          onFilesSelected={handleFilesSelected}
-          accept={[".html", ".htm"]}
-          maxSize={10 * 1024 * 1024}
-        />
-
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4">
-            <p className="text-sm text-red-400">{error}</p>
+        {/* Main Card */}
+        <div className="bg-card border border-border rounded-xl p-6 shadow-card">
+          {/* HTML Input */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Enter HTML Content
+            </label>
+            <textarea
+              value={htmlContent}
+              onChange={(e) => setHtmlContent(e.target.value)}
+              placeholder="<!DOCTYPE html>
+<html>
+<head>
+    <title>My Document</title>
+</head>
+<body>
+    <h1>Hello World</h1>
+</body>
+</html>"
+              rows={12}
+              className="w-full px-4 py-3 border border-border bg-card text-foreground rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-secondary/50 resize-none font-mono text-sm"
+            />
+            <p className="mt-2 text-xs text-secondary">
+              Paste your complete HTML code including tags
+            </p>
           </div>
-        )}
 
-        {result && (
-          <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-green-400 mb-4">
-              Conversion Complete!
-            </h3>
-            <a
-              href={result.url}
-              download={result.filename}
-              className="flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors"
-            >
-              <Download className="h-4 w-4" />
-              <span>Download {result.filename}</span>
-            </a>
-          </div>
-        )}
-
-        <button
-          onClick={handleConvert}
-          disabled={!file || processing}
-          className="w-full bg-primary hover:bg-primary/90 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
-        >
-          {processing ? (
-            <>
-              <Loader2 className="h-5 w-5 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            "Convert to PDF"
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
           )}
-        </button>
+
+          {/* Success Result */}
+          {result && (
+            <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-green-900 mb-4">
+                HTML Converted to PDF!
+              </h3>
+              <a
+                href={result.url}
+                download={result.filename}
+                className="inline-flex items-center gap-2 text-green-700 hover:text-green-800 font-medium transition-colors"
+              >
+                <Download className="h-4 w-4" />
+                <span>Download {result.filename}</span>
+              </a>
+            </div>
+          )}
+
+          {/* Convert Button */}
+          <button
+            onClick={handleConvert}
+            disabled={!htmlContent || processing}
+            className="w-full bg-primary hover:bg-primary/90 disabled:bg-secondary/30 disabled:cursor-not-allowed text-white font-semibold py-3.5 px-6 rounded-lg transition-all hover:shadow-glow-orange flex items-center justify-center gap-2"
+          >
+            {processing ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Converting...
+              </>
+            ) : (
+              <>
+                <Globe className="h-5 w-5" />
+                Convert to PDF
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Info Card */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <p className="text-sm text-blue-900">
+            <strong>Tip:</strong> Include inline CSS for styling. External stylesheets and scripts may not be fully supported.
+          </p>
+        </div>
       </div>
     </div>
   );

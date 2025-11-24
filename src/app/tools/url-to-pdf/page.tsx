@@ -2,21 +2,29 @@
 
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { databases } from "@/lib/appwrite";
+import { storage, databases } from "@/lib/appwrite";
 import { appwriteConfig } from "@/lib/config";
 import { ID } from "appwrite";
-import { Loader2, Download, Link as LinkIcon } from "lucide-react";
+import { Loader2, Download, Globe } from "lucide-react";
 
 export default function UrlToPdfToolPage() {
   const { user } = useAuth();
-  const [url, setUrl] = useState("");
+  const [url, setUrl] = useState<string>("");
   const [processing, setProcessing] = useState(false);
   const [result, setResult] = useState<{ url: string; filename: string } | null>(null);
   const [error, setError] = useState<string>("");
 
   async function handleConvert() {
     if (!url || !user) {
-      setError("Please enter a valid URL");
+      setError("Please enter a URL");
+      return;
+    }
+
+    // Basic URL validation
+    try {
+      new URL(url);
+    } catch {
+      setError("Please enter a valid URL (e.g., https://example.com)");
       return;
     }
 
@@ -33,7 +41,7 @@ export default function UrlToPdfToolPage() {
           userId: user?.$id,
           operationType: "URL_TO_PDF",
           status: "PENDING",
-          inputFileIds: JSON.stringify([]), // No input file for URL conversion
+          inputFileIds: JSON.stringify([]),
           startedAt: new Date().toISOString(),
         }
       );
@@ -64,63 +72,89 @@ export default function UrlToPdfToolPage() {
   return (
     <div className="container mx-auto max-w-4xl py-8 px-4">
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-white">URL to PDF</h1>
-          <p className="mt-2 text-gray-400">Convert webpages to PDF documents.</p>
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">URL to PDF</h1>
+          <p className="text-secondary">
+            Convert any webpage to a PDF document
+          </p>
         </div>
 
-        <div className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Website URL</label>
+        {/* Main Card */}
+        <div className="bg-card border border-border rounded-xl p-6 shadow-card">
+          {/* URL Input */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Enter Website URL
+            </label>
             <div className="relative">
-              <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-secondary" />
               <input
                 type="url"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="https://example.com"
-                className="w-full pl-10 pr-4 py-2 border border-white/10 bg-white/5 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full pl-10 pr-4 py-3 border border-border bg-card text-foreground rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-secondary/50"
               />
             </div>
+            <p className="mt-2 text-xs text-secondary">
+              Enter the full URL including http:// or https://
+            </p>
           </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
+
+          {/* Success Result */}
+          {result && (
+            <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-green-900 mb-4">
+                Webpage Converted to PDF!
+              </h3>
+              <p className="text-sm text-green-800 mb-4">
+                The webpage has been successfully saved as a PDF document.
+              </p>
+              <a
+                href={result.url}
+                download={result.filename}
+                className="inline-flex items-center gap-2 text-green-700 hover:text-green-800 font-medium transition-colors"
+              >
+                <Download className="h-4 w-4" />
+                <span>Download {result.filename}</span>
+              </a>
+            </div>
+          )}
+
+          {/* Convert Button */}
+          <button
+            onClick={handleConvert}
+            disabled={!url || processing}
+            className="w-full bg-primary hover:bg-primary/90 disabled:bg-secondary/30 disabled:cursor-not-allowed text-white font-semibold py-3.5 px-6 rounded-lg transition-all hover:shadow-glow-orange flex items-center justify-center gap-2"
+          >
+            {processing ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Converting Webpage...
+              </>
+            ) : (
+              <>
+                <Globe className="h-5 w-5" />
+                Convert to PDF
+              </>
+            )}
+          </button>
         </div>
 
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4">
-            <p className="text-sm text-red-400">{error}</p>
-          </div>
-        )}
-
-        {result && (
-          <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-green-400 mb-4">
-              Conversion Complete!
-            </h3>
-            <a
-              href={result.url}
-              download={result.filename}
-              className="flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors"
-            >
-              <Download className="h-4 w-4" />
-              <span>Download {result.filename}</span>
-            </a>
-          </div>
-        )}
-
-        <button
-          onClick={handleConvert}
-          disabled={!url || processing}
-          className="w-full bg-primary hover:bg-primary/90 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
-        >
-          {processing ? (
-            <>
-              <Loader2 className="h-5 w-5 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            "Convert to PDF"
-          )}
-        </button>
+        {/* Info Card */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <p className="text-sm text-blue-900">
+            <strong>Tip:</strong> The PDF will capture the webpage as it appears at the time of conversion. Dynamic content and interactive elements may not be preserved.
+          </p>
+        </div>
       </div>
     </div>
   );

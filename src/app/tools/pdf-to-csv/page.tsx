@@ -6,7 +6,7 @@ import { storage, databases } from "@/lib/appwrite";
 import { appwriteConfig } from "@/lib/config";
 import { ID } from "appwrite";
 import { FileUploader } from "@/components/FileUploader";
-import { Loader2, Download, Table } from "lucide-react";
+import { Loader2, Download, FileSpreadsheet } from "lucide-react";
 
 export default function PdfToCsvToolPage() {
   const { user } = useAuth();
@@ -17,11 +17,13 @@ export default function PdfToCsvToolPage() {
 
   const handleFilesSelected = (files: File[]) => {
     setFile(files[0] ?? null);
+    setError("");
+    setResult(null);
   };
 
   async function handleConvert() {
     if (!file || !user) {
-      setError("Please select a PDF file");
+      setError("Please select a file");
       return;
     }
 
@@ -75,53 +77,41 @@ export default function PdfToCsvToolPage() {
   return (
     <div className="container mx-auto max-w-4xl py-8 px-4">
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-white">PDF to CSV</h1>
-          <p className="mt-2 text-gray-400">Extract tables from PDF documents to CSV files.</p>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">PDF to CSV</h1>
+          <p className="text-secondary">Extract tables from PDF to CSV format</p>
         </div>
 
-        <FileUploader
-          onFilesSelected={handleFilesSelected}
-          accept={[".pdf"]}
-          maxSize={30 * 1024 * 1024}
-        />
-
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4">
-            <p className="text-sm text-red-400">{error}</p>
+        <div className="bg-card border border-border rounded-xl p-6 shadow-card">
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-foreground mb-2">Select PDF File</label>
+            <FileUploader onFilesSelected={handleFilesSelected} accept={[".pdf"]} maxSize={30 * 1024 * 1024} />
           </div>
-        )}
 
-        {result && (
-          <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-green-400 mb-4">
-              Conversion Complete!
-            </h3>
-            <a
-              href={result.url}
-              download={result.filename}
-              className="flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors"
-            >
-              <Download className="h-4 w-4" />
-              <span>Download {result.filename}</span>
-            </a>
-          </div>
-        )}
-
-        <button
-          onClick={handleConvert}
-          disabled={!file || processing}
-          className="w-full bg-primary hover:bg-primary/90 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
-        >
-          {processing ? (
-            <>
-              <Loader2 className="h-5 w-5 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            "Convert to CSV"
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
           )}
-        </button>
+
+          {result && (
+            <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-green-900 mb-4">Conversion Complete!</h3>
+              <a href={result.url} download={result.filename} className="inline-flex items-center gap-2 text-green-700 hover:text-green-800 font-medium transition-colors">
+                <Download className="h-4 w-4" />
+                <span>Download {result.filename}</span>
+              </a>
+            </div>
+          )}
+
+          <button onClick={handleConvert} disabled={!file || processing} className="w-full bg-primary hover:bg-primary/90 disabled:bg-secondary/30 disabled:cursor-not-allowed text-white font-semibold py-3.5 px-6 rounded-lg transition-all hover:shadow-glow-orange flex items-center justify-center gap-2">
+            {processing ? (<><Loader2 className="h-5 w-5 animate-spin" />Converting...</>) : (<><FileSpreadsheet className="h-5 w-5" />Convert to CSV</>)}
+          </button>
+        </div>
+
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <p className="text-sm text-blue-900"><strong>Tip:</strong> Works best with PDFs containing structured tables.</p>
+        </div>
       </div>
     </div>
   );

@@ -17,6 +17,8 @@ export default function FlattenToolPage() {
 
   const handleFilesSelected = (files: File[]) => {
     setFile(files[0] ?? null);
+    setError("");
+    setResult(null);
   };
 
   async function handleFlatten() {
@@ -75,53 +77,81 @@ export default function FlattenToolPage() {
   return (
     <div className="container mx-auto max-w-4xl py-8 px-4">
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Flatten PDF</h1>
-          <p className="mt-2 text-gray-400">Flatten forms and annotations in your PDF.</p>
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">Flatten PDF</h1>
+          <p className="text-secondary">
+            Flatten form fields and annotations into the PDF content
+          </p>
         </div>
 
-        <FileUploader
-          onFilesSelected={handleFilesSelected}
-          accept={[".pdf"]}
-          maxSize={30 * 1024 * 1024}
-        />
-
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4">
-            <p className="text-sm text-red-400">{error}</p>
+        {/* Main Card */}
+        <div className="bg-card border border-border rounded-xl p-6 shadow-card">
+          {/* File Upload */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Select PDF File
+            </label>
+            <FileUploader
+              onFilesSelected={handleFilesSelected}
+              accept={[".pdf"]}
+              maxSize={30 * 1024 * 1024}
+            />
           </div>
-        )}
 
-        {result && (
-          <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-green-400 mb-4">
-              Flattening Complete!
-            </h3>
-            <a
-              href={result.url}
-              download={result.filename}
-              className="flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors"
-            >
-              <Download className="h-4 w-4" />
-              <span>Download {result.filename}</span>
-            </a>
-          </div>
-        )}
-
-        <button
-          onClick={handleFlatten}
-          disabled={!file || processing}
-          className="w-full bg-primary hover:bg-primary/90 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
-        >
-          {processing ? (
-            <>
-              <Loader2 className="h-5 w-5 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            "Flatten PDF"
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
           )}
-        </button>
+
+          {/* Success Result */}
+          {result && (
+            <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-green-900 mb-4">
+                PDF Flattened Successfully!
+              </h3>
+              <p className="text-sm text-green-800 mb-4">
+                All form fields and annotations have been flattened.
+              </p>
+              <a
+                href={result.url}
+                download={result.filename}
+                className="inline-flex items-center gap-2 text-green-700 hover:text-green-800 font-medium transition-colors"
+              >
+                <Download className="h-4 w-4" />
+                <span>Download {result.filename}</span>
+              </a>
+            </div>
+          )}
+
+          {/* Flatten Button */}
+          <button
+            onClick={handleFlatten}
+            disabled={!file || processing}
+            className="w-full bg-primary hover:bg-primary/90 disabled:bg-secondary/30 disabled:cursor-not-allowed text-white font-semibold py-3.5 px-6 rounded-lg transition-all hover:shadow-glow-orange flex items-center justify-center gap-2"
+          >
+            {processing ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Flattening PDF...
+              </>
+            ) : (
+              <>
+                <Layers className="h-5 w-5" />
+                Flatten PDF
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Info Card */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <p className="text-sm text-blue-900">
+            <strong>What is flattening?</strong> Flattening converts interactive form fields and annotations into static content, preventing further editing.
+          </p>
+        </div>
       </div>
     </div>
   );

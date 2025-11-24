@@ -10,23 +10,27 @@ import { Loader2, Download, Layers } from "lucide-react";
 
 export default function OverlayToolPage() {
   const { user } = useAuth();
-  const [file1, setFile1] = useState<File | null>(null);
-  const [file2, setFile2] = useState<File | null>(null);
+  const [baseFile, setBaseFile] = useState<File | null>(null);
+  const [overlayFile, setOverlayFile] = useState<File | null>(null);
   const [processing, setProcessing] = useState(false);
   const [result, setResult] = useState<{ url: string; filename: string } | null>(null);
   const [error, setError] = useState<string>("");
 
-  const handleFile1Selected = (files: File[]) => {
-    setFile1(files[0] ?? null);
+  const handleBaseSelected = (files: File[]) => {
+    setBaseFile(files[0] ?? null);
+    setError("");
+    setResult(null);
   };
 
-  const handleFile2Selected = (files: File[]) => {
-    setFile2(files[0] ?? null);
+  const handleOverlaySelected = (files: File[]) => {
+    setOverlayFile(files[0] ?? null);
+    setError("");
+    setResult(null);
   };
 
   async function handleOverlay() {
-    if (!file1 || !file2 || !user) {
-      setError("Please select two PDF files");
+    if (!baseFile || !overlayFile || !user) {
+      setError("Please select both PDF files");
       return;
     }
 
@@ -35,9 +39,9 @@ export default function OverlayToolPage() {
     setResult(null);
 
     try {
-      const [uploadedFile1, uploadedFile2] = await Promise.all([
-        storage.createFile(appwriteConfig.buckets.input, ID.unique(), file1),
-        storage.createFile(appwriteConfig.buckets.input, ID.unique(), file2),
+      const [uploadedBase, uploadedOverlay] = await Promise.all([
+        storage.createFile(appwriteConfig.buckets.input, ID.unique(), baseFile),
+        storage.createFile(appwriteConfig.buckets.input, ID.unique(), overlayFile),
       ]);
 
       const job = await databases.createDocument(
@@ -46,9 +50,9 @@ export default function OverlayToolPage() {
         ID.unique(),
         {
           userId: user?.$id,
-          operationType: "OVERLAY_PDF",
+          operationType: "OVERLAY",
           status: "PENDING",
-          inputFileIds: JSON.stringify([uploadedFile1.$id, uploadedFile2.$id]),
+          inputFileIds: JSON.stringify([uploadedBase.$id, uploadedOverlay.$id]),
           startedAt: new Date().toISOString(),
         }
       );
@@ -57,8 +61,8 @@ export default function OverlayToolPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          file1Id: uploadedFile1.$id,
-          file2Id: uploadedFile2.$id,
+          baseFileId: uploadedBase.$id,
+          overlayFileId: uploadedOverlay.$id,
           jobId: job.$id,
         }),
       });
@@ -80,67 +84,92 @@ export default function OverlayToolPage() {
   return (
     <div className="container mx-auto max-w-4xl py-8 px-4">
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Overlay PDF</h1>
-          <p className="mt-2 text-gray-400">Overlay one PDF document on top of another.</p>
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">Overlay PDF</h1>
+          <p className="text-secondary">
+            Overlay one PDF onto another PDF document
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-300">Base PDF</label>
+        {/* Main Card */}
+        <div className="bg-card border border-border rounded-xl p-6 shadow-card space-y-6">
+          {/* Base PDF Upload */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Base PDF File
+            </label>
             <FileUploader
-              onFilesSelected={handleFile1Selected}
+              onFilesSelected={handleBaseSelected}
               accept={[".pdf"]}
               maxSize={30 * 1024 * 1024}
             />
+            <p className="mt-1 text-xs text-secondary">This will be the background document</p>
           </div>
 
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-300">Overlay PDF</label>
+          {/* Overlay PDF Upload */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Overlay PDF File
+            </label>
             <FileUploader
-              onFilesSelected={handleFile2Selected}
+              onFilesSelected={handleOverlaySelected}
               accept={[".pdf"]}
               maxSize={30 * 1024 * 1024}
             />
+            <p className="mt-1 text-xs text-secondary">This will be placed on top of the base</p>
           </div>
-        </div>
 
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4">
-            <p className="text-sm text-red-400">{error}</p>
-          </div>
-        )}
-
-        {result && (
-          <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-green-400 mb-4">
-              Overlay Complete!
-            </h3>
-            <a
-              href={result.url}
-              download={result.filename}
-              className="flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors"
-            >
-              <Download className="h-4 w-4" />
-              <span>Download {result.filename}</span>
-            </a>
-          </div>
-        )}
-
-        <button
-          onClick={handleOverlay}
-          disabled={!file1 || !file2 || processing}
-          className="w-full bg-primary hover:bg-primary/90 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
-        >
-          {processing ? (
-            <>
-              <Loader2 className="h-5 w-5 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            "Overlay PDFs"
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
           )}
-        </button>
+
+          {/* Success Result */}
+          {result && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-green-900 mb-4">
+                Overlay Complete!
+              </h3>
+              <a
+                href={result.url}
+                download={result.filename}
+                className="inline-flex items-center gap-2 text-green-700 hover:text-green-800 font-medium transition-colors"
+              >
+                <Download className="h-4 w-4" />
+                <span>Download {result.filename}</span>
+              </a>
+            </div>
+          )}
+
+          {/* Overlay Button */}
+          <button
+            onClick={handleOverlay}
+            disabled={!baseFile || !overlayFile || processing}
+            className="w-full bg-primary hover:bg-primary/90 disabled:bg-secondary/30 disabled:cursor-not-allowed text-white font-semibold py-3.5 px-6 rounded-lg transition-all hover:shadow-glow-orange flex items-center justify-center gap-2"
+          >
+            {processing ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Overlaying PDFs...
+              </>
+            ) : (
+              <>
+                <Layers className="h-5 w-5" />
+                Overlay PDFs
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Info Card */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <p className="text-sm text-blue-900">
+            <strong>Use case:</strong> Great for adding letterheads, stamps, or combining content from two PDFs.
+          </p>
+        </div>
       </div>
     </div>
   );

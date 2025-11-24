@@ -14,13 +14,14 @@ export default function ExtractImagesToolPage() {
   const [processing, setProcessing] = useState(false);
   const [result, setResult] = useState<{ url: string; filename: string } | null>(null);
   const [error, setError] = useState<string>("");
-  const [format, setFormat] = useState("png");
 
   const handleFilesSelected = (files: File[]) => {
     setFile(files[0] ?? null);
+    setError("");
+    setResult(null);
   };
 
-  async function handleExtractImages() {
+  async function handleExtract() {
     if (!file || !user) {
       setError("Please select a file");
       return;
@@ -56,7 +57,6 @@ export default function ExtractImagesToolPage() {
         body: JSON.stringify({
           fileId: uploadedFile.$id,
           jobId: job.$id,
-          format,
         }),
       });
 
@@ -77,70 +77,81 @@ export default function ExtractImagesToolPage() {
   return (
     <div className="container mx-auto max-w-4xl py-8 px-4">
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Extract Images</h1>
-          <p className="mt-2 text-gray-400">Extract all images from your PDF document.</p>
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">Extract Images from PDF</h1>
+          <p className="text-secondary">
+            Extract all images from your PDF document
+          </p>
         </div>
 
-        <FileUploader
-          onFilesSelected={handleFilesSelected}
-          accept={[".pdf"]}
-          maxSize={30 * 1024 * 1024}
-        />
+        {/* Main Card */}
+        <div className="bg-card border border-border rounded-xl p-6 shadow-card">
+          {/* File Upload */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Select PDF File
+            </label>
+            <FileUploader
+              onFilesSelected={handleFilesSelected}
+              accept={[".pdf"]}
+              maxSize={30 * 1024 * 1024}
+            />
+          </div>
 
-        {file && (
-          <div className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Output Format</label>
-              <select
-                value={format}
-                onChange={(e) => setFormat(e.target.value)}
-                className="w-full px-4 py-2 border border-white/10 bg-white/5 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="png">PNG</option>
-                <option value="jpg">JPG</option>
-                <option value="gif">GIF</option>
-              </select>
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-700">{error}</p>
             </div>
-          </div>
-        )}
-
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4">
-            <p className="text-sm text-red-400">{error}</p>
-          </div>
-        )}
-
-        {result && (
-          <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-green-400 mb-4">
-              Images Extracted!
-            </h3>
-            <a
-              href={result.url}
-              download={result.filename}
-              className="flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors"
-            >
-              <Download className="h-4 w-4" />
-              <span>Download {result.filename}</span>
-            </a>
-          </div>
-        )}
-
-        <button
-          onClick={handleExtractImages}
-          disabled={!file || processing}
-          className="w-full bg-primary hover:bg-primary/90 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
-        >
-          {processing ? (
-            <>
-              <Loader2 className="h-5 w-5 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            "Extract Images"
           )}
-        </button>
+
+          {/* Success Result */}
+          {result && (
+            <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-green-900 mb-4">
+                Images Extracted Successfully!
+              </h3>
+              <p className="text-sm text-green-800 mb-4">
+                All images have been extracted from your PDF.
+              </p>
+              <a
+                href={result.url}
+                download={result.filename}
+                className="inline-flex items-center gap-2 text-green-700 hover:text-green-800 font-medium transition-colors"
+              >
+                <Download className="h-4 w-4" />
+                <span>Download {result.filename}</span>
+              </a>
+            </div>
+          )}
+
+          {/* Extract Button */}
+          <button
+            onClick={handleExtract}
+            disabled={!file || processing}
+            className="w-full bg-primary hover:bg-primary/90 disabled:bg-secondary/30 disabled:cursor-not-allowed text-white font-semibold py-3.5 px-6 rounded-lg transition-all hover:shadow-glow-orange flex items-center justify-center gap-2"
+          >
+            {processing ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Extracting Images...
+              </>
+            ) : (
+              <>
+                <ImageIcon className="h-5 w-5" />
+                Extract Images
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Info Card */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <p className="text-sm text-blue-900">
+            <strong>Tip:</strong> All images will be extracted from the PDF and provided as a ZIP archive containing individual image files.
+          </p>
+        </div>
       </div>
     </div>
   );

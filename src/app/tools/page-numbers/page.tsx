@@ -21,6 +21,8 @@ export default function PageNumbersToolPage() {
 
   const handleFilesSelected = (files: File[]) => {
     setFile(files[0] ?? null);
+    setError("");
+    setResult(null);
   };
 
   async function handleAddPageNumbers() {
@@ -82,99 +84,125 @@ export default function PageNumbersToolPage() {
   return (
     <div className="container mx-auto max-w-4xl py-8 px-4">
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Page Numbers</h1>
-          <p className="mt-2 text-gray-400">Add page numbers to your PDF document.</p>
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">Add Page Numbers</h1>
+          <p className="text-secondary">
+            Add customizable page numbers to your PDF document
+          </p>
         </div>
 
-        <FileUploader
-          onFilesSelected={handleFilesSelected}
-          accept={[".pdf"]}
-          maxSize={30 * 1024 * 1024}
-        />
+        {/* Main Card */}
+        <div className="bg-card border border-border rounded-xl p-6 shadow-card">
+          {/* File Upload */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Select PDF File
+            </label>
+            <FileUploader
+              onFilesSelected={handleFilesSelected}
+              accept={[".pdf"]}
+              maxSize={30 * 1024 * 1024}
+            />
+          </div>
 
-        {file && (
-          <div className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Text Format</label>
-                <input
-                  type="text"
-                  value={customText}
-                  onChange={(e) => setCustomText(e.target.value)}
-                  className="w-full px-4 py-2 border border-white/10 bg-white/5 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="{n} of {total}"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Use {'{n}'} for current page and {'{total}'} for total pages
-                </p>
-              </div>
+          {/* Configuration */}
+          {file && (
+            <div className="mb-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">Text Format</label>
+                  <input
+                    type="text"
+                    value={customText}
+                    onChange={(e) => setCustomText(e.target.value)}
+                    className="w-full px-4 py-3 border border-border bg-card text-foreground rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                    placeholder="{n} of {total}"
+                  />
+                  <p className="text-xs text-secondary mt-1">
+                    Use {'{n}'} for current page and {'{total}'} for total pages
+                  </p>
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Position</label>
-                <select
-                  value={position}
-                  onChange={(e) => setPosition(e.target.value)}
-                  className="w-full px-4 py-2 border border-white/10 bg-white/5 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value="BOTTOM_CENTER">Bottom Center</option>
-                  <option value="BOTTOM_LEFT">Bottom Left</option>
-                  <option value="BOTTOM_RIGHT">Bottom Right</option>
-                  <option value="TOP_CENTER">Top Center</option>
-                  <option value="TOP_LEFT">Top Left</option>
-                  <option value="TOP_RIGHT">Top Right</option>
-                </select>
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">Position</label>
+                  <select
+                    value={position}
+                    onChange={(e) => setPosition(e.target.value)}
+                    className="w-full px-4 py-3 border border-border bg-card text-foreground rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                  >
+                    <option value="BOTTOM_CENTER">Bottom Center</option>
+                    <option value="BOTTOM_LEFT">Bottom Left</option>
+                    <option value="BOTTOM_RIGHT">Bottom Right</option>
+                    <option value="TOP_CENTER">Top Center</option>
+                    <option value="TOP_LEFT">Top Left</option>
+                    <option value="TOP_RIGHT">Top Right</option>
+                  </select>
+                </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Margin (px)</label>
-                <input
-                  type="number"
-                  value={margin}
-                  onChange={(e) => setMargin(e.target.value)}
-                  className="w-full px-4 py-2 border border-white/10 bg-white/5 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                />
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">Margin (px)</label>
+                  <input
+                    type="number"
+                    value={margin}
+                    onChange={(e) => setMargin(e.target.value)}
+                    className="w-full px-4 py-3 border border-border bg-card text-foreground rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        )}
-
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4">
-            <p className="text-sm text-red-400">{error}</p>
-          </div>
-        )}
-
-        {result && (
-          <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-green-400 mb-4">
-              Page Numbers Added!
-            </h3>
-            <a
-              href={result.url}
-              download={result.filename}
-              className="flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors"
-            >
-              <Download className="h-4 w-4" />
-              <span>Download {result.filename}</span>
-            </a>
-          </div>
-        )}
-
-        <button
-          onClick={handleAddPageNumbers}
-          disabled={!file || processing}
-          className="w-full bg-primary hover:bg-primary/90 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
-        >
-          {processing ? (
-            <>
-              <Loader2 className="h-5 w-5 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            "Add Page Numbers"
           )}
-        </button>
+
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
+
+          {/* Success Result */}
+          {result && (
+            <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-green-900 mb-4">
+                Page Numbers Added!
+              </h3>
+              <a
+                href={result.url}
+                download={result.filename}
+                className="inline-flex items-center gap-2 text-green-700 hover:text-green-800 font-medium transition-colors"
+              >
+                <Download className="h-4 w-4" />
+                <span>Download {result.filename}</span>
+              </a>
+            </div>
+          )}
+
+          {/* Add Button */}
+          <button
+            onClick={handleAddPageNumbers}
+            disabled={!file || processing}
+            className="w-full bg-primary hover:bg-primary/90 disabled:bg-secondary/30 disabled:cursor-not-allowed text-white font-semibold py-3.5 px-6 rounded-lg transition-all hover:shadow-glow-orange flex items-center justify-center gap-2"
+          >
+            {processing ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Adding Page Numbers...
+              </>
+            ) : (
+              <>
+                <Hash className="h-5 w-5" />
+                Add Page Numbers
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Info Card */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <p className="text-sm text-blue-900">
+            <strong>Tip:</strong> You can customize the format, position,  and margins of page numbers to match your document style.
+          </p>
+        </div>
       </div>
     </div>
   );

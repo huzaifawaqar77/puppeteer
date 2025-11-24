@@ -6,33 +6,33 @@ import { storage, databases } from "@/lib/appwrite";
 import { appwriteConfig } from "@/lib/config";
 import { ID } from "appwrite";
 import { FileUploader } from "@/components/FileUploader";
-import { Loader2, FileX } from "lucide-react";
+import { Loader2, Download, Search } from "lucide-react";
 
 export default function DetectBlankPagesToolPage() {
   const { user } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [processing, setProcessing] = useState(false);
-  const [blankPages, setBlankPages] = useState<number[] | null>(null);
+  const [result, setResult] = useState<{ url: string; filename: string; blankPages?: number[] } | null>(null);
   const [error, setError] = useState<string>("");
 
-  const handleFileSelected = (files: File[]) => {
+  const handleFilesSelected = (files: File[]) => {
     setFile(files[0] ?? null);
-    setBlankPages(null);
     setError("");
+    setResult(null);
   };
 
-  async function handleDetectBlankPages() {
+  async function handleDetect() {
     if (!file || !user) {
-      setError("Please select a PDF file");
+      setError("Please select a file");
       return;
     }
 
     setProcessing(true);
     setError("");
-    setBlankPages(null);
+    setResult(null);
 
     try {
-      const uploadedPdf = await storage.createFile(
+      const uploadedFile = await storage.createFile(
         appwriteConfig.buckets.input,
         ID.unique(),
         file
@@ -46,7 +46,7 @@ export default function DetectBlankPagesToolPage() {
           userId: user?.$id,
           operationType: "DETECT_BLANK_PAGES",
           status: "PENDING",
-          inputFileIds: JSON.stringify([uploadedPdf.$id]),
+          inputFileIds: JSON.stringify([uploadedFile.$id]),
           startedAt: new Date().toISOString(),
         }
       );
@@ -55,7 +55,7 @@ export default function DetectBlankPagesToolPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fileId: uploadedPdf.$id,
+          fileId: uploadedFile.$id,
           jobId: job.$id,
         }),
       });
@@ -66,7 +66,7 @@ export default function DetectBlankPagesToolPage() {
         throw new Error(data.error || "Failed to detect blank pages");
       }
 
-      setBlankPages(data.blankPages);
+      setResult(data);
     } catch (err: any) {
       setError(err.message || "An error occurred");
     } finally {
@@ -77,70 +77,87 @@ export default function DetectBlankPagesToolPage() {
   return (
     <div className="container mx-auto max-w-4xl py-8 px-4">
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Detect Blank Pages</h1>
-          <p className="mt-2 text-gray-400">Identify blank pages in your PDF document.</p>
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">Detect Blank Pages</h1>
+          <p className="text-secondary">
+            Find and optionally remove blank pages from your PDF
+          </p>
         </div>
 
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-300">PDF File</label>
-          <FileUploader
-            onFilesSelected={handleFileSelected}
-            accept={[".pdf"]}
-            maxSize={30 * 1024 * 1024}
-          />
-        </div>
-
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4">
-            <p className="text-sm text-red-400">{error}</p>
+        {/* Main Card */}
+        <div className="bg-card border border-border rounded-xl p-6 shadow-card">
+          {/* File Upload */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Select PDF File
+            </label>
+            <FileUploader
+              onFilesSelected={handleFilesSelected}
+              accept={[".pdf"]}
+              maxSize={30 * 1024 * 1024}
+            />
           </div>
-        )}
 
-        {blankPages && (
-          <div className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-4">
-            <h3 className="text-xl font-semibold text-white flex items-center gap-2">
-              <FileX className="h-5 w-5 text-primary" />
-              Blank Pages Found
-            </h3>
-            {blankPages.length > 0 ? (
-              <div className="bg-black/20 p-4 rounded-lg">
-                <p className="text-gray-300">
-                  The following pages are blank:
-                </p>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {blankPages.map((page) => (
-                    <span
-                      key={page}
-                      className="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm font-medium"
-                    >
-                      Page {page}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-4">
-                <p className="text-green-400">No blank pages detected.</p>
-              </div>
-            )}
-          </div>
-        )}
-
-        <button
-          onClick={handleDetectBlankPages}
-          disabled={!file || processing}
-          className="w-full bg-primary hover:bg-primary/90 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
-        >
-          {processing ? (
-            <>
-              <Loader2 className="h-5 w-5 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            "Detect Blank Pages"
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
           )}
-        </button>
+
+          {/* Success Result */}
+          {result && (
+            <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-green-900 mb-4">
+                Detection Complete!
+              </h3>
+              {result.blankPages && result.blankPages.length > 0 ? (
+                <p className="text-sm text-green-800 mb-4">
+                  Found {result.blankPages.length} blank page(s): {result.blankPages.join(", ")}
+                </p>
+              ) : (
+                <p className="text-sm text-green-800 mb-4">
+                  No blank pages detected in your PDF.
+                </p>
+              )}
+              <a
+                href={result.url}
+                download={result.filename}
+                className="inline-flex items-center gap-2 text-green-700 hover:text-green-800 font-medium transition-colors"
+              >
+                <Download className="h-4 w-4" />
+                <span>Download {result.filename}</span>
+              </a>
+            </div>
+          )}
+
+          {/* Detect Button */}
+          <button
+            onClick={handleDetect}
+            disabled={!file || processing}
+            className="w-full bg-primary hover:bg-primary/90 disabled:bg-secondary/30 disabled:cursor-not-allowed text-white font-semibold py-3.5 px-6 rounded-lg transition-all hover:shadow-glow-orange flex items-center justify-center gap-2"
+          >
+            {processing ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Detecting Blank Pages...
+              </>
+            ) : (
+              <>
+                <Search className="h-5 w-5" />
+                Detect & Remove Blank Pages
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Info Card */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <p className="text-sm text-blue-900">
+            <strong>Tip:</strong> This tool identifies completely blank pages and can remove them to reduce file size.
+          </p>
+        </div>
       </div>
     </div>
   );

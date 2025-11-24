@@ -18,12 +18,15 @@ export async function POST(req: NextRequest) {
     // 1. Get files from Appwrite Storage
     const fileBuffers: ArrayBuffer[] = [];
     for (const fileId of fileIds) {
-      const fileResponse = await storage.getFileDownload(
+      const fileResponse = storage.getFileDownload(
         appwriteConfig.buckets.input,
         fileId
       );
-      // getFileDownload returns ArrayBuffer in node-appwrite
-      fileBuffers.push(fileResponse);
+      
+      // Fetch the file
+      const response = await fetch(fileResponse.toString());
+      const arrayBuffer = await response.arrayBuffer();
+      fileBuffers.push(arrayBuffer);
     }
 
     // 2. Create FormData for Stirling PDF

@@ -5,23 +5,18 @@ import { useAuth } from "@/contexts/AuthContext";
 import { storage, databases } from "@/lib/appwrite";
 import { appwriteConfig } from "@/lib/config";
 import { ID } from "appwrite";
-import { FileUploader } from "@/components/FileUploader";
 import { Loader2, Download, FileText } from "lucide-react";
 
 export default function MarkdownToPdfToolPage() {
   const { user } = useAuth();
-  const [file, setFile] = useState<File | null>(null);
+  const [markdownContent, setMarkdownContent] = useState<string>("");
   const [processing, setProcessing] = useState(false);
   const [result, setResult] = useState<{ url: string; filename: string } | null>(null);
   const [error, setError] = useState<string>("");
 
-  const handleFilesSelected = (files: File[]) => {
-    setFile(files[0] ?? null);
-  };
-
   async function handleConvert() {
-    if (!file || !user) {
-      setError("Please select a Markdown file");
+    if (!markdownContent || !user) {
+      setError("Please enter Markdown content");
       return;
     }
 
@@ -30,12 +25,6 @@ export default function MarkdownToPdfToolPage() {
     setResult(null);
 
     try {
-      const uploadedFile = await storage.createFile(
-        appwriteConfig.buckets.input,
-        ID.unique(),
-        file
-      );
-
       const job = await databases.createDocument(
         appwriteConfig.databaseId,
         appwriteConfig.collections.processingJobs,
@@ -44,7 +33,7 @@ export default function MarkdownToPdfToolPage() {
           userId: user?.$id,
           operationType: "MARKDOWN_TO_PDF",
           status: "PENDING",
-          inputFileIds: JSON.stringify([uploadedFile.$id]),
+          inputFileIds: JSON.stringify([]),
           startedAt: new Date().toISOString(),
         }
       );
@@ -53,7 +42,7 @@ export default function MarkdownToPdfToolPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fileId: uploadedFile.$id,
+          markdownContent,
           jobId: job.$id,
         }),
       });
@@ -75,53 +64,92 @@ export default function MarkdownToPdfToolPage() {
   return (
     <div className="container mx-auto max-w-4xl py-8 px-4">
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Markdown to PDF</h1>
-          <p className="mt-2 text-gray-400">Convert Markdown files (.md) to PDF documents.</p>
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">Markdown to PDF</h1>
+          <p className="text-secondary">
+            Convert Markdown text to a formatted PDF document
+          </p>
         </div>
 
-        <FileUploader
-          onFilesSelected={handleFilesSelected}
-          accept={[".md", ".markdown"]}
-          maxSize={10 * 1024 * 1024}
-        />
+        {/* Main Card */}
+        <div className="bg-card border border-border rounded-xl p-6 shadow-card">
+          {/* Markdown Input */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Enter Markdown Content
+            </label>
+            <textarea
+              value={markdownContent}
+              onChange={(e) => setMarkdownContent(e.target.value)}
+              placeholder="# My Document
 
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4">
-            <p className="text-sm text-red-400">{error}</p>
+## Introduction
+This is a **bold** statement and this is *italic*.
+
+- List item 1
+- List item 2
+- List item 3
+
+[Link](https://example.com)"
+              rows={12}
+              className="w-full px-4 py-3 border border-border bg-card text-foreground rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-secondary/50 resize-none font-mono text-sm"
+            />
+            <p className="mt-2 text-xs text-secondary">
+              Use standard Markdown syntax for formatting
+            </p>
           </div>
-        )}
 
-        {result && (
-          <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-green-400 mb-4">
-              Conversion Complete!
-            </h3>
-            <a
-              href={result.url}
-              download={result.filename}
-              className="flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors"
-            >
-              <Download className="h-4 w-4" />
-              <span>Download {result.filename}</span>
-            </a>
-          </div>
-        )}
-
-        <button
-          onClick={handleConvert}
-          disabled={!file || processing}
-          className="w-full bg-primary hover:bg-primary/90 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
-        >
-          {processing ? (
-            <>
-              <Loader2 className="h-5 w-5 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            "Convert to PDF"
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
           )}
-        </button>
+
+          {/* Success Result */}
+          {result && (
+            <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-green-900 mb-4">
+                Markdown Converted to PDF!
+              </h3>
+              <a
+                href={result.url}
+                download={result.filename}
+                className="inline-flex items-center gap-2 text-green-700 hover:text-green-800 font-medium transition-colors"
+              >
+                <Download className="h-4 w-4" />
+                <span>Download {result.filename}</span>
+              </a>
+            </div>
+          )}
+
+          {/* Convert Button */}
+          <button
+            onClick={handleConvert}
+            disabled={!markdownContent || processing}
+            className="w-full bg-primary hover:bg-primary/90 disabled:bg-secondary/30 disabled:cursor-not-allowed text-white font-semibold py-3.5 px-6 rounded-lg transition-all hover:shadow-glow-orange flex items-center justify-center gap-2"
+          >
+            {processing ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Converting...
+              </>
+            ) : (
+              <>
+                <FileText className="h-5 w-5" />
+                Convert to PDF
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Info Card */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <p className="text-sm text-blue-900">
+            <strong>Supported formatting:</strong> Headers (#), bold (**), italic (*), lists, links, code blocks, and more.
+          </p>
+        </div>
       </div>
     </div>
   );

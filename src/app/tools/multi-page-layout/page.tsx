@@ -6,7 +6,7 @@ import { storage, databases } from "@/lib/appwrite";
 import { appwriteConfig } from "@/lib/config";
 import { ID } from "appwrite";
 import { FileUploader } from "@/components/FileUploader";
-import { Loader2, Download, LayoutGrid } from "lucide-react";
+import { Loader2, Download, Grid3x3 } from "lucide-react";
 
 export default function MultiPageLayoutToolPage() {
   const { user } = useAuth();
@@ -14,13 +14,15 @@ export default function MultiPageLayoutToolPage() {
   const [processing, setProcessing] = useState(false);
   const [result, setResult] = useState<{ url: string; filename: string } | null>(null);
   const [error, setError] = useState<string>("");
-  const [pagesPerSheet, setPagesPerSheet] = useState("2");
+  const [pagesPerSheet, setPagesPerSheet] = useState<number>(2);
 
   const handleFilesSelected = (files: File[]) => {
     setFile(files[0] ?? null);
+    setError("");
+    setResult(null);
   };
 
-  async function handleMultiPageLayout() {
+  async function handleConvert() {
     if (!file || !user) {
       setError("Please select a file");
       return;
@@ -77,73 +79,100 @@ export default function MultiPageLayoutToolPage() {
   return (
     <div className="container mx-auto max-w-4xl py-8 px-4">
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Multi-Page Layout</h1>
-          <p className="mt-2 text-gray-400">Combine multiple pages into a single page (N-up).</p>
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">Multi-Page Layout</h1>
+          <p className="text-secondary">
+            Arrange multiple pages per sheet for printing
+          </p>
         </div>
 
-        <FileUploader
-          onFilesSelected={handleFilesSelected}
-          accept={[".pdf"]}
-          maxSize={30 * 1024 * 1024}
-        />
+        {/* Main Card */}
+        <div className="bg-card border border-border rounded-xl p-6 shadow-card">
+          {/* File Upload */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Select PDF File
+            </label>
+            <FileUploader
+              onFilesSelected={handleFilesSelected}
+              accept={[".pdf"]}
+              maxSize={30 * 1024 * 1024}
+            />
+          </div>
 
-        {file && (
-          <div className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Pages Per Sheet</label>
+          {/* Pages Per Sheet Selection */}
+          {file && (
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Pages Per Sheet
+              </label>
               <select
                 value={pagesPerSheet}
-                onChange={(e) => setPagesPerSheet(e.target.value)}
-                className="w-full px-4 py-2 border border-white/10 bg-white/5 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                onChange={(e) => setPagesPerSheet(Number(e.target.value))}
+                className="w-full px-4 py-3 border border-border bg-card text-foreground rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
               >
-                <option value="2">2 Pages</option>
-                <option value="4">4 Pages</option>
-                <option value="6">6 Pages</option>
-                <option value="8">8 Pages</option>
-                <option value="9">9 Pages</option>
-                <option value="16">16 Pages</option>
+                <option value={2}>2 pages per sheet</option>
+                <option value={4}>4 pages per sheet</option>
+                <option value={6}>6 pages per sheet</option>
+                <option value={9}>9 pages per sheet</option>
               </select>
+              <p className="mt-2 text-xs text-secondary">
+                Useful for saving paper when printing
+              </p>
             </div>
-          </div>
-        )}
-
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4">
-            <p className="text-sm text-red-400">{error}</p>
-          </div>
-        )}
-
-        {result && (
-          <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-green-400 mb-4">
-              Layout Created!
-            </h3>
-            <a
-              href={result.url}
-              download={result.filename}
-              className="flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors"
-            >
-              <Download className="h-4 w-4" />
-              <span>Download {result.filename}</span>
-            </a>
-          </div>
-        )}
-
-        <button
-          onClick={handleMultiPageLayout}
-          disabled={!file || processing}
-          className="w-full bg-primary hover:bg-primary/90 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
-        >
-          {processing ? (
-            <>
-              <Loader2 className="h-5 w-5 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            "Create Layout"
           )}
-        </button>
+
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
+
+          {/* Success Result */}
+          {result && (
+            <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-green-900 mb-4">
+                Layout Created Successfully!
+              </h3>
+              <a
+                href={result.url}
+                download={result.filename}
+                className="inline-flex items-center gap-2 text-green-700 hover:text-green-800 font-medium transition-colors"
+              >
+                <Download className="h-4 w-4" />
+                <span>Download {result.filename}</span>
+              </a>
+            </div>
+          )}
+
+          {/* Convert Button */}
+          <button
+            onClick={handleConvert}
+            disabled={!file || processing}
+            className="w-full bg-primary hover:bg-primary/90 disabled:bg-secondary/30 disabled:cursor-not-allowed text-white font-semibold py-3.5 px-6 rounded-lg transition-all hover:shadow-glow-orange flex items-center justify-center gap-2"
+          >
+            {processing ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Creating Layout...
+              </>
+            ) : (
+              <>
+                <Grid3x3 className="h-5 w-5" />
+                Create Layout
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Info Card */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <p className="text-sm text-blue-900">
+            <strong>Tip:</strong> Multi-page layouts help save paper and are great for handouts or compact printing.
+          </p>
+        </div>
       </div>
     </div>
   );

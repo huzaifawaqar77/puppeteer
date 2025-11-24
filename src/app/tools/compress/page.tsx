@@ -16,6 +16,12 @@ export default function CompressToolPage() {
   const [error, setError] = useState<string>("");
   const [compressionLevel, setCompressionLevel] = useState<number>(1);
 
+  const handleFileSelected = (files: File[]) => {
+    setFile(files[0] || null);
+    setError("");
+    setResult(null);
+  };
+
   async function handleCompress() {
     if (!file) {
       setError("Please upload a PDF file");
@@ -29,14 +35,12 @@ export default function CompressToolPage() {
     try {
       const originalSize = file.size;
 
-      // Upload file to Appwrite Storage
       const uploadedFile = await storage.createFile(
         appwriteConfig.buckets.input,
         ID.unique(),
         file
       );
 
-      // Create processing job
       const job = await databases.createDocument(
         appwriteConfig.databaseId,
         appwriteConfig.collections.processingJobs,
@@ -45,12 +49,11 @@ export default function CompressToolPage() {
           userId: user?.$id,
           operationType: "COMPRESS",
           status: "PENDING",
-          inputFileIds: JSON.stringify([uploadedFile.$id]), // Store as JSON string
+          inputFileIds: JSON.stringify([uploadedFile.$id]),
           startedAt: new Date().toISOString(),
         }
       );
 
-      // Call server action
       const response = await fetch("/api/compress", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -89,91 +92,113 @@ export default function CompressToolPage() {
   return (
     <div className="container mx-auto max-w-4xl py-8 px-4">
       <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-white">Compress PDF</h1>
-        <p className="mt-2 text-gray-400">
-          Reduce PDF file size while maintaining quality
-        </p>
-      </div>
-
-      <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-        <h2 className="text-lg font-semibold text-white mb-4">Upload File</h2>
-        <FileUploader
-          onFilesSelected={(files) => setFile(files[0] || null)}
-          accept={["application/pdf"]}
-          multiple={false}
-          maxSize={30}
-        />
-      </div>
-
-      <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-        <h2 className="text-lg font-semibold text-white mb-4">Compression Level</h2>
-        <div className="space-y-4">
-          <input
-            type="range"
-            min="1"
-            max="3"
-            value={compressionLevel}
-            onChange={(e) => setCompressionLevel(Number(e.target.value))}
-            className="w-full"
-          />
-          <div className="flex justify-between text-sm text-gray-400">
-            <span>Low (Faster)</span>
-            <span>Medium</span>
-            <span>High (Smaller)</span>
-          </div>
-        </div>
-      </div>
-
-      {error && (
-        <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4 flex items-start gap-3">
-          <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-red-400">{error}</p>
-        </div>
-      )}
-
-      {result && (
-        <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-white mb-4 text-center">Success!</h3>
-          <div className="grid grid-cols-2 gap-4 mb-4 text-center">
-            <div>
-              <p className="text-sm text-gray-400">Original Size</p>
-              <p className="text-xl font-semibold text-white">{formatFileSize(result.originalSize)}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-400">Compressed Size</p>
-              <p className="text-xl font-semibold text-green-400">{formatFileSize(result.compressedSize)}</p>
-            </div>
-          </div>
-          <p className="text-center text-sm text-gray-400 mb-4">
-            Saved {formatFileSize(result.originalSize - result.compressedSize)} (
-            {((1 - result.compressedSize / result.originalSize) * 100).toFixed(1)}%)
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">Compress PDF</h1>
+          <p className="text-secondary">
+            Reduce PDF file size while maintaining quality
           </p>
-          <a
-            href={result.url}
-            download={result.filename}
-            className="flex items-center justify-center gap-2 w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
-          >
-            <Download className="h-5 w-5" />
-            Download Compressed PDF
-          </a>
         </div>
-      )}
 
-      <button
-        onClick={handleCompress}
-        disabled={processing || !file}
-        className="w-full py-4 px-6 bg-primary hover:bg-primary/90 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
-      >
-        {processing ? (
-          <>
-            <Loader2 className="h-5 w-5 animate-spin" />
-            Compressing...
-          </>
-        ) : (
-          "Compress PDF"
-        )}
-      </button>
+        {/* Main Card */}
+        <div className="bg-card border border-border rounded-xl p-6 shadow-card">
+          {/* File Upload */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Select PDF File
+            </label>
+            <FileUploader
+              onFilesSelected={handleFileSelected}
+              accept={["application/pdf"]}
+              multiple={false}
+              maxSize={30 * 1024 * 1024}
+            />
+          </div>
+
+          {/* Compression Level */}
+          {file && (
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-foreground mb-3">
+                Compression Level
+              </label>
+              <input
+                type="range"
+                min="1"
+                max="3"
+                value={compressionLevel}
+                onChange={(e) => setCompressionLevel(Number(e.target.value))}
+                className="w-full accent-primary"
+              />
+              <div className="flex justify-between text-sm text-secondary mt-2">
+                <span>Low (Faster)</span>
+                <span>Medium</span>
+                <span>High (Smaller)</span>
+              </div>
+            </div>
+          )}
+
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
+
+          {/* Success Result */}
+          {result && (
+            <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-green-900 mb-4 text-center">
+                Compression Complete!
+              </h3>
+              <div className="grid grid-cols-2 gap-4 mb-4 text-center">
+                <div>
+                  <p className="text-sm text-secondary">Original Size</p>
+                  <p className="text-xl font-semibold text-foreground">{formatFileSize(result.originalSize)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-secondary">Compressed Size</p>
+                  <p className="text-xl font-semibold text-green-700">{formatFileSize(result.compressedSize)}</p>
+                </div>
+              </div>
+              <p className="text-center text-sm text-secondary mb-4">
+                Saved {formatFileSize(result.originalSize - result.compressedSize)} (
+                {((1 - result.compressedSize / result.originalSize) * 100).toFixed(1)}% reduction)
+              </p>
+              <a
+                href={result.url}
+                download={result.filename}
+                className="flex items-center justify-center gap-2 w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-medium"
+              >
+                <Download className="h-5 w-5" />
+                Download Compressed PDF
+              </a>
+            </div>
+          )}
+
+          {/* Compress Button */}
+          <button
+            onClick={handleCompress}
+            disabled={processing || !file}
+            className="w-full bg-primary hover:bg-primary/90 disabled:bg-secondary/30 disabled:cursor-not-allowed text-white font-semibold py-3.5 px-6 rounded-lg transition-all hover:shadow-glow-orange flex items-center justify-center gap-2"
+          >
+            {processing ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Compressing...
+              </>
+            ) : (
+              "Compress PDF"
+            )}
+          </button>
+        </div>
+
+        {/* Info Card */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <p className="text-sm text-blue-900">
+            <strong>Tip:</strong> Higher compression levels will take longer but produce smaller files. Try 'Medium' for a good balance.
+          </p>
+        </div>
       </div>
     </div>
   );

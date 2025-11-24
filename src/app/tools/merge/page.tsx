@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { FileUploader } from "@/components/FileUploader";
-import { Loader2, Download, AlertCircle } from "lucide-react";
+import { Loader2, Download } from "lucide-react";
 import { storage, databases } from "@/lib/appwrite";
 import { appwriteConfig } from "@/lib/config";
 import { ID } from "appwrite";
@@ -15,6 +15,12 @@ export default function MergeToolPage() {
   const [result, setResult] = useState<{ url: string; filename: string } | null>(null);
   const [error, setError] = useState<string>("");
 
+  const handleFilesSelected = (selectedFiles: File[]) => {
+    setFiles(selectedFiles);
+    setError("");
+    setResult(null);
+  };
+
   async function handleMerge() {
     if (files.length < 2) {
       setError("Please upload at least 2 PDF files to merge");
@@ -26,13 +32,11 @@ export default function MergeToolPage() {
     setResult(null);
 
     try {
-      // Upload files to Appwrite Storage
       const uploadPromises = files.map((file) =>
         storage.createFile(appwriteConfig.buckets.input, ID.unique(), file)
       );
       const uploadedFiles = await Promise.all(uploadPromises);
 
-      // Create processing job
       const job = await databases.createDocument(
         appwriteConfig.databaseId,
         appwriteConfig.collections.processingJobs,
@@ -41,12 +45,11 @@ export default function MergeToolPage() {
           userId: user?.$id,
           operationType: "MERGE",
           status: "PENDING",
-          inputFileIds: JSON.stringify(uploadedFiles.map((f) => f.$id)), // Store as JSON string
+          inputFileIds: JSON.stringify(uploadedFiles.map((f) => f.$id)),
           startedAt: new Date().toISOString(),
         }
       );
 
-      // Call server action to process
       const response = await fetch("/api/merge", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -76,67 +79,92 @@ export default function MergeToolPage() {
   return (
     <div className="container mx-auto max-w-4xl py-8 px-4">
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Merge PDFs</h1>
-          <p className="mt-2 text-gray-400">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">Merge PDFs</h1>
+          <p className="text-secondary">
             Combine multiple PDF files into a single document
           </p>
         </div>
 
-      <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-        <h2 className="text-lg font-semibold text-white mb-4">Upload Files</h2>
-        <FileUploader
-          onFilesSelected={setFiles}
-          accept={["application/pdf"]}
-          multiple={true}
-          maxSize={30}
-        />
-
-        {files.length > 0 && (
-          <div className="mt-4 p-4 bg-blue-500/10 border border-blue-500/50 rounded-lg">
-            <p className="text-sm text-blue-400">
-              {files.length} file{files.length > 1 ? "s" : ""} selected
-            </p>
+        {/* Main Card */}
+        <div className="bg-card border border-border rounded-xl p-6 shadow-card">
+          {/* File Upload */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Select PDF Files (at least 2)
+            </label>
+            <FileUploader
+              onFilesSelected={handleFilesSelected}
+              accept={["application/pdf"]}
+              multiple={true}
+              maxSize={30 * 1024 * 1024}
+            />
           </div>
-        )}
-      </div>
 
-      {error && (
-        <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4 flex items-start gap-3">
-          <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-red-400">{error}</p>
-        </div>
-      )}
+          {/* Files Selected Info */}
+          {files.length > 0 && (
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-900">
+                <strong>{files.length}</strong> file{files.length > 1 ? "s" : ""} selected
+              </p>
+              <ul className="mt-2 space-y-1">
+                {files.map((file, index) => (
+                  <li key={index} className="text-xs text-blue-800">
+                    {index + 1}. {file.name}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
-      {result && (
-        <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-6 text-center">
-          <h3 className="text-lg font-semibold text-white mb-2">Success!</h3>
-          <p className="text-gray-400 mb-4">Your PDFs have been merged</p>
-          <a
-            href={result.url}
-            download={result.filename}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
+
+          {/* Success Result */}
+          {result && (
+            <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-green-900 mb-4">
+                PDFs Merged Successfully!
+              </h3>
+              <a
+                href={result.url}
+                download={result.filename}
+                className="inline-flex items-center gap-2 text-green-700 hover:text-green-800 font-medium transition-colors"
+              >
+                <Download className="h-4 w-4" />
+                <span>Download {result.filename}</span>
+              </a>
+            </div>
+          )}
+
+          {/* Merge Button */}
+          <button
+            onClick={handleMerge}
+            disabled={files.length < 2 || processing}
+            className="w-full bg-primary hover:bg-primary/90 disabled:bg-secondary/30 disabled:cursor-not-allowed text-white font-semibold py-3.5 px-6 rounded-lg transition-all hover:shadow-glow-orange flex items-center justify-center gap-2"
           >
-            <Download className="h-5 w-5" />
-            Download Merged PDF
-          </a>
+            {processing ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Merging PDFs...
+              </>
+            ) : (
+              "Merge PDFs"
+            )}
+          </button>
         </div>
-      )}
 
-      <button
-        onClick={handleMerge}
-        disabled={processing || files.length < 2}
-        className="w-full py-4 px-6 bg-primary hover:bg-primary/90 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
-      >
-        {processing ? (
-          <>
-            <Loader2 className="h-5 w-5 animate-spin" />
-            Merging PDFs...
-          </>
-        ) : (
-          "Merge PDFs"
-        )}
-      </button>
+        {/* Info Card */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <p className="text-sm text-blue-900">
+            <strong>Tip:</strong> Files will be merged in the order they appear. You can upload multiple PDFs at once.
+          </p>
+        </div>
       </div>
     </div>
   );

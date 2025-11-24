@@ -18,6 +18,8 @@ export default function ImageToPdfToolPage() {
 
   const handleFilesSelected = (selectedFiles: File[]) => {
     setFiles(selectedFiles);
+    setError("");
+    setResult(null);
   };
 
   async function handleConvert() {
@@ -31,7 +33,6 @@ export default function ImageToPdfToolPage() {
     setResult(null);
 
     try {
-      // Upload all files to Appwrite Storage
       const uploadedFileIds = await Promise.all(
         files.map(async (file) => {
           const uploaded = await storage.createFile(
@@ -83,74 +84,102 @@ export default function ImageToPdfToolPage() {
   return (
     <div className="container mx-auto max-w-4xl py-8 px-4">
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Image to PDF</h1>
-          <p className="mt-2 text-gray-400">Convert multiple images into a single PDF document.</p>
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">Images to PDF</h1>
+          <p className="text-secondary">
+            Convert multiple images into a single PDF document
+          </p>
         </div>
 
-        <FileUploader
-          onFilesSelected={handleFilesSelected}
-          accept={[".jpg", ".jpeg", ".png", ".gif"]}
-          multiple={true}
-          maxSize={50 * 1024 * 1024}
-        />
+        {/* Main Card */}
+        <div className="bg-card border border-border rounded-xl p-6 shadow-card">
+          {/* File Upload */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Select Images (JPG, PNG, GIF)
+            </label>
+            <FileUploader
+              onFilesSelected={handleFilesSelected}
+              accept={[".jpg", ".jpeg", ".png", ".gif", ".webp"]}
+              multiple={true}
+              maxSize={50 * 1024 * 1024}
+            />
+          </div>
 
-        {files.length > 0 && (
-          <div className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Fit Option</label>
+          {/* Fit Option Selection */}
+          {files.length > 0 && (
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Image Fit Option
+              </label>
               <select
                 value={fitOption}
                 onChange={(e) => setFitOption(e.target.value)}
-                className="w-full px-4 py-2 border border-white/10 bg-white/5 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full px-4 py-3 border border-border bg-card text-foreground rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
               >
-                <option value="fillPage">Fill Page</option>
-                <option value="fitPage">Fit Page</option>
+                <option value="fillPage">Fill Page (stretch to fit)</option>
+                <option value="fitPage">Fit Page (shrink to fit)</option>
                 <option value="maintainAspectRatio">Maintain Aspect Ratio</option>
               </select>
+              <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-xs text-blue-900">
+                  <strong>{files.length}</strong> image{files.length > 1 ? "s" : ""} selected
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-gray-400">{files.length} images selected</p>
-            </div>
-          </div>
-        )}
-
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4">
-            <p className="text-sm text-red-400">{error}</p>
-          </div>
-        )}
-
-        {result && (
-          <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-green-400 mb-4">
-              Conversion Complete!
-            </h3>
-            <a
-              href={result.url}
-              download={result.filename}
-              className="flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors"
-            >
-              <Download className="h-4 w-4" />
-              <span>Download {result.filename}</span>
-            </a>
-          </div>
-        )}
-
-        <button
-          onClick={handleConvert}
-          disabled={files.length === 0 || processing}
-          className="w-full bg-primary hover:bg-primary/90 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
-        >
-          {processing ? (
-            <>
-              <Loader2 className="h-5 w-5 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            "Convert to PDF"
           )}
-        </button>
+
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
+
+          {/* Success Result */}
+          {result && (
+            <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-green-900 mb-4">
+                Images Converted to PDF!
+              </h3>
+              <a
+                href={result.url}
+                download={result.filename}
+                className="inline-flex items-center gap-2 text-green-700 hover:text-green-800 font-medium transition-colors"
+              >
+                <Download className="h-4 w-4" />
+                <span>Download {result.filename}</span>
+              </a>
+            </div>
+          )}
+
+          {/* Convert Button */}
+          <button
+            onClick={handleConvert}
+            disabled={files.length === 0 || processing}
+            className="w-full bg-primary hover:bg-primary/90 disabled:bg-secondary/30 disabled:cursor-not-allowed text-white font-semibold py-3.5 px-6 rounded-lg transition-all hover:shadow-glow-orange flex items-center justify-center gap-2"
+          >
+            {processing ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Converting to PDF...
+              </>
+            ) : (
+              <>
+                <ImageIcon className="h-5 w-5" />
+                Convert to PDF
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Info Card */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <p className="text-sm text-blue-900">
+            <strong>Tip:</strong> Images will be arranged in the order you select them. For best results, use high-quality images with similar dimensions.
+          </p>
+        </div>
       </div>
     </div>
   );

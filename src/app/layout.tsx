@@ -14,8 +14,16 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PDF Flex - Enterprise PDF Tools",
-  description: "Secure, fast, and private PDF processing for professionals.",
+  title: "OmniPDF - Master Your PDFs with Intelligent Workflows",
+  description: "Process PDFs with intelligent workflows. Visual pipeline builder, OCR, redaction, and 50+ powerful tools.",
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.png', type: 'image/png', sizes: '32x32' },
+    ],
+    shortcut: '/favicon.svg',
+    apple: '/favicon.png',
+  },
 };
 
 export default function RootLayout({

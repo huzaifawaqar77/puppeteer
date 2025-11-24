@@ -6,7 +6,7 @@ import { storage, databases } from "@/lib/appwrite";
 import { appwriteConfig } from "@/lib/config";
 import { ID } from "appwrite";
 import { FileUploader } from "@/components/FileUploader";
-import { Loader2, Download, GitCompare } from "lucide-react";
+import { Loader2, Download, FileType } from "lucide-react";
 
 export default function CompareToolPage() {
   const { user } = useAuth();
@@ -18,15 +18,19 @@ export default function CompareToolPage() {
 
   const handleFile1Selected = (files: File[]) => {
     setFile1(files[0] ?? null);
+    setError("");
+    setResult(null);
   };
 
   const handleFile2Selected = (files: File[]) => {
     setFile2(files[0] ?? null);
+    setError("");
+    setResult(null);
   };
 
   async function handleCompare() {
     if (!file1 || !file2 || !user) {
-      setError("Please select two PDF files to compare");
+      setError("Please select both PDF files");
       return;
     }
 
@@ -35,7 +39,7 @@ export default function CompareToolPage() {
     setResult(null);
 
     try {
-      const [uploadedFile1, uploadedFile2] = await Promise.all([
+      const [uploaded1, uploaded2] = await Promise.all([
         storage.createFile(appwriteConfig.buckets.input, ID.unique(), file1),
         storage.createFile(appwriteConfig.buckets.input, ID.unique(), file2),
       ]);
@@ -46,9 +50,9 @@ export default function CompareToolPage() {
         ID.unique(),
         {
           userId: user?.$id,
-          operationType: "COMPARE_PDFS",
+          operationType: "COMPARE",
           status: "PENDING",
-          inputFileIds: JSON.stringify([uploadedFile1.$id, uploadedFile2.$id]),
+          inputFileIds: JSON.stringify([uploaded1.$id, uploaded2.$id]),
           startedAt: new Date().toISOString(),
         }
       );
@@ -57,8 +61,8 @@ export default function CompareToolPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          file1Id: uploadedFile1.$id,
-          file2Id: uploadedFile2.$id,
+          file1Id: uploaded1.$id,
+          file2Id: uploaded2.$id,
           jobId: job.$id,
         }),
       });
@@ -80,14 +84,21 @@ export default function CompareToolPage() {
   return (
     <div className="container mx-auto max-w-4xl py-8 px-4">
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Compare PDFs</h1>
-          <p className="mt-2 text-gray-400">Compare two PDF documents and highlight differences.</p>
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">Compare PDFs</h1>
+          <p className="text-secondary">
+            Compare two PDF documents and highlight differences
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-300">First PDF</label>
+        {/* Main Card */}
+        <div className="bg-card border border-border rounded-xl p-6 shadow-card space-y-6">
+          {/* File 1 Upload */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2">
+              First PDF File
+            </label>
             <FileUploader
               onFilesSelected={handleFile1Selected}
               accept={[".pdf"]}
@@ -95,52 +106,71 @@ export default function CompareToolPage() {
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-300">Second PDF</label>
+          {/* File 2 Upload */}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Second PDF File
+            </label>
             <FileUploader
               onFilesSelected={handleFile2Selected}
               accept={[".pdf"]}
               maxSize={30 * 1024 * 1024}
             />
           </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
+
+          {/* Success Result */}
+          {result && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-green-900 mb-4">
+                Comparison Complete!
+              </h3>
+              <p className="text-sm text-green-800 mb-4">
+                Differences have been highlighted in the output PDF.
+              </p>
+              <a
+                href={result.url}
+                download={result.filename}
+                className="inline-flex items-center gap-2 text-green-700 hover:text-green-800 font-medium transition-colors"
+              >
+                <Download className="h-4 w-4" />
+                <span>Download {result.filename}</span>
+              </a>
+            </div>
+          )}
+
+          {/* Compare Button */}
+          <button
+            onClick={handleCompare}
+            disabled={!file1 || !file2 || processing}
+            className="w-full bg-primary hover:bg-primary/90 disabled:bg-secondary/30 disabled:cursor-not-allowed text-white font-semibold py-3.5 px-6 rounded-lg transition-all hover:shadow-glow-orange flex items-center justify-center gap-2"
+          >
+            {processing ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Comparing PDFs...
+              </>
+            ) : (
+              <>
+                <FileType className="h-5 w-5" />
+                Compare PDFs
+              </>
+            )}
+          </button>
         </div>
 
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4">
-            <p className="text-sm text-red-400">{error}</p>
-          </div>
-        )}
-
-        {result && (
-          <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-green-400 mb-4">
-              Comparison Complete!
-            </h3>
-            <a
-              href={result.url}
-              download={result.filename}
-              className="flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors"
-            >
-              <Download className="h-4 w-4" />
-              <span>Download {result.filename}</span>
-            </a>
-          </div>
-        )}
-
-        <button
-          onClick={handleCompare}
-          disabled={!file1 || !file2 || processing}
-          className="w-full bg-primary hover:bg-primary/90 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
-        >
-          {processing ? (
-            <>
-              <Loader2 className="h-5 w-5 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            "Compare PDFs"
-          )}
-        </button>
+        {/* Info Card */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <p className="text-sm text-blue-900">
+            <strong>Tip:</strong> This tool compares two PDF files and creates a new PDF highlighting the differences between them.
+          </p>
+        </div>
       </div>
     </div>
   );

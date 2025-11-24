@@ -15,13 +15,15 @@ export default function LinearizeToolPage() {
   const [result, setResult] = useState<{ url: string; filename: string } | null>(null);
   const [error, setError] = useState<string>("");
 
-  const handleFileSelected = (files: File[]) => {
+  const handleFilesSelected = (files: File[]) => {
     setFile(files[0] ?? null);
+    setError("");
+    setResult(null);
   };
 
   async function handleLinearize() {
     if (!file || !user) {
-      setError("Please select a PDF file");
+      setError("Please select a file");
       return;
     }
 
@@ -30,7 +32,7 @@ export default function LinearizeToolPage() {
     setResult(null);
 
     try {
-      const uploadedPdf = await storage.createFile(
+      const uploadedFile = await storage.createFile(
         appwriteConfig.buckets.input,
         ID.unique(),
         file
@@ -44,7 +46,7 @@ export default function LinearizeToolPage() {
           userId: user?.$id,
           operationType: "LINEARIZE",
           status: "PENDING",
-          inputFileIds: JSON.stringify([uploadedPdf.$id]),
+          inputFileIds: JSON.stringify([uploadedFile.$id]),
           startedAt: new Date().toISOString(),
         }
       );
@@ -53,7 +55,7 @@ export default function LinearizeToolPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fileId: uploadedPdf.$id,
+          fileId: uploadedFile.$id,
           jobId: job.$id,
         }),
       });
@@ -75,56 +77,81 @@ export default function LinearizeToolPage() {
   return (
     <div className="container mx-auto max-w-4xl py-8 px-4">
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Linearize PDF</h1>
-          <p className="mt-2 text-gray-400">Optimize your PDF for fast web view (linearization).</p>
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">Linearize PDF</h1>
+          <p className="text-secondary">
+            Optimize PDF for fast web viewing (fast web view)
+          </p>
         </div>
 
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-300">PDF File</label>
-          <FileUploader
-            onFilesSelected={handleFileSelected}
-            accept={[".pdf"]}
-            maxSize={30 * 1024 * 1024}
-          />
-        </div>
-
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4">
-            <p className="text-sm text-red-400">{error}</p>
+        {/* Main Card */}
+        <div className="bg-card border border-border rounded-xl p-6 shadow-card">
+          {/* File Upload */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Select PDF File
+            </label>
+            <FileUploader
+              onFilesSelected={handleFilesSelected}
+              accept={[".pdf"]}
+              maxSize={30 * 1024 * 1024}
+            />
           </div>
-        )}
 
-        {result && (
-          <div className="bg-green-500/10 border border-green-500/50 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-green-400 mb-4">
-              PDF Linearized!
-            </h3>
-            <a
-              href={result.url}
-              download={result.filename}
-              className="flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors"
-            >
-              <Download className="h-4 w-4" />
-              <span>Download {result.filename}</span>
-            </a>
-          </div>
-        )}
-
-        <button
-          onClick={handleLinearize}
-          disabled={!file || processing}
-          className="w-full bg-primary hover:bg-primary/90 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
-        >
-          {processing ? (
-            <>
-              <Loader2 className="h-5 w-5 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            "Linearize PDF"
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
           )}
-        </button>
+
+          {/* Success Result */}
+          {result && (
+            <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-green-900 mb-4">
+                PDF Linearized Successfully!
+              </h3>
+              <p className="text-sm text-green-800 mb-4">
+                Your PDF is now optimized for fast web viewing.
+              </p>
+              <a
+                href={result.url}
+                download={result.filename}
+                className="inline-flex items-center gap-2 text-green-700 hover:text-green-800 font-medium transition-colors"
+              >
+                <Download className="h-4 w-4" />
+                <span>Download {result.filename}</span>
+              </a>
+            </div>
+          )}
+
+          {/* Linearize Button */}
+          <button
+            onClick={handleLinearize}
+            disabled={!file || processing}
+            className="w-full bg-primary hover:bg-primary/90 disabled:bg-secondary/30 disabled:cursor-not-allowed text-white font-semibold py-3.5 px-6 rounded-lg transition-all hover:shadow-glow-orange flex items-center justify-center gap-2"
+          >
+            {processing ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Optimizing PDF...
+              </>
+            ) : (
+              <>
+                <Zap className="h-5 w-5" />
+                Linearize PDF
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Info Card */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <p className="text-sm text-blue-900">
+            <strong>What is linearization?</strong> Linearized PDFs are optimized for web viewing, allowing browsers to display the first page before the entire file is downloaded.
+          </p>
+        </div>
       </div>
     </div>
   );

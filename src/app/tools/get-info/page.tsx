@@ -12,34 +12,32 @@ export default function GetInfoToolPage() {
   const { user } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [processing, setProcessing] = useState(false);
-  const [info, setInfo] = useState<any>(null);
+  const [result, setResult] = useState<any | null>(null);
   const [error, setError] = useState<string>("");
 
-  const handleFileSelected = (files: File[]) => {
+  const handleFilesSelected = (files: File[]) => {
     setFile(files[0] ?? null);
-    setInfo(null);
     setError("");
+    setResult(null);
   };
 
   async function handleGetInfo() {
     if (!file || !user) {
-      setError("Please select a PDF file");
+      setError("Please select a file");
       return;
     }
 
     setProcessing(true);
     setError("");
-    setInfo(null);
+    setResult(null);
 
     try {
-      const uploadedPdf = await storage.createFile(
+      const uploadedFile = await storage.createFile(
         appwriteConfig.buckets.input,
         ID.unique(),
         file
       );
 
-      // We don't necessarily need a job for this as it's a quick synchronous check,
-      // but keeping it for consistency and history tracking is good.
       const job = await databases.createDocument(
         appwriteConfig.databaseId,
         appwriteConfig.collections.processingJobs,
@@ -48,7 +46,7 @@ export default function GetInfoToolPage() {
           userId: user?.$id,
           operationType: "GET_INFO",
           status: "PENDING",
-          inputFileIds: JSON.stringify([uploadedPdf.$id]),
+          inputFileIds: JSON.stringify([uploadedFile.$id]),
           startedAt: new Date().toISOString(),
         }
       );
@@ -57,7 +55,7 @@ export default function GetInfoToolPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fileId: uploadedPdf.$id,
+          fileId: uploadedFile.$id,
           jobId: job.$id,
         }),
       });
@@ -68,7 +66,7 @@ export default function GetInfoToolPage() {
         throw new Error(data.error || "Failed to get PDF info");
       }
 
-      setInfo(data.info);
+      setResult(data);
     } catch (err: any) {
       setError(err.message || "An error occurred");
     } finally {
@@ -79,61 +77,78 @@ export default function GetInfoToolPage() {
   return (
     <div className="container mx-auto max-w-4xl py-8 px-4">
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Get PDF Information</h1>
-          <p className="mt-2 text-gray-400">View detailed metadata and information about your PDF document.</p>
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">Get PDF Info</h1>
+          <p className="text-secondary">
+            View detailed information and metadata about your PDF
+          </p>
         </div>
 
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-300">PDF File</label>
-          <FileUploader
-            onFilesSelected={handleFileSelected}
-            accept={[".pdf"]}
-            maxSize={30 * 1024 * 1024}
-          />
-        </div>
-
-        {error && (
-          <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-4">
-            <p className="text-sm text-red-400">{error}</p>
+        {/* Main Card */}
+        <div className="bg-card border border-border rounded-xl p-6 shadow-card">
+          {/* File Upload */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Select PDF File
+            </label>
+            <FileUploader
+              onFilesSelected={handleFilesSelected}
+              accept={[".pdf"]}
+              maxSize={30 * 1024 * 1024}
+            />
           </div>
-        )}
 
-        {info && (
-          <div className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-4">
-            <h3 className="text-xl font-semibold text-white flex items-center gap-2">
-              <Info className="h-5 w-5 text-primary" />
-              PDF Information
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              {Object.entries(info).map(([key, value]) => (
-                <div key={key} className="bg-black/20 p-3 rounded-lg">
-                  <span className="block text-gray-400 capitalize mb-1">
-                    {key.replace(/([A-Z])/g, " $1").trim()}
-                  </span>
-                  <span className="text-white font-medium break-all">
-                    {String(value)}
-                  </span>
-                </div>
-              ))}
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-700">{error}</p>
             </div>
-          </div>
-        )}
-
-        <button
-          onClick={handleGetInfo}
-          disabled={!file || processing}
-          className="w-full bg-primary hover:bg-primary/90 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
-        >
-          {processing ? (
-            <>
-              <Loader2 className="h-5 w-5 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            "Get Info"
           )}
-        </button>
+
+          {/* Success Result */}
+          {result && (
+            <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-blue-900 mb-4">
+                PDF Information
+              </h3>
+              <div className="space-y-2 text-sm">
+                {Object.entries(result.info || {}).map(([key, value]) => (
+                  <div key={key} className="flex justify-between py-2 border-b border-blue-200 last:border-0">
+                    <span className="font-medium text-blue-900">{key}:</span>
+                    <span className="text-blue-700">{String(value)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Get Info Button */}
+          <button
+            onClick={handleGetInfo}
+            disabled={!file || processing}
+            className="w-full bg-primary hover:bg-primary/90 disabled:bg-secondary/30 disabled:cursor-not-allowed text-white font-semibold py-3.5 px-6 rounded-lg transition-all hover:shadow-glow-orange flex items-center justify-center gap-2"
+          >
+            {processing ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Getting Info...
+              </>
+            ) : (
+              <>
+                <Info className="h-5 w-5" />
+                Get PDF Info
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Info Card */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <p className="text-sm text-blue-900">
+            <strong>Information includes:</strong> Page count, file size, creation date, author, PDF version, and other metadata.
+          </p>
+        </div>
       </div>
     </div>
   );
