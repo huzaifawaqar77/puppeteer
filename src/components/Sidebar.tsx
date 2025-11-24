@@ -16,7 +16,7 @@ import {
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Tools", href: "/tools", icon: Wrench },
-  { name: "Pipelines", href: "/pipelines", icon: GitBranch },
+  { name: "Pipelines", href: "/pipelines/builder", icon: GitBranch },
   { name: "History", href: "/history", icon: Clock },
   { name: "API", href: "/api-docs", icon: Code },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },

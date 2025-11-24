@@ -47,6 +47,16 @@ const allTools: SearchResult[] = [
   { type: "tool", name: "Unlock PDF", description: "Remove password protection", href: "/tools/unlock" },
   { type: "tool", name: "URL to PDF", description: "Convert webpage to PDF", href: "/tools/url-to-pdf" },
   { type: "tool", name: "Add Watermark", description: "Add watermark to PDF", href: "/tools/watermark" },
+  { type: "tool", name: "PDF to Word", description: "Convert PDF to Word (DOC/DOCX)", href: "/tools/pdf-to-word" },
+  { type: "tool", name: "PDF to PowerPoint", description: "Convert PDF to Presentation (PPT/PPTX)", href: "/tools/pdf-to-presentation" },
+  { type: "tool", name: "Office to PDF", description: "Convert Word, Excel, PPT to PDF", href: "/tools/file-to-pdf" },
+  { type: "tool", name: "PDF to PDF/A", description: "Convert to archival format", href: "/tools/pdf-to-pdfa" },
+  { type: "tool", name: "Scanner Effect", description: "Make PDF look scanned", href: "/tools/scanner-effect" },
+  { type: "tool", name: "Add Stamp", description: "Add text or image stamps", href: "/tools/add-stamp" },
+  { type: "tool", name: "Show JavaScript", description: "Extract embedded JavaScript", href: "/tools/show-javascript" },
+  { type: "tool", name: "PDF to Markdown", description: "Convert PDF to Markdown", href: "/tools/pdf-to-markdown" },
+  { type: "tool", name: "Auto Rename", description: "Rename based on content", href: "/tools/auto-rename" },
+  { type: "tool", name: "Remove Blanks", description: "Remove blank pages", href: "/tools/remove-blanks" },
   { type: "pipeline", name: "Visual Pipeline Builder", description: "Chain multiple operations", href: "/pipelines/builder" },
 ];
 
