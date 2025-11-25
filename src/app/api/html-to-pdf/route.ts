@@ -16,17 +16,28 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Get file from Appwrite Storage
-    const fileResponse = await storage.getFileDownload(
+    const fileUrl = storage.getFileDownload(
       appwriteConfig.buckets.input,
       fileId
     );
+    
+    // Get file metadata to preserve filename
+    const fileMetadata = await storage.getFile(
+      appwriteConfig.buckets.input,
+      fileId
+    );
+    
+    // Fetch file content
+    const fileDownloadResponse = await fetch(fileUrl.toString());
+    const arrayBuffer = await fileDownloadResponse.arrayBuffer();
 
     // 2. Create FormData for Stirling PDF
     const formData = new FormData();
-    const blob = new Blob([fileResponse]);
-    formData.append("fileInput", blob, "input.html");
+    const blob = new Blob([arrayBuffer], { type: "text/html" });
+    formData.append("fileInput", blob, fileMetadata.name);
+    formData.append("zoom", "1"); // Required parameter - default zoom level
 
-    // 3. Call Stirling PDF API
+    // 3. Call Stirling PDF API (correct endpoint: /html/pdf not /html-to-pdf)
     const stirlingUrl = process.env.STIRLING_PDF_URL;
     const stirlingApiKey = process.env.STIRLING_PDF_API_KEY;
 
@@ -34,7 +45,7 @@ export async function POST(req: NextRequest) {
       throw new Error("Stirling PDF URL not configured");
     }
 
-    const response = await fetch(`${stirlingUrl}/api/v1/convert/html-to-pdf`, {
+    const response = await fetch(`${stirlingUrl}/api/v1/convert/html/pdf`, {
       method: "POST",
       headers: {
         "X-API-Key": stirlingApiKey || "",

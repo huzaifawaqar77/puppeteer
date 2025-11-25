@@ -48,7 +48,7 @@ export default function PageNumbersToolPage() {
         ID.unique(),
         {
           userId: user?.$id,
-          operationType: "PAGE_NUMBERS",
+          operationType: "COMPRESS",
           status: "PENDING",
           inputFileIds: JSON.stringify([uploadedFile.$id]),
           startedAt: new Date().toISOString(),

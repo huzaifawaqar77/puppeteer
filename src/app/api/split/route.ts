@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     const formData = new FormData();
     const blob = new Blob([arrayBuffer], { type: "application/pdf" });
     formData.append("fileInput", blob, "document.pdf");
-    formData.append("pages", pageRange); // Stirling PDF uses "pages" parameter
+    formData.append("pageNumbers", pageRange); // Stirling PDF uses "pageNumbers" parameter
 
     // Call Stirling PDF Split API
     console.log("📡 Calling Stirling PDF at:", `${stirlingConfig.url}/api/v1/general/split-pages`);
@@ -61,10 +61,25 @@ export async function POST(request: NextRequest) {
     // Get the result - could be a single file or ZIP
     const resultBuffer = await stirlingResponse.arrayBuffer();
     const contentType = stirlingResponse.headers.get("content-type") || "application/pdf";
+    const contentDisposition = stirlingResponse.headers.get("content-disposition") || "";
+    
+    console.log("📦 Stirling PDF Response:");
+    console.log("  Content-Type:", contentType);
+    console.log("  Content-Disposition:", contentDisposition);
+    console.log("  Buffer size:", resultBuffer.byteLength, "bytes");
+    console.log("  Split mode:", splitMode);
+    console.log("  Page range:", pageRange);
+    
+    // Check if it's a ZIP file by magic bytes (PK = 0x50 0x4B)
+    const uint8Array = new Uint8Array(resultBuffer);
+    const isZipFile = uint8Array[0] === 0x50 && uint8Array[1] === 0x4B;
+    
+    console.log("  Is ZIP (magic bytes):", isZipFile);
+    console.log("  First 4 bytes:", Array.from(uint8Array.slice(0, 4)).map(b => '0x' + b.toString(16).padStart(2, '0')).join(' '));
     
     const files: { url: string; filename: string }[] = [];
 
-    if (contentType.includes("zip")) {
+    if (isZipFile) {
       // It's a ZIP file with multiple PDFs
       const zipBlob = new Blob([resultBuffer], { type: "application/zip" });
       const outputFile = await storage.createFile(

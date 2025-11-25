@@ -16,41 +16,41 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Get file from Appwrite Storage
-    const fileResponse = await storage.getFileDownload(
+    const fileUrl = storage.getFileDownload(
       appwriteConfig.buckets.input,
       fileId
     );
+    
+    const fileDownloadResponse = await fetch(fileUrl.toString());
+    const arrayBuffer = await fileDownloadResponse.arrayBuffer();
 
     // 2. Create FormData for Stirling PDF
     const formData = new FormData();
-    const blob = new Blob([fileResponse]);
+    const blob = new Blob([arrayBuffer], { type: "application/pdf" });
     formData.append("fileInput", blob, "input.pdf");
-    formData.append("customText", customText || "{n} / {total}");
+    formData.append("pageNumbers", "all"); // Required
+    formData.append("customMargin", margin || "medium"); // Optional
+    formData.append("fontSize", "12"); // Required
+    formData.append("fontType", "HELVETICA"); // Required
+    formData.append("customText", customText || "{n}"); // Optional
     
-    // Map position to Stirling PDF expected values
-    // Assuming Stirling PDF uses standard int values or strings for position
-    // Based on typical Stirling PDF usage: 1=Bottom Left, 2=Bottom Center, 3=Bottom Right, etc.
-    // Or it might take strings. Let's try sending the string directly first or mapping if we knew the exact enum.
-    // Checking Swagger documentation would be ideal, but for now let's assume it accepts standard position strings or we map them.
-    // Let's use a safe default mapping if needed, but 'customText' usually goes with 'position'.
-    // For now, let's pass the position string and see. If it fails, we might need to map to integers.
-    // Common Stirling PDF positions: 
-    // 1: Top Left, 2: Top Center, 3: Top Right
-    // 4: Bottom Left, 5: Bottom Center, 6: Bottom Right
-    
-    let positionInt = "5"; // Default Bottom Center
+    // Map position (1-9 grid)
+    let positionInt = "8"; // Default bottom-center
     switch (position) {
       case "TOP_LEFT": positionInt = "1"; break;
       case "TOP_CENTER": positionInt = "2"; break;
       case "TOP_RIGHT": positionInt = "3"; break;
-      case "BOTTOM_LEFT": positionInt = "4"; break;
-      case "BOTTOM_CENTER": positionInt = "5"; break;
-      case "BOTTOM_RIGHT": positionInt = "6"; break;
+      case "MIDDLE_LEFT": positionInt = "4"; break;
+      case "MIDDLE_CENTER": positionInt = "5"; break;
+      case "MIDDLE_RIGHT": positionInt = "6"; break;
+      case "BOTTOM_LEFT": positionInt = "7"; break;
+      case "BOTTOM_CENTER": positionInt = "8"; break;
+      case "BOTTOM_RIGHT": positionInt = "9"; break;
     }
-    formData.append("position", positionInt);
-    formData.append("margin", margin || "20");
+    formData.append("position", positionInt); // Required
+    formData.append("startingNumber", "1"); // Required
 
-    // 3. Call Stirling PDF API
+    // 3. Call Stirling PDF API (correct endpoint: /misc/add-page-numbers)
     const stirlingUrl = process.env.STIRLING_PDF_URL;
     const stirlingApiKey = process.env.STIRLING_PDF_API_KEY;
 
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
       throw new Error("Stirling PDF URL not configured");
     }
 
-    const response = await fetch(`${stirlingUrl}/api/v1/general/page-numbers`, {
+    const response = await fetch(`${stirlingUrl}/api/v1/misc/add-page-numbers`, {
       method: "POST",
       headers: {
         "X-API-Key": stirlingApiKey || "",

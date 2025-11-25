@@ -45,7 +45,7 @@ export default function PdfToTextToolPage() {
         ID.unique(),
         {
           userId: user?.$id,
-          operationType: "PDF_TO_TEXT",
+          operationType: "CONVERT",
           status: "PENDING",
           inputFileIds: JSON.stringify([uploadedFile.$id]),
           startedAt: new Date().toISOString(),

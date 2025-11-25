@@ -25,15 +25,26 @@ export default function HtmlToPdfToolPage() {
     setResult(null);
 
     try {
+      // Create HTML file from content
+      const htmlBlob = new Blob([htmlContent], { type: "text/html" });
+      const htmlFile = new File([htmlBlob], "input.html", { type: "text/html" });
+      
+      // Upload to Appwrite
+      const uploadedFile = await storage.createFile(
+        appwriteConfig.buckets.input,
+        ID.unique(),
+        htmlFile
+      );
+
       const job = await databases.createDocument(
         appwriteConfig.databaseId,
         appwriteConfig.collections.processingJobs,
         ID.unique(),
         {
           userId: user?.$id,
-          operationType: "HTML_TO_PDF",
+          operationType: "CONVERT",
           status: "PENDING",
-          inputFileIds: JSON.stringify([]),
+          inputFileIds: JSON.stringify([uploadedFile.$id]),
           startedAt: new Date().toISOString(),
         }
       );
@@ -42,7 +53,7 @@ export default function HtmlToPdfToolPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          htmlContent,
+          fileId: uploadedFile.$id,
           jobId: job.$id,
         }),
       });

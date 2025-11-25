@@ -46,7 +46,7 @@ async function createStorageBuckets() {
       INPUT_BUCKET_ID,
       "Input Files",
       [Permission.read(Role.users()), Permission.create(Role.users()), Permission.update(Role.users()), Permission.delete(Role.users())],
-      false, true, 30000000, ["pdf", "jpg", "jpeg", "png"], "none", true, false
+      false, true, 30000000, ["pdf", "jpg", "jpeg", "png", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "odt", "ods", "odp", "rtf", "txt"], "none", true, false
     );
     console.log("✅ Input bucket created");
   } catch (error) {

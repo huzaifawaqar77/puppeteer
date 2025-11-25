@@ -50,7 +50,7 @@ export default function OverlayToolPage() {
         ID.unique(),
         {
           userId: user?.$id,
-          operationType: "OVERLAY",
+          operationType: "MERGE",
           status: "PENDING",
           inputFileIds: JSON.stringify([uploadedBase.$id, uploadedOverlay.$id]),
           startedAt: new Date().toISOString(),

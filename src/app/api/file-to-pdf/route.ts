@@ -19,20 +19,26 @@ export async function POST(request: NextRequest) {
     );
 
     // Download file from Appwrite Storage
-    const fileResponse = storage.getFileDownload(
+    const fileUrl = storage.getFileDownload(
+      appwriteConfig.buckets.input,
+      fileId
+    );
+    
+    // Get file metadata to preserve original filename and extension
+    const fileMetadata = await storage.getFile(
       appwriteConfig.buckets.input,
       fileId
     );
     
     // Fetch the file
-    const response = await fetch(fileResponse.toString());
+    const response = await fetch(fileUrl.toString());
     const arrayBuffer = await response.arrayBuffer();
 
     // Prepare form data for Stirling PDF
     const formData = new FormData();
-    // Note: We don't force type to application/pdf here as it could be any office file
+    // IMPORTANT: Preserve original filename with extension so Stirling knows the file type
     const blob = new Blob([arrayBuffer]);
-    formData.append("fileInput", blob, "document"); 
+    formData.append("fileInput", blob, fileMetadata.name); 
 
     // Call Stirling PDF API
     const stirlingResponse = await fetch(
@@ -47,7 +53,11 @@ export async function POST(request: NextRequest) {
     );
 
     if (!stirlingResponse.ok) {
-      throw new Error(`Stirling PDF API failed: ${stirlingResponse.statusText}`);
+      const errorText = await stirlingResponse.text();
+      console.error("❌ Stirling PDF file-to-pdf error:");
+      console.error("  Status:", stirlingResponse.status, stirlingResponse.statusText);
+      console.error("  Response:", errorText);
+      throw new Error(`Stirling PDF API failed: ${stirlingResponse.status} - ${errorText}`);
     }
 
     const processedBlob = await stirlingResponse.blob();

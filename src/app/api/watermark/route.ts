@@ -16,24 +16,30 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Get file from Appwrite Storage
-    const fileResponse = await storage.getFileDownload(
+    const fileUrl = storage.getFileDownload(
       appwriteConfig.buckets.input,
       fileId
     );
+    
+    const fileDownloadResponse = await fetch(fileUrl.toString());
+    const arrayBuffer = await fileDownloadResponse.arrayBuffer();
 
     // 2. Create FormData for Stirling PDF
     const formData = new FormData();
-    const blob = new Blob([fileResponse]);
+    const blob = new Blob([arrayBuffer], { type: "application/pdf" });
     formData.append("fileInput", blob, "input.pdf");
-    formData.append("text", watermarkText);
-    formData.append("alphabet", "roman"); // Default
-    formData.append("fontSize", "30"); // Default
-    formData.append("rotation", "0"); // Default
-    formData.append("opacity", "0.5"); // Default
-    formData.append("widthSpacer", "50"); // Default
-    formData.append("heightSpacer", "50"); // Default
+    formData.append("watermarkType", "text"); // Required: text or image
+    formData.append("watermarkText", watermarkText); // Correct parameter name
+    formData.append("alphabet", "roman");
+    formData.append("fontSize", "30");
+    formData.append("rotation", "0");
+    formData.append("opacity", "0.5");
+    formData.append("widthSpacer", "50");
+    formData.append("heightSpacer", "50");
+    formData.append("customColor", "#000000"); // Required: hex color for watermark
+    formData.append("convertPDFToImage", "false"); // Required parameter
 
-    // 3. Call Stirling PDF API
+    // 3. Call Stirling PDF API (correct endpoint: /security/add-watermark)
     const stirlingUrl = process.env.STIRLING_PDF_URL;
     const stirlingApiKey = process.env.STIRLING_PDF_API_KEY;
 
@@ -41,7 +47,7 @@ export async function POST(req: NextRequest) {
       throw new Error("Stirling PDF URL not configured");
     }
 
-    const response = await fetch(`${stirlingUrl}/api/v1/general/add-watermark`, {
+    const response = await fetch(`${stirlingUrl}/api/v1/security/add-watermark`, {
       method: "POST",
       headers: {
         "X-API-Key": stirlingApiKey || "",
@@ -51,8 +57,10 @@ export async function POST(req: NextRequest) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Stirling PDF Error:", errorText);
-      throw new Error(`Stirling PDF API failed: ${response.statusText}`);
+      console.error("❌ Stirling PDF watermark error:");
+      console.error("  Status:", response.status, response.statusText);
+      console.error("  Response:", errorText);
+      throw new Error(`Stirling PDF API failed: ${response.status} - ${errorText}`);
     }
 
     // 4. Upload processed file to Appwrite

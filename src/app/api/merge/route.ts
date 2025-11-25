@@ -41,10 +41,17 @@ export async function POST(request: NextRequest) {
       const blob = new Blob([buffer], { type: "application/pdf" });
       formData.append("fileInput", blob, `file${index}.pdf`);
     });
+    
+    // Add required parameters from Swagger
+    formData.append("sortType", "orderProvided"); // Files in the order provided
+    formData.append("removeCertSign", "false"); // Don't remove certification signatures
+    formData.append("generateToc", "false"); // Don't generate table of contents
 
-    // Call Stirling PDF API
+    console.log("📡 Calling Stirling PDF merge with", fileBuffers.length, "files");
+
+    // Call Stirling PDF API (correct endpoint: /general/ not /misc/)
     const stirlingResponse = await fetch(
-      `${stirlingConfig.url}/api/v1/misc/merge-pdfs`,
+      `${stirlingConfig.url}/api/v1/general/merge-pdfs`,
       {
         method: "POST",
         headers: {
@@ -55,7 +62,11 @@ export async function POST(request: NextRequest) {
     );
 
     if (!stirlingResponse.ok) {
-      throw new Error("Stirling PDF merge failed");
+      const errorText = await stirlingResponse.text();
+      console.error("❌ Stirling PDF merge error:");
+      console.error("  Status:", stirlingResponse.status, stirlingResponse.statusText);
+      console.error("  Response:", errorText);
+      throw new Error(`Stirling PDF merge failed: ${stirlingResponse.status} - ${errorText}`);
     }
 
     // Get the merged PDF

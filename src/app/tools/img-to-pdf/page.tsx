@@ -50,7 +50,7 @@ export default function ImageToPdfToolPage() {
         ID.unique(),
         {
           userId: user?.$id,
-          operationType: "IMG_TO_PDF",
+          operationType: "CONVERT",
           status: "PENDING",
           inputFileIds: JSON.stringify(uploadedFileIds),
           startedAt: new Date().toISOString(),

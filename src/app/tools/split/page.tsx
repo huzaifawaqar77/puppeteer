@@ -60,7 +60,7 @@ export default function SplitToolPage() {
           fileId: uploadedFile.$id,
           jobId: job.$id,
           splitMode,
-          pageRange,
+          pageRange: splitMode === "ALL" ? "all" : pageRange,
         }),
       });
 

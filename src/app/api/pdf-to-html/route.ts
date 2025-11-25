@@ -16,17 +16,20 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Get file from Appwrite Storage
-    const fileResponse = await storage.getFileDownload(
+    const fileUrl = storage.getFileDownload(
       appwriteConfig.buckets.input,
       fileId
     );
+    
+    const fileDownloadResponse = await fetch(fileUrl.toString());
+    const arrayBuffer = await fileDownloadResponse.arrayBuffer();
 
     // 2. Create FormData for Stirling PDF
     const formData = new FormData();
-    const blob = new Blob([fileResponse]);
+    const blob = new Blob([arrayBuffer], { type: "application/pdf" });
     formData.append("fileInput", blob, "input.pdf");
 
-    // 3. Call Stirling PDF API
+    // 3. Call Stirling PDF API (correct endpoint: /pdf/html not /pdf-to-html)
     const stirlingUrl = process.env.STIRLING_PDF_URL;
     const stirlingApiKey = process.env.STIRLING_PDF_API_KEY;
 
@@ -34,7 +37,7 @@ export async function POST(req: NextRequest) {
       throw new Error("Stirling PDF URL not configured");
     }
 
-    const response = await fetch(`${stirlingUrl}/api/v1/convert/pdf-to-html`, {
+    const response = await fetch(`${stirlingUrl}/api/v1/convert/pdf/html`, {
       method: "POST",
       headers: {
         "X-API-Key": stirlingApiKey || "",

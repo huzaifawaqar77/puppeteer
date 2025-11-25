@@ -50,7 +50,7 @@ export default function WatermarkToolPage() {
         ID.unique(),
         {
           userId: user?.$id,
-          operationType: "WATERMARK",
+          operationType: "COMPRESS",
           status: "PENDING",
           inputFileIds: JSON.stringify([uploadedFile.$id]),
           startedAt: new Date().toISOString(),

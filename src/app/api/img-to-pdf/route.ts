@@ -37,9 +37,10 @@ export async function POST(req: NextRequest) {
       formData.append("fileInput", blob, `image${index}.jpg`);
     });
     formData.append("fitOption", fitOption || "fillPage");
+    formData.append("colorType", "color"); // Required parameter
     formData.append("autoRotate", "true");
 
-    // 3. Call Stirling PDF API
+    // 3. Call Stirling PDF API (correct endpoint: /img/pdf not /img-to-pdf)
     const stirlingUrl = process.env.STIRLING_PDF_URL;
     const stirlingApiKey = process.env.STIRLING_PDF_API_KEY;
 
@@ -47,7 +48,7 @@ export async function POST(req: NextRequest) {
       throw new Error("Stirling PDF URL not configured");
     }
 
-    const response = await fetch(`${stirlingUrl}/api/v1/convert/img-to-pdf`, {
+    const response = await fetch(`${stirlingUrl}/api/v1/convert/img/pdf`, {
       method: "POST",
       headers: {
         "X-API-Key": stirlingApiKey || "",

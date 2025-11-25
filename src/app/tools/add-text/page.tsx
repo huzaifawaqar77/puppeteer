@@ -50,7 +50,7 @@ export default function AddTextToolPage() {
         ID.unique(),
         {
           userId: user?.$id,
-          operationType: "ADD_TEXT",
+          operationType: "COMPRESS",
           status: "PENDING",
           inputFileIds: JSON.stringify([uploadedFile.$id]),
           startedAt: new Date().toISOString(),

@@ -6,9 +6,9 @@ import { InputFile } from "node-appwrite/file";
 
 export async function POST(req: NextRequest) {
   try {
-    const { file1Id, file2Id, jobId } = await req.json();
+    const { baseFileId, overlayFileId, jobId } = await req.json();
 
-    if (!file1Id || !file2Id || !jobId) {
+    if (!baseFileId || !overlayFileId || !jobId) {
       return NextResponse.json(
         { error: "Missing required parameters" },
         { status: 400 }
@@ -16,20 +16,29 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Get files from Appwrite Storage
+    const file1Url = storage.getFileDownload(appwriteConfig.buckets.input, baseFileId);
+    const file2Url = storage.getFileDownload(appwriteConfig.buckets.input, overlayFileId);
+    
     const [file1Response, file2Response] = await Promise.all([
-      storage.getFileDownload(appwriteConfig.buckets.input, file1Id),
-      storage.getFileDownload(appwriteConfig.buckets.input, file2Id),
+      fetch(file1Url.toString()),
+      fetch(file2Url.toString()),
+    ]);
+    
+    const [arrayBuffer1, arrayBuffer2] = await Promise.all([
+      file1Response.arrayBuffer(),
+      file2Response.arrayBuffer(),
     ]);
 
     // 2. Create FormData for Stirling PDF
     const formData = new FormData();
-    const blob1 = new Blob([file1Response]);
-    const blob2 = new Blob([file2Response]);
+    const blob1 = new Blob([arrayBuffer1], { type: "application/pdf" });
+    const blob2 = new Blob([arrayBuffer2], { type: "application/pdf" });
     formData.append("fileInput", blob1, "base.pdf");
-    formData.append("overlayFile", blob2, "overlay.pdf");
-    formData.append("overlayPosition", "0"); // 0 = Foreground, 1 = Background
+    formData.append("overlayFiles", blob2, "overlay.pdf"); // Correct parameter name
+    formData.append("overlayMode", "SequentialOverlay"); // Required parameter
+    formData.append("overlayPosition", "0"); // Required: 0=Foreground, 1=Background
 
-    // 3. Call Stirling PDF API
+    // 3. Call Stirling PDF API (correct endpoint: /general/overlay-pdfs)
     const stirlingUrl = process.env.STIRLING_PDF_URL;
     const stirlingApiKey = process.env.STIRLING_PDF_API_KEY;
 
@@ -37,7 +46,7 @@ export async function POST(req: NextRequest) {
       throw new Error("Stirling PDF URL not configured");
     }
 
-    const response = await fetch(`${stirlingUrl}/api/v1/misc/overlay-pdf`, {
+    const response = await fetch(`${stirlingUrl}/api/v1/general/overlay-pdfs`, {
       method: "POST",
       headers: {
         "X-API-Key": stirlingApiKey || "",
@@ -47,8 +56,10 @@ export async function POST(req: NextRequest) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Stirling PDF Error:", errorText);
-      throw new Error(`Stirling PDF API failed: ${response.statusText}`);
+      console.error("❌ Stirling PDF overlay error:");
+      console.error("  Status:", response.status, response.statusText);
+      console.error("  Response:", errorText);
+      throw new Error(`Stirling PDF API failed: ${response.status} - ${errorText}`);
     }
 
     // 4. Upload processed file to Appwrite

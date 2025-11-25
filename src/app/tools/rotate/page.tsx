@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { storage, databases } from "@/lib/appwrite";
 import { appwriteConfig } from "@/lib/config";
@@ -15,12 +15,29 @@ export default function RotateToolPage() {
   const [result, setResult] = useState<{ url: string; filename: string } | null>(null);
   const [error, setError] = useState<string>("");
   const [angle, setAngle] = useState<number>(90);
+  const [previewUrl, setPreviewUrl] = useState<string>("");
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const handleFilesSelected = (files: File[]) => {
     setFile(files[0] ?? null);
     setError("");
     setResult(null);
+    
+    // Create preview URL
+    if (files[0]) {
+      const url = URL.createObjectURL(files[0]);
+      setPreviewUrl(url);
+    }
   };
+
+  // Cleanup preview URL
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   async function handleRotate() {
     if (!file || !user) {
@@ -127,6 +144,36 @@ export default function RotateToolPage() {
               </div>
               <p className="mt-2 text-xs text-secondary">
                 All pages will be rotated by {angle} degrees clockwise
+              </p>
+            </div>
+          )}
+
+          {/* Live Preview */}
+          {file && previewUrl && (
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-foreground mb-3">
+                Preview
+              </label>
+              <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-8 flex items-center justify-center min-h-[400px]">
+                <div 
+                  className="transition-transform duration-300 shadow-lg"
+                  style={{ 
+                    transform: `rotate(${angle}deg)`,
+                    maxWidth: '100%',
+                    maxHeight: '350px'
+                  }}
+                >
+                  <iframe
+                    src={`${previewUrl}#page=1&toolbar=0&navpanes=0&scrollbar=0`}
+                    className="border-4 border-white rounded bg-white"
+                    width="300"
+                    height="400"
+                    title="PDF Preview"
+                  />
+                </div>
+              </div>
+              <p className="mt-2 text-xs text-secondary text-center">
+                Preview shows how your PDF will look after rotation
               </p>
             </div>
           )}

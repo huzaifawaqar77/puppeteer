@@ -35,7 +35,7 @@ export default function FileToPdfToolPage() {
       const uploadedFile = await storage.createFile(appwriteConfig.buckets.input, ID.unique(), file);
       const job = await databases.createDocument(appwriteConfig.databaseId, appwriteConfig.collections.processingJobs, ID.unique(), {
         userId: user?.$id,
-        operationType: "FILE_TO_PDF",
+        operationType: "CONVERT",
         status: "PENDING",
         inputFileIds: JSON.stringify([uploadedFile.$id]),
         startedAt: new Date().toISOString(),
