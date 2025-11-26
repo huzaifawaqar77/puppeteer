@@ -50,7 +50,7 @@ export default function UnlockToolPage() {
         ID.unique(),
         {
           userId: user?.$id,
-          operationType: "UNLOCK",
+          operationType: "COMPRESS",
           status: "PENDING",
           inputFileIds: JSON.stringify([uploadedFile.$id]),
           startedAt: new Date().toISOString(),

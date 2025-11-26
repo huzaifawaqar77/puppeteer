@@ -16,18 +16,31 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Get file from Appwrite Storage
-    const fileResponse = await storage.getFileDownload(
+    const fileUrl = storage.getFileDownload(
       appwriteConfig.buckets.input,
       fileId
     );
+    
+    const fileDownloadResponse = await fetch(fileUrl.toString());
+    const arrayBuffer = await fileDownloadResponse.arrayBuffer();
 
-    // 2. Create FormData for Stirling PDF
+    // 2. Create FormData for Stirling PDF OCR
     const formData = new FormData();
-    const blob = new Blob([fileResponse]);
+    const blob = new Blob([arrayBuffer], { type: "application/pdf" });
     formData.append("fileInput", blob, "input.pdf");
-    if (language) {
-      formData.append("languages", language);
-    }
+    
+    // Required parameters for OCR
+    const languages = language ? [language] : ["eng"]; // Default to English
+    languages.forEach(lang => formData.append("languages", lang)); // Append each language
+    formData.append("ocrType", "skip-text"); // Required: skip-text, force-ocr, or Normal
+    formData.append("ocrRenderType", "sandwich"); // Required: hocr or sandwich
+    
+    // Optional parameters
+    formData.append("sidecar", "false");
+    formData.append("deskew", "false");
+    formData.append("clean", "false");
+    formData.append("cleanFinal", "false");
+    formData.append("removeImagesAfter", "false");
 
     // 3. Call Stirling PDF API
     const stirlingUrl = process.env.STIRLING_PDF_URL;
@@ -47,8 +60,10 @@ export async function POST(req: NextRequest) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Stirling PDF Error:", errorText);
-      throw new Error(`Stirling PDF API failed: ${response.statusText}`);
+      console.error("❌ Stirling PDF OCR error:");
+      console.error("  Status:", response.status, response.statusText);
+      console.error("  Response:", errorText);
+      throw new Error(`Stirling PDF API failed: ${response.status} - ${errorText}`);
     }
 
     // 4. Upload processed file to Appwrite

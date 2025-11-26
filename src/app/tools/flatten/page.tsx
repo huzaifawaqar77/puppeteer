@@ -44,7 +44,7 @@ export default function FlattenToolPage() {
         ID.unique(),
         {
           userId: user?.$id,
-          operationType: "FLATTEN",
+          operationType: "COMPRESS",
           status: "PENDING",
           inputFileIds: JSON.stringify([uploadedFile.$id]),
           startedAt: new Date().toISOString(),

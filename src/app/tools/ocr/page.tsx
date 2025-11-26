@@ -59,7 +59,7 @@ export default function OcrToolPage() {
         ID.unique(),
         {
           userId: user?.$id,
-          operationType: "OCR_PDF",
+          operationType: "OCR",
           status: "PENDING",
           inputFileIds: JSON.stringify([uploadedFile.$id]),
           startedAt: new Date().toISOString(),

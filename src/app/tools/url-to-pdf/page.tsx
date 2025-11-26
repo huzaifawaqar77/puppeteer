@@ -39,7 +39,7 @@ export default function UrlToPdfToolPage() {
         ID.unique(),
         {
           userId: user?.$id,
-          operationType: "URL_TO_PDF",
+          operationType: "CONVERT",
           status: "PENDING",
           inputFileIds: JSON.stringify([]),
           startedAt: new Date().toISOString(),

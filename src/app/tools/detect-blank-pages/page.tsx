@@ -44,7 +44,7 @@ export default function DetectBlankPagesToolPage() {
         ID.unique(),
         {
           userId: user?.$id,
-          operationType: "DETECT_BLANK_PAGES",
+          operationType: "COMPRESS",
           status: "PENDING",
           inputFileIds: JSON.stringify([uploadedFile.$id]),
           startedAt: new Date().toISOString(),

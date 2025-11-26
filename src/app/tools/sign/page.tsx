@@ -44,7 +44,7 @@ export default function SignToolPage() {
       
       const job = await databases.createDocument(appwriteConfig.databaseId, appwriteConfig.collections.processingJobs, ID.unique(), {
         userId: user?.$id,
-        operationType: "SIGN",
+        operationType: "COMPRESS",
         status: "PENDING",
         inputFileIds: JSON.stringify([uploadedPdf.$id, ...(uploadedSignature ? [uploadedSignature.$id] : [])]),
         startedAt: new Date().toISOString(),

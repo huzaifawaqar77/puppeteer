@@ -44,7 +44,7 @@ export default function LinearizeToolPage() {
         ID.unique(),
         {
           userId: user?.$id,
-          operationType: "LINEARIZE",
+          operationType: "COMPRESS",
           status: "PENDING",
           inputFileIds: JSON.stringify([uploadedFile.$id]),
           startedAt: new Date().toISOString(),

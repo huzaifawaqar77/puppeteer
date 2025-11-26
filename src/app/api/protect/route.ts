@@ -16,19 +16,22 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Get file from Appwrite Storage
-    const fileResponse = await storage.getFileDownload(
+    const fileUrl = storage.getFileDownload(
       appwriteConfig.buckets.input,
       fileId
     );
+    
+    const fileDownloadResponse = await fetch(fileUrl.toString());
+    const arrayBuffer = await fileDownloadResponse.arrayBuffer();
 
     // 2. Create FormData for Stirling PDF
     const formData = new FormData();
-    const blob = new Blob([fileResponse]);
+    const blob = new Blob([arrayBuffer], { type: "application/pdf" });
     formData.append("fileInput", blob, "input.pdf");
-    formData.append("password", password);
-    // Stirling PDF might require 'ownerPassword' as well or just 'password' depending on version.
-    // Based on common endpoints, 'password' usually sets user password.
-    // Let's assume 'password' is enough for now or check docs if it fails.
+    formData.append("password", password); // User password (opens document)
+    formData.append("keyLength", "128"); // Required: encryption key length (128 or 256)
+    // Optional: Add owner password for restrictions (if needed)
+    // formData.append("ownerPassword", password);
 
     // 3. Call Stirling PDF API
     const stirlingUrl = process.env.STIRLING_PDF_URL;
@@ -48,8 +51,10 @@ export async function POST(req: NextRequest) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Stirling PDF Error:", errorText);
-      throw new Error(`Stirling PDF API failed: ${response.statusText}`);
+      console.error("❌ Stirling PDF protect error:");
+      console.error("  Status:", response.status, response.statusText);
+      console.error("  Response:", errorText);
+      throw new Error(`Stirling PDF API failed: ${response.status} - ${errorText}`);
     }
 
     // 4. Upload processed file to Appwrite

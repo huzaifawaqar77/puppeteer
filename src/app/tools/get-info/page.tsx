@@ -44,7 +44,7 @@ export default function GetInfoToolPage() {
         ID.unique(),
         {
           userId: user?.$id,
-          operationType: "GET_INFO",
+          operationType: "COMPRESS",
           status: "PENDING",
           inputFileIds: JSON.stringify([uploadedFile.$id]),
           startedAt: new Date().toISOString(),

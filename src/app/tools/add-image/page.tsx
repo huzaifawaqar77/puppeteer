@@ -50,7 +50,7 @@ export default function AddImageToolPage() {
         ID.unique(),
         {
           userId: user?.$id,
-          operationType: "ADD_IMAGE",
+          operationType: "COMPRESS",
           status: "PENDING",
           inputFileIds: JSON.stringify([uploadedPdf.$id, uploadedImage.$id]),
           startedAt: new Date().toISOString(),

@@ -16,18 +16,22 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Get file from Appwrite Storage
-    const fileResponse = await storage.getFileDownload(
+    const fileUrl = storage.getFileDownload(
       appwriteConfig.buckets.input,
       fileId
     );
+    
+    const fileDownloadResponse = await fetch(fileUrl.toString());
+    const arrayBuffer = await fileDownloadResponse.arrayBuffer();
 
     // 2. Create FormData for Stirling PDF
     const formData = new FormData();
-    const blob = new Blob([fileResponse]);
+    const blob = new Blob([arrayBuffer], { type: "application/pdf" });
     formData.append("fileInput", blob, "input.pdf");
-    formData.append("format", format || "png");
+    formData.append("format", format || "png"); // Required: png, jpeg, or gif
+    formData.append("allowDuplicates", "false"); // Optional: save duplicate images
 
-    // 3. Call Stirling PDF API
+    // 3. Call Stirling PDF API (correct endpoint: /misc/extract-images)
     const stirlingUrl = process.env.STIRLING_PDF_URL;
     const stirlingApiKey = process.env.STIRLING_PDF_API_KEY;
 
@@ -35,7 +39,7 @@ export async function POST(req: NextRequest) {
       throw new Error("Stirling PDF URL not configured");
     }
 
-    const response = await fetch(`${stirlingUrl}/api/v1/extract/extract-images`, {
+    const response = await fetch(`${stirlingUrl}/api/v1/misc/extract-images`, {
       method: "POST",
       headers: {
         "X-API-Key": stirlingApiKey || "",
@@ -45,8 +49,10 @@ export async function POST(req: NextRequest) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Stirling PDF Error:", errorText);
-      throw new Error(`Stirling PDF API failed: ${response.statusText}`);
+      console.error("❌ Stirling PDF extract-images error:");
+      console.error("  Status:", response.status, response.statusText);
+      console.error("  Response:", errorText);
+      throw new Error(`Stirling PDF API failed: ${response.status} - ${errorText}`);
     }
 
     // 4. Upload processed file to Appwrite

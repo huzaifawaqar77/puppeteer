@@ -50,7 +50,7 @@ export default function MetadataToolPage() {
         ID.unique(),
         {
           userId: user?.$id,
-          operationType: "METADATA",
+          operationType: "COMPRESS",
           status: "PENDING",
           inputFileIds: JSON.stringify([uploadedFile.$id]),
           startedAt: new Date().toISOString(),

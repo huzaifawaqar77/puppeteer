@@ -44,7 +44,7 @@ export default function AutoSplitToolPage() {
         ID.unique(),
         {
           userId: user?.$id,
-          operationType: "AUTO_SPLIT",
+          operationType: "SPLIT",
           status: "PENDING",
           inputFileIds: JSON.stringify([uploadedFile.$id]),
           startedAt: new Date().toISOString(),

@@ -45,7 +45,7 @@ export default function MultiPageLayoutToolPage() {
         ID.unique(),
         {
           userId: user?.$id,
-          operationType: "MULTI_PAGE_LAYOUT",
+          operationType: "COMPRESS",
           status: "PENDING",
           inputFileIds: JSON.stringify([uploadedFile.$id]),
           startedAt: new Date().toISOString(),

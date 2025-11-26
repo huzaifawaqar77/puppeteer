@@ -44,7 +44,7 @@ export default function ExtractImagesToolPage() {
         ID.unique(),
         {
           userId: user?.$id,
-          operationType: "EXTRACT_IMAGES",
+          operationType: "CONVERT",
           status: "PENDING",
           inputFileIds: JSON.stringify([uploadedFile.$id]),
           startedAt: new Date().toISOString(),

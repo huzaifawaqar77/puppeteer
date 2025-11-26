@@ -35,7 +35,7 @@ export default function PdfToMarkdownToolPage() {
       const uploadedFile = await storage.createFile(appwriteConfig.buckets.input, ID.unique(), file);
       const job = await databases.createDocument(appwriteConfig.databaseId, appwriteConfig.collections.processingJobs, ID.unique(), {
         userId: user?.$id,
-        operationType: "PDF_TO_MARKDOWN",
+        operationType: "CONVERT",
         status: "PENDING",
         inputFileIds: JSON.stringify([uploadedFile.$id]),
         startedAt: new Date().toISOString(),

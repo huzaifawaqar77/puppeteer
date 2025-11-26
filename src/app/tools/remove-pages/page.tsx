@@ -40,7 +40,7 @@ export default function RemovePagesToolPage() {
       const uploadedFile = await storage.createFile(appwriteConfig.buckets.input, ID.unique(), file);
       const job = await databases.createDocument(appwriteConfig.databaseId, appwriteConfig.collections.processingJobs, ID.unique(), {
         userId: user?.$id,
-        operationType: "REMOVE_PAGES",
+        operationType: "SPLIT",
         status: "PENDING",
         inputFileIds: JSON.stringify([uploadedFile.$id]),
         startedAt: new Date().toISOString(),

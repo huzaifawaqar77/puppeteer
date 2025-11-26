@@ -31,7 +31,7 @@ export default function MarkdownToPdfToolPage() {
         ID.unique(),
         {
           userId: user?.$id,
-          operationType: "MARKDOWN_TO_PDF",
+          operationType: "CONVERT",
           status: "PENDING",
           inputFileIds: JSON.stringify([]),
           startedAt: new Date().toISOString(),

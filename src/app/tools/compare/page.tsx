@@ -50,7 +50,7 @@ export default function CompareToolPage() {
         ID.unique(),
         {
           userId: user?.$id,
-          operationType: "COMPARE",
+          operationType: "COMPRESS",
           status: "PENDING",
           inputFileIds: JSON.stringify([uploaded1.$id, uploaded2.$id]),
           startedAt: new Date().toISOString(),
