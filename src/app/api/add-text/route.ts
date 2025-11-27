@@ -16,20 +16,29 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Get file from Appwrite Storage
-    const fileResponse = await storage.getFileDownload(
+    const fileUrl = storage.getFileDownload(
       appwriteConfig.buckets.input,
       fileId
     );
+    
+    const fileDownloadResponse = await fetch(fileUrl.toString());
+    const arrayBuffer = await fileDownloadResponse.arrayBuffer();
 
     // 2. Create FormData for Stirling PDF
     const formData = new FormData();
-    const blob = new Blob([fileResponse]);
+    const blob = new Blob([arrayBuffer], { type: "application/pdf" });
     formData.append("fileInput", blob, "input.pdf");
-    formData.append("text", text);
-    formData.append("x", x.toString());
-    formData.append("y", y.toString());
-    formData.append("fontSize", fontSize.toString());
-    formData.append("color", color || "#000000");
+    formData.append("watermarkText", text);
+    formData.append("watermarkType", "text");
+    formData.append("fontSize", (fontSize || 30).toString());
+    formData.append("customTextColor", color || "#000000");
+    formData.append("rotation", "0");
+    formData.append("opacity", "1");
+    // Use x/y as spacers if possible, but Stirling uses widthSpacer/heightSpacer for tiling.
+    // Since we can't do exact X/Y easily with this endpoint, we'll just use defaults or try to map them if possible.
+    // For now, let's just use 0 for spacers to avoid tiling mess.
+    formData.append("widthSpacer", "0");
+    formData.append("heightSpacer", "0");
 
     // 3. Call Stirling PDF API
     const stirlingUrl = process.env.STIRLING_PDF_URL;
@@ -39,7 +48,7 @@ export async function POST(req: NextRequest) {
       throw new Error("Stirling PDF URL not configured");
     }
 
-    const response = await fetch(`${stirlingUrl}/api/v1/general/add-text`, {
+    const response = await fetch(`${stirlingUrl}/api/v1/general/add-watermark`, {
       method: "POST",
       headers: {
         "X-API-Key": stirlingApiKey || "",

@@ -15,6 +15,10 @@ export default function AddTextToolPage() {
   const [result, setResult] = useState<{ url: string; filename: string } | null>(null);
   const [error, setError] = useState<string>("");
   const [text, setText] = useState<string>("");
+  const [x, setX] = useState<number>(0);
+  const [y, setY] = useState<number>(0);
+  const [fontSize, setFontSize] = useState<number>(30);
+  const [color, setColor] = useState<string>("#000000");
 
   const handleFilesSelected = (files: File[]) => {
     setFile(files[0] ?? null);
@@ -64,6 +68,10 @@ export default function AddTextToolPage() {
           fileId: uploadedFile.$id,
           jobId: job.$id,
           text,
+          x,
+          y,
+          fontSize,
+          color,
         }),
       });
 
@@ -108,19 +116,69 @@ export default function AddTextToolPage() {
 
           {/* Text Input */}
           {file && (
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Text to Add
-              </label>
-              <textarea
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="Enter the text you want to add to the PDF..."
-                rows={4}
-                className="w-full px-4 py-3 border border-border bg-card text-foreground rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-secondary/50 resize-none"
-              />
-              <p className="mt-2 text-xs text-secondary">
-                The text will be added to your PDF document
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Text to Add
+                </label>
+                <textarea
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  placeholder="Enter the text you want to add to the PDF..."
+                  rows={4}
+                  className="w-full px-4 py-3 border border-border bg-card text-foreground rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-secondary/50 resize-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    X Coordinate
+                  </label>
+                  <input
+                    type="number"
+                    value={x}
+                    onChange={(e) => setX(Number(e.target.value))}
+                    className="w-full px-4 py-2 border border-border bg-card text-foreground rounded-lg focus:outline-none focus:border-primary"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Y Coordinate
+                  </label>
+                  <input
+                    type="number"
+                    value={y}
+                    onChange={(e) => setY(Number(e.target.value))}
+                    className="w-full px-4 py-2 border border-border bg-card text-foreground rounded-lg focus:outline-none focus:border-primary"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Font Size
+                  </label>
+                  <input
+                    type="number"
+                    value={fontSize}
+                    onChange={(e) => setFontSize(Number(e.target.value))}
+                    className="w-full px-4 py-2 border border-border bg-card text-foreground rounded-lg focus:outline-none focus:border-primary"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Color
+                  </label>
+                  <input
+                    type="color"
+                    value={color}
+                    onChange={(e) => setColor(e.target.value)}
+                    className="w-full h-10 p-1 border border-border bg-card rounded-lg cursor-pointer"
+                  />
+                </div>
+              </div>
+              
+              <p className="text-xs text-secondary">
+                The text will be added to your PDF document at the specified coordinates.
               </p>
             </div>
           )}
