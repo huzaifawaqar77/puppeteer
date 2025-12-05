@@ -6,20 +6,25 @@ import { cn } from "@/lib/utils";
 
 interface FileUploaderProps {
   onFilesSelected: (files: File[]) => void;
-  maxSize?: number; // in MB
+  maxSize?: number; // in MB (will auto-convert if you pass bytes like 30 * 1024 * 1024)
   accept?: string[];
   multiple?: boolean;
 }
 
 export function FileUploader({
   onFilesSelected,
-  maxSize = 100,
+  maxSize = 30,
   accept = ["application/pdf"],
   multiple = false,
 }: FileUploaderProps) {
   const [dragActive, setDragActive] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string>("");
+
+  // Convert bytes to MB if necessary (if maxSize > 100, assume it's in bytes)
+  const maxSizeMB =
+    maxSize > 100 ? Math.round(maxSize / (1024 * 1024)) : maxSize;
+  const maxSizeBytes = maxSizeMB * 1024 * 1024;
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -33,34 +38,41 @@ export function FileUploader({
 
   const validateFiles = (fileList: FileList | null): File[] => {
     if (!fileList) return [];
-    
+
     const filesArray = Array.from(fileList);
     const validFiles: File[] = [];
-    
+
     for (const file of filesArray) {
       // Check file type - handle both extensions (.pdf) and MIME types (application/pdf)
-      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
-      const isValidType = accept.includes("*/*") || 
-                         accept.includes(file.type) || 
-                         accept.some(acceptedType => 
-                           acceptedType.startsWith('.') && acceptedType.toLowerCase() === fileExtension
-                         );
-      
+      const fileExtension = "." + file.name.split(".").pop()?.toLowerCase();
+      const isValidType =
+        accept.includes("*/*") ||
+        accept.includes(file.type) ||
+        accept.some(
+          (acceptedType) =>
+            acceptedType.startsWith(".") &&
+            acceptedType.toLowerCase() === fileExtension
+        );
+
       if (!isValidType) {
-        setError(`File type ${file.type} is not supported. Accepted types: ${accept.join(', ')}`);
+        setError(
+          `File type ${
+            file.type
+          } is not supported. Accepted types: ${accept.join(", ")}`
+        );
         continue;
       }
-      
+
       // Check file size
       const fileSizeMB = file.size / (1024 * 1024);
-      if (fileSizeMB > maxSize) {
-        setError(`File ${file.name} exceeds ${maxSize}MB limit`);
+      if (file.size > maxSizeBytes) {
+        setError(`File ${file.name} exceeds ${maxSizeMB}MB limit`);
         continue;
       }
-      
+
       validFiles.push(file);
     }
-    
+
     return validFiles;
   };
 
@@ -77,13 +89,13 @@ export function FileUploader({
         onFilesSelected(validFiles);
       }
     },
-    [files, multiple, onFilesSelected, maxSize, accept]
+    [files, multiple, onFilesSelected, maxSizeBytes, accept]
   );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     setError("");
-    
+
     const validFiles = validateFiles(e.target.files);
     if (validFiles.length > 0) {
       setFiles(multiple ? [...files, ...validFiles] : validFiles);
@@ -119,17 +131,22 @@ export function FileUploader({
           onChange={handleChange}
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
         />
-        
-        <Upload className={cn(
-          "mx-auto h-12 w-12 transition-colors",
-          dragActive ? "text-primary" : "text-gray-500"
-        )} />
-        
+
+        <Upload
+          className={cn(
+            "mx-auto h-12 w-12 transition-colors",
+            dragActive ? "text-primary" : "text-gray-500"
+          )}
+        />
+
         <p className="mt-4 text-sm font-medium text-gray-400">
           Drop files here or click to browse
         </p>
         <p className="mt-2 text-xs text-gray-500">
-          {accept.includes("application/pdf") || accept.includes(".pdf") ? "PDF" : "Files"} up to {maxSize}MB
+          {accept.includes("application/pdf") || accept.includes(".pdf")
+            ? "PDF"
+            : "Files"}{" "}
+          up to {maxSizeMB}MB
         </p>
       </div>
 
