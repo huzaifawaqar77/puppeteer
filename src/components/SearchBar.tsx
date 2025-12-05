@@ -13,6 +13,12 @@ interface SearchResult {
 const allTools: SearchResult[] = [
   {
     type: "tool",
+    name: "Analytics",
+    description: "View your PDF processing analytics",
+    href: "/analytics",
+  },
+  {
+    type: "tool",
     name: "Add Image",
     description: "Insert images into PDFs",
     href: "/tools/add-image",

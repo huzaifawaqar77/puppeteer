@@ -6,7 +6,12 @@ import { InputFile } from "node-appwrite/file";
 
 export async function POST(req: NextRequest) {
   try {
-    const { fileId, jobId, threshold = 10, whitePercent = 95 } = await req.json();
+    const {
+      fileId,
+      jobId,
+      threshold = 10,
+      whitePercent = 95,
+    } = await req.json();
 
     if (!fileId || !jobId) {
       return NextResponse.json(
@@ -40,16 +45,13 @@ export async function POST(req: NextRequest) {
       throw new Error("Stirling PDF URL not configured");
     }
 
-    const response = await fetch(
-      `${stirlingUrl}/api/v1/misc/remove-blanks`,
-      {
-        method: "POST",
-        headers: {
-          "X-API-Key": stirlingApiKey || "",
-        },
-        body: formData,
-      }
-    );
+    const response = await fetch(`${stirlingUrl}/api/v1/misc/remove-blanks`, {
+      method: "POST",
+      headers: {
+        "X-API-Key": stirlingApiKey || "",
+      },
+      body: formData,
+    });
 
     if (!response.ok) {
       const errorText = await response.text();

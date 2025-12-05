@@ -75,70 +75,77 @@ export default function HistoryPage() {
     <div className="container mx-auto max-w-6xl py-8 px-4">
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-white">Processing History</h1>
-          <p className="mt-2 text-gray-400">
+          <h1 className="text-3xl font-bold text-foreground">
+            Processing History
+          </h1>
+          <p className="mt-2 text-secondary">
             View your recent PDF processing jobs
           </p>
         </div>
 
-      {jobs.length === 0 ? (
-        <div className="bg-white/5 border border-white/10 rounded-xl p-12 text-center">
-          <FileText className="h-12 w-12 text-gray-500 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-white mb-2">
-            No processing history
-          </h3>
-          <p className="text-gray-400">
-            Your completed PDF operations will appear here
-          </p>
-        </div>
-      ) : (
-        <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-white/5">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  Operation
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  Started
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                  Completed
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/10">
-              {jobs.map((job) => (
-                <tr key={job.$id} className="hover:bg-white/5 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <FileText className="h-5 w-5 text-primary mr-3" />
-                      <span className="text-sm font-medium text-white">
-                        {job.operationType}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-2">
-                      {getStatusIcon(job.status)}
-                      <span className="text-sm text-gray-300">{job.status}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                    {formatDate(job.startedAt)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                    {job.completedAt ? formatDate(job.completedAt) : "-"}
-                  </td>
+        {jobs.length === 0 ? (
+          <div className="bg-card border border-border rounded-xl p-12 text-center">
+            <FileText className="h-12 w-12 text-secondary/50 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              No processing history
+            </h3>
+            <p className="text-secondary">
+              Your completed PDF operations will appear here
+            </p>
+          </div>
+        ) : (
+          <div className="bg-card border border-border rounded-xl overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-secondary/5">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                    Operation
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                    Started
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                    Completed
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              </thead>
+              <tbody className="divide-y divide-border">
+                {jobs.map((job) => (
+                  <tr
+                    key={job.$id}
+                    className="hover:bg-secondary/5 transition-colors"
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <FileText className="h-5 w-5 text-primary mr-3" />
+                        <span className="text-sm font-medium text-foreground">
+                          {job.operationType}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        {getStatusIcon(job.status)}
+                        <span className="text-sm text-foreground">
+                          {job.status}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary">
+                      {formatDate(job.startedAt)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary">
+                      {job.completedAt ? formatDate(job.completedAt) : "-"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
