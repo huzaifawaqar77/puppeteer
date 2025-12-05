@@ -1,12 +1,12 @@
-# Environment Variable Migration - README
+﻿# Environment Variable Migration - README
 
-## 🎉 Welcome!
+## ðŸŽ‰ Welcome!
 
 Your PDF Conversion application has been successfully migrated to use environment variables for all configuration. This README will get you up and running in 30 seconds.
 
 ---
 
-## ⚡ Quick Start (30 seconds)
+## âš¡ Quick Start (30 seconds)
 
 ```bash
 cd web
@@ -14,13 +14,13 @@ cp .env.example .env.local
 npm run dev
 ```
 
-That's it! 🚀
+That's it! ðŸš€
 
 Visit `http://localhost:3000` and everything just works.
 
 ---
 
-## 📚 Documentation Structure
+## ðŸ“š Documentation Structure
 
 ### New to this project? Start here:
 
@@ -38,29 +38,29 @@ Visit `http://localhost:3000` and everything just works.
 
 ### Full navigation:
 
-→ See `../ENVIRONMENT_MIGRATION_INDEX.md`
+â†’ See `../ENVIRONMENT_MIGRATION_INDEX.md`
 
 ---
 
-## 🎯 What's New
+## ðŸŽ¯ What's New
 
 ### The Change
 
 All hardcoded environment-specific URLs have been replaced with environment variables.
 
-**Before**: `https://omnipdf.com/api/premium` (hardcoded)  
+**Before**: `https://omnipdf.uiflexer.com/api/premium` (hardcoded)  
 **After**: Dynamically resolved based on environment
 
 ### The Benefit
 
-- ✅ Same code works for local, staging, and production
-- ✅ No hardcoded URLs or API keys
-- ✅ Secure configuration management
-- ✅ Easy to deploy anywhere
+- âœ… Same code works for local, staging, and production
+- âœ… No hardcoded URLs or API keys
+- âœ… Secure configuration management
+- âœ… Easy to deploy anywhere
 
 ---
 
-## 🔧 Environment Variables
+## ðŸ”§ Environment Variables
 
 ### You need these 6 for the frontend:
 
@@ -84,7 +84,7 @@ STIRLING_PDF_API_KEY=75e0b668-27be-423c-8016-5b1ccd1c19d9
 
 ---
 
-## 📁 Key Files
+## ðŸ“ Key Files
 
 | File                         | Purpose                                               |
 | ---------------------------- | ----------------------------------------------------- |
@@ -96,11 +96,11 @@ STIRLING_PDF_API_KEY=75e0b668-27be-423c-8016-5b1ccd1c19d9
 
 ---
 
-## 🚀 Deployment Quick Reference
+## ðŸš€ Deployment Quick Reference
 
 ### Vercel
 
-1. Go to Project Settings → Environment Variables
+1. Go to Project Settings â†’ Environment Variables
 2. Add each variable from `.env.example`
 3. Deploy normally
 
@@ -120,7 +120,7 @@ Set environment variables in your shell or systemd service file
 
 ---
 
-## ✅ Verify It's Working
+## âœ… Verify It's Working
 
 1. **Dev server running?**
 
@@ -138,56 +138,56 @@ Set environment variables in your shell or systemd service file
 
 3. **Can upload files?**
    ```
-   Upload any PDF → Process it → Should work!
+   Upload any PDF â†’ Process it â†’ Should work!
    ```
 
-**Having issues?** See `ENV_QUICK_REFERENCE.md` → Troubleshooting
+**Having issues?** See `ENV_QUICK_REFERENCE.md` â†’ Troubleshooting
 
 ---
 
-## 🔒 Security Notes
+## ðŸ”’ Security Notes
 
-### ✅ Do This
+### âœ… Do This
 
-- ✅ Keep `.env.local` on your machine only
-- ✅ Use environment variables for all configuration
-- ✅ Rotate API keys periodically
-- ✅ Never commit `.env.local` to git
+- âœ… Keep `.env.local` on your machine only
+- âœ… Use environment variables for all configuration
+- âœ… Rotate API keys periodically
+- âœ… Never commit `.env.local` to git
 
-### ❌ Don't Do This
+### âŒ Don't Do This
 
-- ❌ Don't hardcode URLs in your code
-- ❌ Don't commit `.env.local` to version control
-- ❌ Don't share API keys via email
-- ❌ Don't expose private variables to the browser
+- âŒ Don't hardcode URLs in your code
+- âŒ Don't commit `.env.local` to version control
+- âŒ Don't share API keys via email
+- âŒ Don't expose private variables to the browser
 
-**Full security guide**: See `ENV_CONFIGURATION.md` → Security Considerations
+**Full security guide**: See `ENV_CONFIGURATION.md` â†’ Security Considerations
 
 ---
 
-## 🎓 Learning Paths
+## ðŸŽ“ Learning Paths
 
 ### I'm a Developer
 
-→ Read `ENV_QUICK_REFERENCE.md` (5 min)  
-→ Read `ENV_CONFIGURATION.md` (15 min)  
-→ You're ready to code!
+â†’ Read `ENV_QUICK_REFERENCE.md` (5 min)  
+â†’ Read `ENV_CONFIGURATION.md` (15 min)  
+â†’ You're ready to code!
 
 ### I'm Deploying
 
-→ Read `ENV_MIGRATION_FINAL_REPORT.md` (5 min)  
-→ Read `ENVIRONMENT_SETUP_GUIDE.md` (15 min)  
-→ Follow platform-specific instructions
+â†’ Read `ENV_MIGRATION_FINAL_REPORT.md` (5 min)  
+â†’ Read `ENVIRONMENT_SETUP_GUIDE.md` (15 min)  
+â†’ Follow platform-specific instructions
 
 ### I'm Reviewing This Change
 
-→ Read `ENV_MIGRATION_AUDIT.md` (10 min)  
-→ Check `ENVIRONMENT_MIGRATION_CHECKLIST.md` (5 min)  
-→ You're ready to approve!
+â†’ Read `ENV_MIGRATION_AUDIT.md` (10 min)  
+â†’ Check `ENVIRONMENT_MIGRATION_CHECKLIST.md` (5 min)  
+â†’ You're ready to approve!
 
 ---
 
-## 📊 What Was Changed
+## ðŸ“Š What Was Changed
 
 ### Code Changes
 
@@ -210,7 +210,7 @@ Set environment variables in your shell or systemd service file
 
 ---
 
-## 🚨 Troubleshooting
+## ðŸš¨ Troubleshooting
 
 ### Problem: Dev server won't start
 
@@ -244,11 +244,11 @@ Verify: Stirling service is running at the configured URL
 
 ---
 
-## 📞 Quick Help
+## ðŸ“ž Quick Help
 
 | Question                       | Answer                                                | Reference                            |
 | ------------------------------ | ----------------------------------------------------- | ------------------------------------ |
-| How do I setup locally?        | Copy `.env.example` → `.env.local`, run `npm run dev` | `ENV_QUICK_REFERENCE.md`             |
+| How do I setup locally?        | Copy `.env.example` â†’ `.env.local`, run `npm run dev` | `ENV_QUICK_REFERENCE.md`             |
 | What are all the variables?    | See the table in `ENV_CONFIGURATION.md`               | `ENV_CONFIGURATION.md`               |
 | How do I deploy to production? | Follow `ENVIRONMENT_SETUP_GUIDE.md` for your platform | `ENVIRONMENT_SETUP_GUIDE.md`         |
 | What changed in the code?      | See `ENV_MIGRATION_AUDIT.md`                          | `ENV_MIGRATION_AUDIT.md`             |
@@ -256,16 +256,16 @@ Verify: Stirling service is running at the configured URL
 
 ---
 
-## ✨ Key Improvements
+## âœ¨ Key Improvements
 
-### Before ❌
+### Before âŒ
 
 - Hardcoded URLs in multiple places
 - Security risk with exposed values
 - Different setup needed per environment
 - Manual changes for deployment
 
-### After ✅
+### After âœ…
 
 - All configuration externalized
 - Secure multi-environment support
@@ -274,7 +274,7 @@ Verify: Stirling service is running at the configured URL
 
 ---
 
-## 🎯 Next Steps
+## ðŸŽ¯ Next Steps
 
 ### Now (Today)
 
@@ -299,74 +299,74 @@ Verify: Stirling service is running at the configured URL
 
 ---
 
-## 📖 Documentation Map
+## ðŸ“– Documentation Map
 
 ```
 You are here: README.md (this file)
-    ↓
-├─ Quick start needed?
-│  └─ → ENV_QUICK_REFERENCE.md (5 min)
-│
-├─ Full understanding needed?
-│  └─ → ENV_CONFIGURATION.md (20 min)
-│
-├─ Deploying to production?
-│  └─ → ENVIRONMENT_SETUP_GUIDE.md (15 min)
-│
-├─ Need to understand changes?
-│  └─ → ENV_MIGRATION_AUDIT.md (10 min)
-│
-├─ Need visual overview?
-│  └─ → ENVIRONMENT_MIGRATION_SUMMARY.md (3 min)
-│
-└─ Need navigation help?
-   └─ → ENVIRONMENT_MIGRATION_INDEX.md (5 min)
+    â†“
+â”œâ”€ Quick start needed?
+â”‚  â””â”€ â†’ ENV_QUICK_REFERENCE.md (5 min)
+â”‚
+â”œâ”€ Full understanding needed?
+â”‚  â””â”€ â†’ ENV_CONFIGURATION.md (20 min)
+â”‚
+â”œâ”€ Deploying to production?
+â”‚  â””â”€ â†’ ENVIRONMENT_SETUP_GUIDE.md (15 min)
+â”‚
+â”œâ”€ Need to understand changes?
+â”‚  â””â”€ â†’ ENV_MIGRATION_AUDIT.md (10 min)
+â”‚
+â”œâ”€ Need visual overview?
+â”‚  â””â”€ â†’ ENVIRONMENT_MIGRATION_SUMMARY.md (3 min)
+â”‚
+â””â”€ Need navigation help?
+   â””â”€ â†’ ENVIRONMENT_MIGRATION_INDEX.md (5 min)
 ```
 
 ---
 
-## 🤝 Questions?
+## ðŸ¤ Questions?
 
 ### For setup questions
 
-→ See `ENV_QUICK_REFERENCE.md`
+â†’ See `ENV_QUICK_REFERENCE.md`
 
 ### For variable questions
 
-→ See `ENV_CONFIGURATION.md`
+â†’ See `ENV_CONFIGURATION.md`
 
 ### For deployment questions
 
-→ See `ENVIRONMENT_SETUP_GUIDE.md`
+â†’ See `ENVIRONMENT_SETUP_GUIDE.md`
 
 ### For technical questions
 
-→ See `ENV_MIGRATION_AUDIT.md`
+â†’ See `ENV_MIGRATION_AUDIT.md`
 
 ---
 
-## 📋 Checklist to Get Started
+## ðŸ“‹ Checklist to Get Started
 
-- [ ] Read this README (2 min) ← You are here!
+- [ ] Read this README (2 min) â† You are here!
 - [ ] Copy `.env.example` to `.env.local` (1 min)
 - [ ] Run `npm run dev` (1 min)
 - [ ] Verify `http://localhost:3000` loads (1 min)
 - [ ] Read `ENV_QUICK_REFERENCE.md` (5 min)
-- [ ] You're done! Ready to code! 🎉
+- [ ] You're done! Ready to code! ðŸŽ‰
 
 **Total time: ~10 minutes**
 
 ---
 
-## 🎉 Summary
+## ðŸŽ‰ Summary
 
 Your application is now configured for multi-environment deployment with:
 
-✅ Environment variables for all configuration  
-✅ Secure credential management  
-✅ Comprehensive documentation  
-✅ Quick setup for new developers  
-✅ Production-ready configuration
+âœ… Environment variables for all configuration  
+âœ… Secure credential management  
+âœ… Comprehensive documentation  
+âœ… Quick setup for new developers  
+âœ… Production-ready configuration
 
 **Ready to get started?** Run:
 
@@ -374,12 +374,13 @@ Your application is now configured for multi-environment deployment with:
 cd web && cp .env.example .env.local && npm run dev
 ```
 
-Then visit `http://localhost:3000` 🚀
+Then visit `http://localhost:3000` ðŸš€
 
 ---
 
 **Version**: 1.0  
-**Status**: ✅ Ready for Production  
+**Status**: âœ… Ready for Production  
 **Last Updated**: 2024
 
 **Need help?** See `ENVIRONMENT_MIGRATION_INDEX.md` for complete navigation.
+

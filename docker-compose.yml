@@ -1,0 +1,89 @@
+version: "3.8"
+
+services:
+  omnipdf:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: omnipdf-app
+    ports:
+      - "3000:3000"
+    environment:
+      # Next.js Configuration
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+
+      # Appwrite Configuration
+      APPWRITE_ENDPOINT: ${APPWRITE_ENDPOINT:-http://appwrite:80/v1}
+      APPWRITE_API_KEY: ${APPWRITE_API_KEY}
+      APPWRITE_PROJECT_ID: ${APPWRITE_PROJECT_ID}
+      APPWRITE_DATABASE_ID: ${APPWRITE_DATABASE_ID}
+      APPWRITE_BLOG_COLLECTION_ID: ${APPWRITE_BLOG_COLLECTION_ID}
+
+      # Email Configuration (Nodemailer)
+      EMAIL_HOST: ${EMAIL_HOST}
+      EMAIL_PORT: ${EMAIL_PORT:-465}
+      EMAIL_USER: ${EMAIL_USER}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
+      EMAIL_FROM: ${EMAIL_FROM}
+      EMAIL_TO: ${EMAIL_TO}
+
+      # App Configuration
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-https://omnipdf.uiflexer.com}
+
+    restart: unless-stopped
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:3000",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 1024M
+        reservations:
+          cpus: "1"
+          memory: 512M
+
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    # Labels for Coolify (optional)
+    labels:
+      - "coolify.managed=true"
+
+  # Optional: Appwrite service (if self-hosted)
+  # appwrite:
+  #   image: appwrite/appwrite:latest
+  #   container_name: appwrite
+  #   ports:
+  #     - "80:80"
+  #   environment:
+  #     _APP_ENV: production
+  #     _APP_OPENSSL_KEY_V1: ${APPWRITE_KEY}
+  #   restart: unless-stopped
+  #   volumes:
+  #     - appwrite_data:/storage/uploads
+  #     - appwrite_cache:/storage/cache
+  #     - appwrite_config:/storage/config
+# volumes:
+#   appwrite_data:
+#   appwrite_cache:
+#   appwrite_config:
