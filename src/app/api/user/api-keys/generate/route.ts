@@ -67,7 +67,10 @@ export async function POST(request: NextRequest) {
     if (!process.env.APPWRITE_API_KEY) {
       console.error("APPWRITE_API_KEY environment variable not set");
       return NextResponse.json(
-        { error: "Server configuration error", details: "Missing APPWRITE_API_KEY" },
+        {
+          error: "Server configuration error",
+          details: "Missing APPWRITE_API_KEY",
+        },
         { status: 500 }
       );
     }
@@ -155,8 +158,8 @@ export async function POST(request: NextRequest) {
         requestCount: 0,
         dailyLimit: body.dailyLimit || null,
         monthlyLimit: null,
-        allowedEndpoints: [],
-        allowedOrigins: [],
+        allowedEndpoints: JSON.stringify([]),
+        allowedOrigins: JSON.stringify([]),
         createdAt: now,
         updatedAt: now,
         createdFromIP: getClientIp(request),

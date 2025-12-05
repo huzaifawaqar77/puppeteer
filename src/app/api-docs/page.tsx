@@ -205,7 +205,7 @@ export default function ApiDocsPage() {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${user?.$id}`,
+          Authorization: `Bearer ${user?.$id}`,
         },
       });
 
@@ -237,7 +237,7 @@ export default function ApiDocsPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${user?.$id}`,
+          Authorization: `Bearer ${user?.$id}`,
         },
         body: JSON.stringify({
           name: "Generated Key",
@@ -271,7 +271,7 @@ export default function ApiDocsPage() {
       const response = await fetch(`/api/user/api-keys/${keyId}`, {
         method: "DELETE",
         headers: {
-          "Authorization": `Bearer ${user?.$id}`,
+          Authorization: `Bearer ${user?.$id}`,
         },
       });
 

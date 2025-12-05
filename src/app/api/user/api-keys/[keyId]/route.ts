@@ -39,7 +39,10 @@ export async function DELETE(
     if (!process.env.APPWRITE_API_KEY) {
       console.error("APPWRITE_API_KEY environment variable not set");
       return NextResponse.json(
-        { error: "Server configuration error", details: "Missing APPWRITE_API_KEY" },
+        {
+          error: "Server configuration error",
+          details: "Missing APPWRITE_API_KEY",
+        },
         { status: 500 }
       );
     }
