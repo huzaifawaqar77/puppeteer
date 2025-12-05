@@ -8,9 +8,11 @@ import { appwriteConfig } from "@/lib/config";
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { keyId: string } }
+  { params }: { params: Promise<{ keyId: string }> }
 ) {
   try {
+    // Await params as they are now a Promise in Next.js 15+
+    const { keyId } = await params;
     // 1. Authenticate user from Authorization header
     const authHeader = request.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
@@ -28,8 +30,6 @@ export async function DELETE(
         { status: 401 }
       );
     }
-
-    const { keyId } = params;
 
     if (!keyId || keyId.length === 0) {
       return NextResponse.json({ error: "Invalid key ID" }, { status: 400 });

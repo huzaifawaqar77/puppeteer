@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { validateApiKey } from "@/lib/api-keys";
+import {
+  hashApiKey,
+  isValidApiKeyFormat,
+  validateApiKey,
+} from "@/lib/api-keys";
 
 /**
  * Middleware to protect premium endpoints
@@ -132,7 +136,7 @@ export async function requirePremiumApiKey(
     // Check if endpoint is allowed
     if (validation.allowedEndpoints && validation.allowedEndpoints.length > 0) {
       const pathname = new URL(request.url).pathname;
-      const isAllowed = validation.allowedEndpoints.some((endpoint) => {
+      const isAllowed = validation.allowedEndpoints.some((endpoint: string) => {
         // Support wildcards like /api/premium/* or exact paths
         if (endpoint.includes("*")) {
           const pattern = endpoint.replace(/\*/g, ".*");

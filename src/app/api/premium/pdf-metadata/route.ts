@@ -4,6 +4,7 @@ import {
   appendFormField,
   createErrorResponse,
   createPdfResponse,
+  createJsonResponse,
 } from "@/lib/gotenberg";
 import { gotenbergConfig } from "@/lib/config";
 import { requirePremiumApiKey } from "@/middleware/require-premium-api-key";

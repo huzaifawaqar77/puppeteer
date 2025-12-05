@@ -188,6 +188,7 @@ export default function ApiDocsPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTier, setSelectedTier] = useState<"free" | "premium">("premium");
   const baseUrl = getBaseUrl();
 
   // Fetch existing keys on component mount
@@ -240,8 +241,8 @@ export default function ApiDocsPage() {
           Authorization: `Bearer ${user?.$id}`,
         },
         body: JSON.stringify({
-          name: "Generated Key",
-          tier: "free",
+          name: `Generated ${selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)} Key`,
+          tier: selectedTier,
         }),
       });
 
@@ -511,18 +512,42 @@ export default function ApiDocsPage() {
                 </div>
               </div>
             ) : (
-              <button
-                onClick={generateApiKey}
-                className="px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
-                disabled={loading}
-              >
-                {loading ? (
-                  <Loader className="h-4 w-4 animate-spin" />
-                ) : (
-                  <RefreshCw className="h-4 w-4" />
-                )}
-                Generate API Key
-              </button>
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setSelectedTier("free")}
+                    className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors border ${
+                      selectedTier === "free"
+                        ? "bg-blue-500 text-white border-blue-500"
+                        : "bg-background border-border hover:border-primary"
+                    }`}
+                  >
+                    Free Tier
+                  </button>
+                  <button
+                    onClick={() => setSelectedTier("premium")}
+                    className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors border ${
+                      selectedTier === "premium"
+                        ? "bg-amber-500 text-white border-amber-500"
+                        : "bg-background border-border hover:border-primary"
+                    }`}
+                  >
+                    Premium Tier
+                  </button>
+                </div>
+                <button
+                  onClick={generateApiKey}
+                  className="w-full px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <Loader className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4" />
+                  )}
+                  Generate API Key
+                </button>
+              </div>
             )}
 
             {keysList.length > 1 && (

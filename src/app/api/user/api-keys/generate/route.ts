@@ -121,6 +121,15 @@ export async function POST(request: NextRequest) {
     const keyHash = hashApiKey(plainKey);
     const keyPrefix = getKeyPrefix(plainKey);
 
+    console.log("🔑 Generated Key Details:", {
+      key: plainKey,
+      keyLength: plainKey.length,
+      hash: keyHash,
+      hashLength: keyHash.length,
+      hashType: typeof keyHash,
+      prefix: keyPrefix,
+    });
+
     // Validate format
     if (!isValidApiKeyFormat(plainKey)) {
       console.error("Failed to generate valid API key format");
@@ -167,6 +176,8 @@ export async function POST(request: NextRequest) {
       }
     );
 
+    console.log("✅ Document created successfully:", response.$id);
+
     // 8. Return response (full key shown ONLY once!)
     return NextResponse.json(
       {
@@ -184,6 +195,11 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     console.error("API Key Generation Error:", error);
+    if (error instanceof Error) {
+      console.error("Error name:", error.name);
+      console.error("Error message:", error.message);
+      console.error("Stack:", error.stack);
+    }
     return NextResponse.json(
       {
         error: "Failed to generate API key",

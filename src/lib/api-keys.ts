@@ -1,5 +1,8 @@
 import crypto from "crypto";
 
+// Re-export appwrite config for server-side functions
+export { appwriteConfig } from "@/lib/config";
+
 /**
  * Generate a new random API key
  * Format: pk_[32 random uppercase alphanumeric chars]
@@ -176,4 +179,109 @@ export function validateKeyMetadata(data: {
   }
 
   return null;
+}
+
+/**
+ * Get client IP from request
+ */
+export function getClientIp(
+  request: Request | { headers: Map<string, string> }
+): string {
+  // Try to get from common headers
+  let headers: any;
+
+  if (
+    request instanceof Request ||
+    (request && typeof request === "object" && "headers" in request)
+  ) {
+    headers = request.headers;
+  } else {
+    return "unknown";
+  }
+
+  const forwarded = headers.get?.("x-forwarded-for");
+  if (forwarded) {
+    return forwarded.split(",")[0].trim();
+  }
+
+  const realIp = headers.get?.("x-real-ip");
+  if (realIp) {
+    return realIp;
+  }
+
+  return "unknown";
+}
+
+/**
+ * Validate API key against database
+ * Returns key metadata if valid, null otherwise
+ */
+export async function validateApiKey(plainKey: string): Promise<any> {
+  try {
+    // Hash the provided key
+    const keyHash = hashApiKey(plainKey);
+
+    // Import Appwrite client here to avoid circular dependency
+    const { Client, Databases } = await import("node-appwrite");
+    const { appwriteConfig } = await import("@/lib/config");
+
+    // Create admin client
+    const client = new Client()
+      .setEndpoint(
+        process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT ||
+          "https://appwrite.uiflexer.com/v1"
+      )
+      .setProject(
+        process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || "68c77b650020a2e5fa47"
+      )
+      .setKey(process.env.APPWRITE_API_KEY || "");
+
+    if (!process.env.APPWRITE_API_KEY) {
+      console.error("APPWRITE_API_KEY not configured");
+      return null;
+    }
+
+    const databases = new Databases(client);
+
+    // Query for the key hash
+    const { Query } = await import("node-appwrite");
+    const response = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.collections.apiKeys,
+      [Query.equal("keyHash", keyHash)]
+    );
+
+    if (!response.documents || response.documents.length === 0) {
+      return null;
+    }
+
+    const keyDoc = response.documents[0];
+
+    // Parse allowedEndpoints if it's a JSON string
+    let allowedEndpoints: string[] = [];
+    if (keyDoc.allowedEndpoints) {
+      try {
+        allowedEndpoints = JSON.parse(keyDoc.allowedEndpoints);
+      } catch (e) {
+        allowedEndpoints = [];
+      }
+    }
+
+    return {
+      valid: true,
+      keyId: keyDoc.$id,
+      userId: keyDoc.userId,
+      tier: keyDoc.tier,
+      status: keyDoc.status,
+      expiresAt: keyDoc.expiresAt,
+      dailyLimit: keyDoc.dailyLimit,
+      monthlyLimit: keyDoc.monthlyLimit,
+      allowedEndpoints,
+      requestCountToday: keyDoc.requestCountToday || 0,
+      message: null,
+    };
+  } catch (error) {
+    console.error("Error validating API key:", error);
+    return null;
+  }
 }

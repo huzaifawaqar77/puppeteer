@@ -103,11 +103,8 @@ async function setupApiKeysCollection() {
           "apiKeys",
           "keyHash",
           150,
-          true,
-          undefined,
-          undefined,
           true
-        ), // UNIQUE - encrypted string needs min 150
+        ), // UNIQUE will be added via index
       () =>
         databases.createStringAttribute(
           DATABASE_ID,
