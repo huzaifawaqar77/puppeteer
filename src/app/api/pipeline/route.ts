@@ -9,6 +9,7 @@ export async function POST(request: NextRequest) {
     const files = formData.getAll("files") as File[];
     const jsonString = formData.get("json") as string;
     const userId = formData.get("userId") as string;
+    const pipelineName = formData.get("pipelineName") as string;
 
     if (!files || files.length === 0) {
       return NextResponse.json({ error: "Files are required" }, { status: 400 });
@@ -18,6 +19,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Pipeline configuration (JSON) is required" }, { status: 400 });
     }
 
+    // Parse the pipeline steps from frontend
+    let pipelineSteps;
+    try {
+      pipelineSteps = JSON.parse(jsonString);
+    } catch (e) {
+      return NextResponse.json({ error: "Invalid JSON format in pipeline configuration" }, { status: 400 });
+    }
+
+    if (!Array.isArray(pipelineSteps) || pipelineSteps.length === 0) {
+      return NextResponse.json({ error: "Pipeline must contain at least one operation" }, { status: 400 });
+    }
+
     // Create a job record
     const job = await databases.createDocument(
       appwriteConfig.databaseId,
@@ -25,7 +38,7 @@ export async function POST(request: NextRequest) {
       ID.unique(),
       {
         userId: userId || "anonymous",
-        operationType: "MERGE",
+        operationType: "PIPELINE",
         status: "PROCESSING",
         startedAt: new Date().toISOString(),
         inputFileIds: "[]",
@@ -53,12 +66,25 @@ export async function POST(request: NextRequest) {
       }
     );
 
+    // ✅ CONSTRUCT CORRECT JSON FORMAT FOR STIRLING
+    // Stirling expects: { name, pipeline: [...], outputDir, outputFileName }
+    const stirlingPipelineConfig = {
+      name: pipelineName || "Custom Pipeline",
+      pipeline: pipelineSteps,  // Array of { operation, parameters }
+      outputDir: "{outputFolder}",
+      outputFileName: "{filename}-processed"
+    };
+
     // Prepare FormData for Stirling PDF
     const stirlingFormData = new FormData();
     files.forEach((file) => {
       stirlingFormData.append("fileInput", file);
     });
-    stirlingFormData.append("json", jsonString);
+    // ✅ Send the correctly formatted JSON
+    stirlingFormData.append("json", JSON.stringify(stirlingPipelineConfig));
+
+    console.log("📡 Calling Stirling Pipeline with config:", stirlingPipelineConfig);
+    console.log("   Files:", files.length, "Operations:", pipelineSteps.length);
 
     // Call Stirling PDF API
     const stirlingResponse = await fetch(
@@ -74,6 +100,7 @@ export async function POST(request: NextRequest) {
 
     if (!stirlingResponse.ok) {
       const errorText = await stirlingResponse.text();
+      console.error("❌ Stirling Pipeline Error:", stirlingResponse.status, errorText);
       throw new Error(`Stirling PDF API failed: ${stirlingResponse.status} - ${errorText}`);
     }
 
@@ -114,13 +141,15 @@ export async function POST(request: NextRequest) {
       }
     );
 
+    console.log("✅ Pipeline completed successfully");
+
     return NextResponse.json({
       url: downloadUrl.toString(),
       filename: `pipeline_result.${extension}`,
     });
 
   } catch (error: any) {
-    console.error("Pipeline error:", error);
+    console.error("❌ Pipeline error:", error);
     return NextResponse.json(
       { error: error.message || "Failed to execute pipeline" },
       { status: 500 }

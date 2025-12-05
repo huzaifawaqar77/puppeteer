@@ -18,40 +18,41 @@ import {
 } from "lucide-react";
 
 // Define available operations and their default parameters
+// ⚠️ ALL endpoints must match Stirling API format: /api/v1/{category}/{operation}
 const AVAILABLE_OPERATIONS = [
   {
     id: "merge",
     name: "Merge PDFs",
-    endpoint: "merge-pdfs",
+    endpoint: "/api/v1/general/merge-pdfs",
     description: "Combine multiple PDFs into one",
-    params: [],
+    params: [
+      {
+        name: "sortType",
+        type: "select",
+        options: ["orderProvided"],
+        default: "orderProvided",
+        label: "Sort Type",
+      },
+    ],
   },
   {
     id: "split",
     name: "Split PDF",
-    endpoint: "split-pdf",
+    endpoint: "/api/v1/general/split-pages",
     description: "Split PDF into separate pages",
     params: [
       {
-        name: "splitType",
-        type: "select",
-        options: ["all", "pages"],
-        default: "all",
-        label: "Split Type",
-      },
-      {
-        name: "pages",
+        name: "pageNumbers",
         type: "text",
         default: "",
-        label: "Pages (e.g. 1,3-5)",
-        showIf: { param: "splitType", value: "pages" },
+        label: "Page Numbers (e.g., 1,3-5, or leave empty for all)",
       },
     ],
   },
   {
     id: "rotate",
     name: "Rotate PDF",
-    endpoint: "rotate-pdf",
+    endpoint: "/api/v1/general/rotate-pages",
     description: "Rotate pages in the PDF",
     params: [
       {
@@ -59,39 +60,57 @@ const AVAILABLE_OPERATIONS = [
         type: "select",
         options: ["90", "180", "270"],
         default: "90",
-        label: "Rotation Angle",
+        label: "Rotation Angle (degrees)",
       },
     ],
   },
   {
     id: "compress",
     name: "Compress PDF",
-    endpoint: "compress-pdf",
+    endpoint: "/api/v1/misc/compress-pdf",
     description: "Reduce PDF file size",
     params: [
       {
-        name: "compressionLevel",
+        name: "optimizeLevel",
         type: "select",
-        options: ["1", "2", "3"],
-        default: "2",
-        label: "Compression Level (1=Low, 3=High)",
+        options: ["1", "2", "3", "4", "5"],
+        default: "3",
+        label: "Optimization Level (1=Low, 5=High)",
       },
     ],
   },
   {
     id: "protect",
     name: "Protect PDF",
-    endpoint: "protect-pdf",
+    endpoint: "/api/v1/security/add-password",
     description: "Add password protection",
     params: [
-      { name: "password", type: "password", default: "", label: "Password" },
+      { 
+        name: "userPassword", 
+        type: "password", 
+        default: "", 
+        label: "User Password (for opening)" 
+      },
+      { 
+        name: "ownerPassword", 
+        type: "password", 
+        default: "", 
+        label: "Owner Password (for permissions)" 
+      },
+      {
+        name: "permissionSet",
+        type: "select",
+        options: ["128", "256"],
+        default: "256",
+        label: "Encryption Strength",
+      },
     ],
   },
   {
     id: "watermark",
     name: "Add Watermark",
-    endpoint: "add-watermark",
-    description: "Add text watermark",
+    endpoint: "/api/v1/misc/add-watermark",
+    description: "Add text watermark to PDF",
     params: [
       {
         name: "text",
@@ -99,48 +118,44 @@ const AVAILABLE_OPERATIONS = [
         default: "CONFIDENTIAL",
         label: "Watermark Text",
       },
-      { name: "rotation", type: "number", default: "45", label: "Rotation" },
+      { 
+        name: "rotation", 
+        type: "number", 
+        default: "45", 
+        label: "Rotation (degrees)" 
+      },
       {
         name: "opacity",
         type: "number",
         default: "0.5",
         label: "Opacity (0-1)",
       },
-    ],
-  },
-  {
-    id: "auto-rename",
-    name: "Auto Rename",
-    endpoint: "auto-rename",
-    description: "Rename based on content",
-    params: [
       {
-        name: "useFirstTextAsFallback",
-        type: "boolean",
-        default: false,
-        label: "Use First Text as Fallback",
+        name: "fontSize",
+        type: "number",
+        default: "30",
+        label: "Font Size",
       },
     ],
   },
   {
     id: "remove-blanks",
-    name: "Remove Blanks",
-    endpoint: "remove-blanks",
-    description: "Remove blank pages",
+    name: "Remove Blank Pages",
+    endpoint: "/api/v1/misc/detect-blank-pages",
+    description: "Remove blank/near-blank pages",
     params: [
-      { name: "threshold", type: "number", default: "10", label: "Threshold" },
-      {
-        name: "whitePercent",
-        type: "number",
-        default: "99.0",
-        label: "White Percentage",
+      { 
+        name: "threshold", 
+        type: "number", 
+        default: "10", 
+        label: "Blank Threshold (%)" 
       },
     ],
   },
   {
     id: "pdf-to-pdfa",
     name: "PDF to PDF/A",
-    endpoint: "pdf-to-pdfa",
+    endpoint: "/api/v1/convert/pdf-to-pdfa",
     description: "Convert to archival format",
     params: [
       {
@@ -151,6 +166,13 @@ const AVAILABLE_OPERATIONS = [
         label: "PDF/A Standard",
       },
     ],
+  },
+  {
+    id: "flatten",
+    name: "Flatten PDF",
+    endpoint: "/api/v1/misc/flatten",
+    description: "Flatten form fields into static content",
+    params: [],
   },
 ];
 
@@ -249,21 +271,30 @@ export default function PipelineBuilderPage() {
     setResult(null);
 
     try {
-      // Construct the JSON payload for Stirling PDF
-      const pipelineJson = steps.map((step) => {
+      // ✅ Construct JSON payload in the format Stirling expects
+      // Just send the pipeline steps (operations array)
+      const pipelineSteps = steps.map((step) => {
         const operation = AVAILABLE_OPERATIONS.find(
           (op) => op.id === step.operationId
         );
         return {
-          operation: operation?.endpoint,
+          operation: operation?.endpoint,  // Full path like /api/v1/misc/compress-pdf
           parameters: step.params,
         };
       });
 
       const formData = new FormData();
       files.forEach((file) => formData.append("files", file));
-      formData.append("json", JSON.stringify(pipelineJson));
+      // ✅ Send the steps as JSON string (backend will wrap with name, outputDir, etc)
+      formData.append("json", JSON.stringify(pipelineSteps));
+      formData.append("pipelineName", pipelineName);
       if (user) formData.append("userId", user.$id);
+
+      console.log("🚀 Executing pipeline:", {
+        name: pipelineName,
+        operations: pipelineSteps.length,
+        files: files.length,
+      });
 
       const response = await fetch("/api/pipeline", {
         method: "POST",
@@ -454,9 +485,9 @@ export default function PipelineBuilderPage() {
                         opDetails &&
                         opDetails.params.length > 0 && (
                           <div className="p-4 border-t border-border/50 bg-background/50 rounded-b-lg space-y-4">
-                            {opDetails.params.map((param) => {
+                            {opDetails.params.map((param: any) => {
                               // Check visibility condition
-                              if ("showIf" in param && param.showIf) {
+                              if (param.showIf) {
                                 if (
                                   step.params[param.showIf.param] !==
                                   param.showIf.value
