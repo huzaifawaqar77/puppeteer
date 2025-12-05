@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { databases } from "@/lib/appwrite";
+import { Client, Databases } from "appwrite";
 import { appwriteConfig } from "@/lib/config";
 import { Query } from "appwrite";
 import {
@@ -68,6 +68,14 @@ export async function POST(request: NextRequest) {
       userTier === "premium"
         ? parseInt(process.env.PREMIUM_TIER_KEY_LIMIT || "5")
         : parseInt(process.env.FREE_TIER_KEY_LIMIT || "1");
+
+    // Create admin client for server-side access
+    const adminClient = new Client()
+      .setEndpoint(appwriteConfig.endpoint)
+      .setProject(appwriteConfig.projectId)
+      .setKey(process.env.APPWRITE_API_KEY || "");
+
+    const databases = new Databases(adminClient);
 
     const existingKeys = await databases.listDocuments(
       appwriteConfig.databaseId,

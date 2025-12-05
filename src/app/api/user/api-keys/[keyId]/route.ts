@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { databases } from "@/lib/appwrite";
+import { Client, Databases } from "appwrite";
 import { appwriteConfig } from "@/lib/config";
 
 /**
@@ -34,6 +34,14 @@ export async function DELETE(
     if (!keyId || keyId.length === 0) {
       return NextResponse.json({ error: "Invalid key ID" }, { status: 400 });
     }
+
+    // Create admin client for server-side access
+    const adminClient = new Client()
+      .setEndpoint(appwriteConfig.endpoint)
+      .setProject(appwriteConfig.projectId)
+      .setKey(process.env.APPWRITE_API_KEY || "");
+
+    const databases = new Databases(adminClient);
 
     // 2. Verify user owns this key
     const key = await databases.getDocument(

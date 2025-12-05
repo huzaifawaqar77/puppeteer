@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { databases } from "@/lib/appwrite";
+import { Client, Databases } from "appwrite";
 import { appwriteConfig } from "@/lib/config";
 import { Query } from "appwrite";
 
@@ -27,8 +27,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 2. Get Appwrite client
-    // Using pre-configured client from @/lib/appwrite
+    // 2. Create an admin Appwrite client for server-side access
+    const adminClient = new Client()
+      .setEndpoint(appwriteConfig.endpoint)
+      .setProject(appwriteConfig.projectId)
+      .setKey(process.env.APPWRITE_API_KEY || "");
+
+    const databases = new Databases(adminClient);
 
     // 3. Get all keys for this user, ordered by newest first
     const response = await databases.listDocuments(
