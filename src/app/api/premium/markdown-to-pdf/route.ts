@@ -6,6 +6,7 @@ import {
   createPdfResponse,
 } from "@/lib/gotenberg";
 import { gotenbergConfig } from "@/lib/config";
+import { requirePremiumApiKey } from "@/middleware/require-premium-api-key";
 
 const client = new GotenbergClient(gotenbergConfig);
 

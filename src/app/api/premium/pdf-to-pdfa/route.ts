@@ -6,6 +6,7 @@ import {
   createPdfResponse,
 } from "@/lib/gotenberg";
 import { gotenbergConfig } from "@/lib/config";
+import { requirePremiumApiKey } from "@/middleware/require-premium-api-key";
 
 const client = new GotenbergClient(gotenbergConfig);
 
@@ -14,6 +15,11 @@ interface PdfToPdfARequest {
 }
 
 export async function POST(request: NextRequest) {
+  const apiKeyValidation = await requirePremiumApiKey(request);
+  if (!apiKeyValidation.valid) {
+    return apiKeyValidation.response!;
+  }
+
   try {
     const formData = await request.formData();
 

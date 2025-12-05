@@ -1,9 +1,16 @@
 import { GotenbergClient } from "@/lib/gotenberg";
 import { gotenbergConfig } from "@/lib/config";
+import { NextRequest } from "next/server";
+import { requirePremiumApiKey } from "@/middleware/require-premium-api-key";
 
 const client = new GotenbergClient(gotenbergConfig);
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const apiKeyValidation = await requirePremiumApiKey(request);
+  if (!apiKeyValidation.valid) {
+    return apiKeyValidation.response!;
+  }
+
   try {
     const formData = await request.formData();
     const url = formData.get("url") as string;
