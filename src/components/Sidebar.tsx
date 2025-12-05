@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Wrench,
@@ -14,11 +14,11 @@ import {
   Crown,
   X,
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Tools", href: "/tools", icon: Wrench },
-  { name: "Pipelines", href: "/pipelines/builder", icon: GitBranch },
   { name: "History", href: "/history", icon: Clock },
   { name: "API", href: "/api-docs", icon: Code },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },
@@ -34,6 +34,8 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { logout } = useAuth();
 
   const isActive = (href: string) => {
     if (href === "/dashboard") {
@@ -42,9 +44,15 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
     return pathname.startsWith(href);
   };
 
-  const handleLogout = () => {
-    // Logout logic here
-    window.location.href = "/login";
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      // Even if logout fails, redirect to login
+      router.push("/login");
+    }
   };
 
   return (

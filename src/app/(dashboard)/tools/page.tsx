@@ -36,7 +36,6 @@ import {
   FileCode,
   FileSignature,
   FileMinus,
-  Workflow,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -321,14 +320,6 @@ const allTools = [
     href: "/tools/remove-blanks",
     color: "from-pink-600 to-pink-400",
   },
-  {
-    name: "Visual Pipeline Builder",
-    description: "Chain multiple operations",
-    icon: Workflow,
-    href: "/pipelines/builder",
-    color: "from-amber-500 to-yellow-500",
-    special: true,
-  },
 ];
 
 export default function ToolsPage() {
@@ -351,12 +342,8 @@ export default function ToolsPage() {
             <Link
               key={tool.name}
               href={tool.href}
-              className={`group relative overflow-hidden rounded-xl bg-card border p-6 transition-all shadow-card 
-                ${
-                  (tool as any).special
-                    ? "border-amber-500/50 shadow-glow-gold hover:shadow-glow-gold-intense col-span-1 sm:col-span-2 lg:col-span-2"
-                    : "border-border hover:border-primary/50 hover:shadow-glow-orange"
-                }
+              className={`group relative overflow-hidden rounded-xl bg-card border border-border p-6 transition-all shadow-card 
+                hover:border-primary/50 hover:shadow-glow-orange
               `}
             >
               {/* Background Gradient on Hover */}
@@ -364,21 +351,8 @@ export default function ToolsPage() {
                 className={`absolute inset-0 bg-linear-to-br ${tool.color} opacity-0 group-hover:opacity-5 transition-opacity`}
               />
 
-              {/* Special Badge */}
-              {(tool as any).special && (
-                <div className="absolute top-0 right-0 bg-linear-to-bl from-amber-500 to-orange-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl shadow-sm">
-                  ADVANCED
-                </div>
-              )}
-
               <div className="relative">
-                <div
-                  className={`mb-4 transform group-hover:scale-110 transition-transform duration-300 inline-block p-3 rounded-lg ${
-                    (tool as any).special
-                      ? "bg-amber-500/10 text-amber-600"
-                      : "bg-primary/5 text-primary"
-                  }`}
-                >
+                <div className="mb-4 transform group-hover:scale-110 transition-transform duration-300 inline-block p-3 rounded-lg bg-primary/5 text-primary">
                   <tool.icon className="h-6 w-6" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
