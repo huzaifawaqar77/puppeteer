@@ -1,6 +1,43 @@
 "use client";
 
-import { Merge, Split, FileArchive, FileOutput, ScanText, Shield, FileEdit, Scissors, Image, Link as LinkIcon, FileType, FileDigit, Grid3x3, Lock, Unlock, RotateCw, Trash2, Wrench, FilePlus, FileText, Globe, FileCheck, Layers, Minimize2, ZoomIn, Contrast, Search, Presentation, Archive, ScanLine, Stamp, Code, FileCode, FileSignature, FileMinus, Workflow } from "lucide-react";
+import {
+  Merge,
+  Split,
+  FileArchive,
+  FileOutput,
+  ScanText,
+  Shield,
+  FileEdit,
+  Scissors,
+  Image,
+  Link as LinkIcon,
+  FileType,
+  FileDigit,
+  Grid3x3,
+  Lock,
+  Unlock,
+  RotateCw,
+  Trash2,
+  Wrench,
+  FilePlus,
+  FileText,
+  Globe,
+  FileCheck,
+  Layers,
+  Minimize2,
+  ZoomIn,
+  Contrast,
+  Search,
+  Presentation,
+  Archive,
+  ScanLine,
+  Stamp,
+  Code,
+  FileCode,
+  FileSignature,
+  FileMinus,
+  Workflow,
+} from "lucide-react";
 import Link from "next/link";
 
 const allTools = [
@@ -110,13 +147,6 @@ const allTools = [
     color: "from-fuchsia-500 to-pink-500",
   },
   {
-    name: "Add Text",
-    description: "Add text content to PDFs",
-    icon: FilePlus,
-    href: "/tools/add-text",
-    color: "from-blue-600 to-indigo-600",
-  },
-  {
     name: "Add Image",
     description: "Insert images into PDFs",
     icon: Image,
@@ -129,13 +159,6 @@ const allTools = [
     icon: FileCheck,
     href: "/tools/sign",
     color: "from-emerald-600 to-green-600",
-  },
-  {
-    name: "URL to PDF",
-    description: "Convert webpage to PDF",
-    icon: LinkIcon,
-    href: "/tools/url-to-pdf",
-    color: "from-indigo-500 to-blue-500",
   },
   {
     name: "HTML to PDF",
@@ -222,20 +245,6 @@ const allTools = [
     color: "from-cyan-500 to-blue-500",
   },
   {
-    name: "Compare PDFs",
-    description: "Compare two PDF documents",
-    icon: FileType,
-    href: "/tools/compare",
-    color: "from-emerald-500 to-teal-500",
-  },
-  {
-    name: "Adjust Contrast",
-    description: "Modify PDF contrast",
-    icon: Contrast,
-    href: "/tools/contrast",
-    color: "from-slate-500 to-gray-500",
-  },
-  {
     name: "Detect Blank Pages",
     description: "Find and remove blank pages",
     icon: Search,
@@ -276,13 +285,6 @@ const allTools = [
     icon: Archive,
     href: "/tools/pdf-to-pdfa",
     color: "from-purple-700 to-purple-500",
-  },
-  {
-    name: "Scanner Effect",
-    description: "Make PDF look scanned",
-    icon: ScanLine,
-    href: "/tools/scanner-effect",
-    color: "from-gray-600 to-gray-400",
   },
   {
     name: "Add Stamp",
@@ -335,7 +337,9 @@ export default function ToolsPage() {
       <div className="space-y-8">
         {/* Header */}
         <div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-foreground">PDF Tools</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-foreground">
+            PDF Tools
+          </h1>
           <p className="mt-2 text-secondary">
             {allTools.length} powerful tools to process your PDF files
           </p>
@@ -348,32 +352,39 @@ export default function ToolsPage() {
               key={tool.name}
               href={tool.href}
               className={`group relative overflow-hidden rounded-xl bg-card border p-6 transition-all shadow-card 
-                ${(tool as any).special 
-                  ? "border-amber-500/50 shadow-glow-gold hover:shadow-glow-gold-intense col-span-1 sm:col-span-2 lg:col-span-2" 
-                  : "border-border hover:border-primary/50 hover:shadow-glow-orange"
+                ${
+                  (tool as any).special
+                    ? "border-amber-500/50 shadow-glow-gold hover:shadow-glow-gold-intense col-span-1 sm:col-span-2 lg:col-span-2"
+                    : "border-border hover:border-primary/50 hover:shadow-glow-orange"
                 }
               `}
             >
               {/* Background Gradient on Hover */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${tool.color} opacity-0 group-hover:opacity-5 transition-opacity`} />
-              
+              <div
+                className={`absolute inset-0 bg-linear-to-br ${tool.color} opacity-0 group-hover:opacity-5 transition-opacity`}
+              />
+
               {/* Special Badge */}
               {(tool as any).special && (
-                <div className="absolute top-0 right-0 bg-gradient-to-bl from-amber-500 to-orange-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl shadow-sm">
+                <div className="absolute top-0 right-0 bg-linear-to-bl from-amber-500 to-orange-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl shadow-sm">
                   ADVANCED
                 </div>
               )}
 
               <div className="relative">
-                <div className={`mb-4 transform group-hover:scale-110 transition-transform duration-300 inline-block p-3 rounded-lg ${(tool as any).special ? "bg-amber-500/10 text-amber-600" : "bg-primary/5 text-primary"}`}>
+                <div
+                  className={`mb-4 transform group-hover:scale-110 transition-transform duration-300 inline-block p-3 rounded-lg ${
+                    (tool as any).special
+                      ? "bg-amber-500/10 text-amber-600"
+                      : "bg-primary/5 text-primary"
+                  }`}
+                >
                   <tool.icon className="h-6 w-6" />
                 </div>
                 <h3 className="text-lg font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
                   {tool.name}
                 </h3>
-                <p className="text-sm text-secondary">
-                  {tool.description}
-                </p>
+                <p className="text-sm text-secondary">{tool.description}</p>
               </div>
             </Link>
           ))}

@@ -11,6 +11,7 @@ import {
   BarChart3,
   Settings,
   LogOut,
+  Crown,
 } from "lucide-react";
 
 const navigation = [
@@ -20,6 +21,7 @@ const navigation = [
   { name: "History", href: "/history", icon: Clock },
   { name: "API", href: "/api-docs", icon: Code },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },
+  { name: "Premium", href: "/premium", icon: Crown },
 ];
 
 const bottomNav = [

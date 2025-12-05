@@ -4,7 +4,14 @@ import { appwriteConfig, stirlingConfig } from "@/lib/config";
 
 export async function POST(request: NextRequest) {
   try {
-    const { fileId, jobId, quality = "2", noise = "0.5", blur = "0.5", rotation = "0" } = await request.json();
+    const {
+      fileId,
+      jobId,
+      quality = "2",
+      noise = "0.5",
+      blur = "0.5",
+      rotation = "0",
+    } = await request.json();
 
     if (!fileId) {
       return NextResponse.json({ error: "File ID required" }, { status: 400 });
@@ -23,28 +30,78 @@ export async function POST(request: NextRequest) {
       appwriteConfig.buckets.input,
       fileId
     );
-    
+
     // Fetch the file
     const response = await fetch(fileResponse.toString());
+    if (!response.ok) {
+      throw new Error(`Failed to download file: ${response.status}`);
+    }
     const arrayBuffer = await response.arrayBuffer();
 
     // Prepare form data for Stirling PDF
     const formData = new FormData();
     const blob = new Blob([arrayBuffer], { type: "application/pdf" });
-    formData.append("fileInput", blob, "document.pdf");
-    
+    formData.append("fileInput", blob, "input.pdf");
+
     // Append scanner effect parameters
-    // Note: Stirling PDF API expects strings for these parameters
-    formData.append("quality", String(quality)); // 0=Low, 1=Medium, 2=High
-    formData.append("noise", String(noise));
-    formData.append("blur", String(blur));
-    formData.append("rotation", String(rotation));
-    
-    // Add defaults for other required parameters if needed
-    // Based on Swagger: rotation, quality are required. 
-    // We are sending them.
+    // Note: Stirling PDF API expects lowercase string values for quality and rotation presets
+
+    // Map quality (0-2)
+    // 0=Low, 1=Medium, 2=High
+    const qualityMap: Record<string, string> = {
+      "0": "low",
+      "1": "medium",
+      "2": "high",
+    };
+    const qualityVal = qualityMap[String(quality)] || "high";
+
+    formData.append("quality", qualityVal);
+
+    // Map rotation preset
+    // 0=None, 1=Slight, 2=Moderate, 3=Severe
+    const rotationMap: Record<string, string> = {
+      "0": "none",
+      "1": "slight",
+      "2": "moderate",
+      "3": "severe",
+    };
+    const rotationVal = rotationMap[String(rotation)] || "none";
+
+    formData.append("rotation", rotationVal);
+
+    // Map colorspace
+    // 0=Color, 1=Grayscale, 2=Monochrome
+    const colorspaceMap: Record<string, string> = {
+      "0": "color",
+      "1": "grayscale",
+      "2": "monochrome",
+    };
+    const colorspaceVal = colorspaceMap["0"] || "color";
+
+    formData.append("colorspace", colorspaceVal);
+
+    // Numerical parameters
+    formData.append("border", "20");
+    formData.append("rotate", "0");
+    formData.append("rotateVariance", "2");
+
+    // Convert client-side values (0-1 range) to Stirling API values
+    // Client sends noise and blur as 0-1, scale them appropriately
+    const blurScaled = (parseFloat(String(blur)) * 10).toString(); // 0-1 -> 0-10
+    const noiseScaled = (parseFloat(String(noise)) * 10).toString(); // 0-1 -> 0-10
+
+    formData.append("brightness", "1.0");
+    formData.append("contrast", "1.0");
+    formData.append("blur", blurScaled);
+    formData.append("noise", noiseScaled);
+    formData.append("yellowish", "false");
+    formData.append("resolution", "300");
+    formData.append("advancedEnabled", "true");
 
     // Call Stirling PDF API
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 120000); // 120 second timeout
+
     const stirlingResponse = await fetch(
       `${stirlingConfig.url}/api/v1/misc/scanner-effect`,
       {
@@ -53,11 +110,28 @@ export async function POST(request: NextRequest) {
           "X-API-Key": stirlingConfig.apiKey,
         },
         body: formData,
+        signal: controller.signal,
       }
     );
 
+    clearTimeout(timeout);
+
     if (!stirlingResponse.ok) {
-      throw new Error(`Stirling PDF API failed: ${stirlingResponse.statusText}`);
+      const errorText = await stirlingResponse.text();
+      console.error("❌ Stirling PDF Scanner Effect error:");
+      console.error(
+        "  Status:",
+        stirlingResponse.status,
+        stirlingResponse.statusText
+      );
+      console.error(
+        "  URL:",
+        `${stirlingConfig.url}/api/v1/misc/scanner-effect`
+      );
+      console.error("  Response:", errorText);
+      throw new Error(
+        `Stirling PDF API failed: ${stirlingResponse.status} - ${errorText}`
+      );
     }
 
     const processedBlob = await stirlingResponse.blob();
@@ -95,10 +169,16 @@ export async function POST(request: NextRequest) {
       filename: "scanned_effect.pdf",
     });
   } catch (error: any) {
-    console.error("Scanner Effect error:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to apply scanner effect" },
-      { status: 500 }
-    );
+    console.error("❌ Scanner Effect error:", error);
+    console.error("  Error message:", error.message);
+    console.error("  Error name:", error.name);
+
+    // Handle specific error types
+    let errorMessage = error.message || "Failed to apply scanner effect";
+    if (error.name === "AbortError") {
+      errorMessage = "Request timeout - processing took too long";
+    }
+
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

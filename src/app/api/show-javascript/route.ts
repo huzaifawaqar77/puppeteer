@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
       appwriteConfig.buckets.input,
       fileId
     );
-    
+
     // Fetch the file
     const response = await fetch(fileResponse.toString());
     const arrayBuffer = await response.arrayBuffer();
@@ -46,7 +46,9 @@ export async function POST(request: NextRequest) {
     );
 
     if (!stirlingResponse.ok) {
-      throw new Error(`Stirling PDF API failed: ${stirlingResponse.statusText}`);
+      throw new Error(
+        `Stirling PDF API failed: ${stirlingResponse.statusText}`
+      );
     }
 
     // The response is likely a JS file or text

@@ -69,13 +69,6 @@ const popularOperations = [
     href: "/tools/extract-images",
     color: "from-cyan-500 to-blue-500",
   },
-  {
-    name: "Link to PDF",
-    description: "Convert URLs or HTML directly into PDF",
-    icon: <LinkIcon className="h-8 w-8" />,
-    href: "/tools/url-to-pdf",
-    color: "from-indigo-500 to-purple-500",
-  },
 ];
 
 // Recent Activity - Mock data
@@ -120,7 +113,9 @@ export default function DashboardPage() {
 
       {/* Popular Operations */}
       <section>
-        <h2 className="text-2xl font-bold text-foreground mb-6">Popular Operations</h2>
+        <h2 className="text-2xl font-bold text-foreground mb-6">
+          Popular Operations
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {popularOperations.map((tool) => (
             <ToolCard
@@ -138,7 +133,9 @@ export default function DashboardPage() {
 
       {/* Recent Activity */}
       <section>
-        <h2 className="text-2xl font-bold text-foreground mb-6">Recent Activity</h2>
+        <h2 className="text-2xl font-bold text-foreground mb-6">
+          Recent Activity
+        </h2>
         <div className="bg-card border border-border rounded-xl overflow-hidden shadow-card">
           <table className="w-full">
             <thead className="bg-sidebar border-b border-border">
@@ -162,7 +159,10 @@ export default function DashboardPage() {
             </thead>
             <tbody className="divide-y divide-border">
               {recentActivity.map((activity, index) => (
-                <tr key={index} className="hover:bg-sidebar/50 transition-colors">
+                <tr
+                  key={index}
+                  className="hover:bg-sidebar/50 transition-colors"
+                >
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">
                     {activity.operation}
                   </td>
@@ -177,13 +177,22 @@ export default function DashboardPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <div className="flex items-center gap-2">
-                      <button className="p-1.5 hover:bg-black/5 rounded transition-colors" title="Download">
+                      <button
+                        className="p-1.5 hover:bg-black/5 rounded transition-colors"
+                        title="Download"
+                      >
                         <Download className="h-4 w-4 text-secondary hover:text-primary" />
                       </button>
-                      <button className="p-1.5 hover:bg-black/5 rounded transition-colors" title="View Log">
+                      <button
+                        className="p-1.5 hover:bg-black/5 rounded transition-colors"
+                        title="View Log"
+                      >
                         <Eye className="h-4 w-4 text-secondary hover:text-primary" />
                       </button>
-                      <button className="p-1.5 hover:bg-black/5 rounded transition-colors" title="Rerun">
+                      <button
+                        className="p-1.5 hover:bg-black/5 rounded transition-colors"
+                        title="Rerun"
+                      >
                         <RotateCcw className="h-4 w-4 text-secondary hover:text-primary" />
                       </button>
                     </div>

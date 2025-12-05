@@ -8,7 +8,10 @@ export async function POST(request: NextRequest) {
     const { fileId, jobId, targetFormat } = await request.json();
 
     if (!fileId || !targetFormat) {
-      return NextResponse.json({ error: "File ID and target format required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "File ID and target format required" },
+        { status: 400 }
+      );
     }
 
     // Update job status
@@ -24,7 +27,7 @@ export async function POST(request: NextRequest) {
       appwriteConfig.buckets.input,
       fileId
     );
-    
+
     // Fetch the file
     const response = await fetch(fileResponse.toString());
     const arrayBuffer = await response.arrayBuffer();
@@ -39,9 +42,12 @@ export async function POST(request: NextRequest) {
     formData.append("dpi", "300"); // High quality
 
     // Call Stirling PDF Convert API
-    console.log("📡 Calling Stirling PDF at:", `${stirlingConfig.url}/api/v1/convert/pdf-to-img`);
+    console.log(
+      "📡 Calling Stirling PDF at:",
+      `${stirlingConfig.url}/api/v1/convert/pdf-to-img`
+    );
     const stirlingResponse = await fetch(
-      `${stirlingConfig.url}/api/v1/convert/pdf-to-img`,
+      `${stirlingConfig.url}/api/v1/convert/pdf/img`,
       {
         method: "POST",
         headers: {
@@ -56,24 +62,31 @@ export async function POST(request: NextRequest) {
       console.error("❌ Stirling PDF error:", {
         status: stirlingResponse.status,
         statusText: stirlingResponse.statusText,
-        body: errorText
+        body: errorText,
       });
-      throw new Error(`Stirling PDF conversion failed: ${stirlingResponse.status} - ${errorText}`);
+      throw new Error(
+        `Stirling PDF conversion failed: ${stirlingResponse.status} - ${errorText}`
+      );
     }
 
     // Get the result
     const resultBuffer = await stirlingResponse.arrayBuffer();
-    const contentType = stirlingResponse.headers.get("content-type") || "application/zip";
-    
+    const contentType =
+      stirlingResponse.headers.get("content-type") || "application/zip";
+
     // Result is usually a ZIP file with multiple images
     const extension = contentType.includes("zip") ? "zip" : targetFormat;
-    const mimeType = contentType.includes("zip") ? "application/zip" : `image/${targetFormat}`;
-    
+    const mimeType = contentType.includes("zip")
+      ? "application/zip"
+      : `image/${targetFormat}`;
+
     const resultBlob = new Blob([resultBuffer], { type: mimeType });
     const outputFile = await storage.createFile(
       appwriteConfig.buckets.output,
       ID.unique(),
-      new File([resultBlob], `converted_${Date.now()}.${extension}`, { type: mimeType })
+      new File([resultBlob], `converted_${Date.now()}.${extension}`, {
+        type: mimeType,
+      })
     );
 
     // Update job as completed

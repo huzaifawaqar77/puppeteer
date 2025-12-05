@@ -13,8 +13,14 @@ export default function AddImageToolPage() {
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [processing, setProcessing] = useState(false);
-  const [result, setResult] = useState<{ url: string; filename: string } | null>(null);
+  const [result, setResult] = useState<{
+    url: string;
+    filename: string;
+  } | null>(null);
   const [error, setError] = useState<string>("");
+  const [x, setX] = useState<number>(0);
+  const [y, setY] = useState<number>(0);
+  const [everyPage, setEveryPage] = useState<boolean>(false);
 
   const handlePdfSelected = (files: File[]) => {
     setPdfFile(files[0] ?? null);
@@ -41,7 +47,11 @@ export default function AddImageToolPage() {
     try {
       const [uploadedPdf, uploadedImage] = await Promise.all([
         storage.createFile(appwriteConfig.buckets.input, ID.unique(), pdfFile),
-        storage.createFile(appwriteConfig.buckets.input, ID.unique(), imageFile),
+        storage.createFile(
+          appwriteConfig.buckets.input,
+          ID.unique(),
+          imageFile
+        ),
       ]);
 
       const job = await databases.createDocument(
@@ -61,9 +71,12 @@ export default function AddImageToolPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          pdfFileId: uploadedPdf.$id,
-          imageFileId: uploadedImage.$id,
+          pdfId: uploadedPdf.$id,
+          imageId: uploadedImage.$id,
           jobId: job.$id,
+          x,
+          y,
+          everyPage,
         }),
       });
 
@@ -86,7 +99,9 @@ export default function AddImageToolPage() {
       <div className="space-y-6">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Add Image to PDF</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            Add Image to PDF
+          </h1>
           <p className="text-secondary">
             Insert an image into your PDF document
           </p>
@@ -117,6 +132,44 @@ export default function AddImageToolPage() {
               maxSize={10 * 1024 * 1024}
             />
           </div>
+
+          {pdfFile && imageFile && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  X Position
+                </label>
+                <input
+                  type="number"
+                  value={x}
+                  onChange={(e) => setX(Number(e.target.value))}
+                  className="w-full px-4 py-3 border border-border bg-card text-foreground rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Y Position
+                </label>
+                <input
+                  type="number"
+                  value={y}
+                  onChange={(e) => setY(Number(e.target.value))}
+                  className="w-full px-4 py-3 border border-border bg-card text-foreground rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                />
+              </div>
+              <div className="flex items-center gap-2 mt-8">
+                <input
+                  id="everypage"
+                  type="checkbox"
+                  checked={everyPage}
+                  onChange={(e) => setEveryPage(e.target.checked)}
+                />
+                <label htmlFor="everypage" className="text-sm text-foreground">
+                  Apply to every page
+                </label>
+              </div>
+            </div>
+          )}
 
           {/* Error Message */}
           {error && (
@@ -165,7 +218,8 @@ export default function AddImageToolPage() {
         {/* Info Card */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <p className="text-sm text-blue-900">
-            <strong>Tip:</strong> The image will be added to your PDF. You can specify positioning and sizing options in advanced mode.
+            <strong>Tip:</strong> The image will be added to your PDF. You can
+            specify positioning and sizing options in advanced mode.
           </p>
         </div>
       </div>

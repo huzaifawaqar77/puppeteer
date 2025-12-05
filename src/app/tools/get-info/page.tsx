@@ -112,11 +112,24 @@ export default function GetInfoToolPage() {
               <h3 className="text-lg font-semibold text-blue-900 mb-4">
                 PDF Information
               </h3>
-              <div className="space-y-2 text-sm">
+              <div className="space-y-4 text-sm">
                 {Object.entries(result.info || {}).map(([key, value]) => (
-                  <div key={key} className="flex justify-between py-2 border-b border-blue-200 last:border-0">
-                    <span className="font-medium text-blue-900">{key}:</span>
-                    <span className="text-blue-700">{String(value)}</span>
+                  <div key={key} className="border-b border-blue-200 last:border-0 pb-2">
+                    <span className="font-bold text-blue-900 block mb-1">{key}:</span>
+                    {typeof value === 'object' && value !== null ? (
+                      <div className="pl-4 space-y-1">
+                        {Object.entries(value).map(([subKey, subValue]) => (
+                          <div key={subKey} className="flex justify-between">
+                            <span className="font-medium text-blue-800">{subKey}:</span>
+                            <span className="text-blue-700 break-all ml-4">
+                              {typeof subValue === 'object' ? JSON.stringify(subValue) : String(subValue)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-blue-700">{String(value)}</span>
+                    )}
                   </div>
                 ))}
               </div>

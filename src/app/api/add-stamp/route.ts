@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
       appwriteConfig.buckets.input,
       fileId
     );
-    
+
     // Fetch the file
     const response = await fetch(fileResponse.toString());
     const arrayBuffer = await response.arrayBuffer();
@@ -42,8 +42,11 @@ export async function POST(request: NextRequest) {
     const stirlingFormData = new FormData();
     const blob = new Blob([arrayBuffer], { type: "application/pdf" });
     stirlingFormData.append("fileInput", blob, "document.pdf");
-    
-    stirlingFormData.append("stampType", stampType === "image" ? "Image" : "Text");
+
+    stirlingFormData.append(
+      "stampType",
+      stampType === "image" ? "Image" : "Text"
+    );
     stirlingFormData.append("pageNumbers", "all");
     stirlingFormData.append("position", position); // 1-9
     stirlingFormData.append("rotation", rotation);
@@ -74,7 +77,9 @@ export async function POST(request: NextRequest) {
     );
 
     if (!stirlingResponse.ok) {
-      throw new Error(`Stirling PDF API failed: ${stirlingResponse.statusText}`);
+      throw new Error(
+        `Stirling PDF API failed: ${stirlingResponse.statusText}`
+      );
     }
 
     const processedBlob = await stirlingResponse.blob();

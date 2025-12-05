@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { storage, databases } from "@/lib/appwrite";
-import { appwriteConfig } from "@/lib/config";
+import { appwriteConfig, stirlingConfig } from "@/lib/config";
 import { ID } from "appwrite";
 import { InputFile } from "node-appwrite/file";
 
@@ -16,25 +16,29 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Get file from Appwrite Storage
-    const fileResponse = await storage.getFileDownload(
+    const fileUrl = storage.getFileDownload(
       appwriteConfig.buckets.input,
       fileId
     );
 
+    // Fetch the file
+    const fileResponse = await fetch(fileUrl.toString());
+    const arrayBuffer = await fileResponse.arrayBuffer();
+
     // 2. Create FormData for Stirling PDF
     const formData = new FormData();
-    const blob = new Blob([fileResponse]);
+    const blob = new Blob([arrayBuffer], { type: "application/pdf" });
     formData.append("fileInput", blob, "input.pdf");
 
     // 3. Call Stirling PDF API
-    const stirlingUrl = process.env.STIRLING_PDF_URL;
-    const stirlingApiKey = process.env.STIRLING_PDF_API_KEY;
+    const stirlingUrl = stirlingConfig.url;
+    const stirlingApiKey = stirlingConfig.apiKey;
 
     if (!stirlingUrl) {
       throw new Error("Stirling PDF URL not configured");
     }
 
-    const response = await fetch(`${stirlingUrl}/api/v1/general/auto-split-pdf`, {
+    const response = await fetch(`${stirlingUrl}/api/v1/misc/auto-split-pdf`, {
       method: "POST",
       headers: {
         "X-API-Key": stirlingApiKey || "",
@@ -53,7 +57,10 @@ export async function POST(req: NextRequest) {
     const processedFile = await storage.createFile(
       appwriteConfig.buckets.output,
       ID.unique(),
-      InputFile.fromBuffer(Buffer.from(processedBuffer), "auto_split_result.zip")
+      InputFile.fromBuffer(
+        Buffer.from(processedBuffer),
+        "auto_split_result.zip"
+      )
     );
 
     // 5. Update Job Status
@@ -79,7 +86,6 @@ export async function POST(req: NextRequest) {
       url: downloadUrl,
       filename: "auto_split_result.zip",
     });
-
   } catch (error: any) {
     console.error("Auto-Split error:", error);
     return NextResponse.json(

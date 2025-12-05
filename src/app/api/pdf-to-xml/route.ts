@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { storage, databases } from "@/lib/appwrite";
-import { appwriteConfig } from "@/lib/config";
+import { appwriteConfig, stirlingConfig } from "@/lib/config";
 import { ID } from "appwrite";
 import { InputFile } from "node-appwrite/file";
 
@@ -16,25 +16,27 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Get file from Appwrite Storage
-    const fileResponse = await storage.getFileDownload(
+    const fileUrl = storage.getFileDownload(
       appwriteConfig.buckets.input,
       fileId
     );
 
     // 2. Create FormData for Stirling PDF
     const formData = new FormData();
-    const blob = new Blob([fileResponse]);
+    const fetchResp = await fetch(fileUrl.toString());
+    const arrayBuffer = await fetchResp.arrayBuffer();
+    const blob = new Blob([arrayBuffer], { type: "application/pdf" });
     formData.append("fileInput", blob, "input.pdf");
 
     // 3. Call Stirling PDF API
-    const stirlingUrl = process.env.STIRLING_PDF_URL;
-    const stirlingApiKey = process.env.STIRLING_PDF_API_KEY;
+    const stirlingUrl = stirlingConfig.url;
+    const stirlingApiKey = stirlingConfig.apiKey;
 
     if (!stirlingUrl) {
       throw new Error("Stirling PDF URL not configured");
     }
 
-    const response = await fetch(`${stirlingUrl}/api/v1/convert/pdf-to-xml`, {
+    const response = await fetch(`${stirlingUrl}/api/v1/convert/pdf/xml`, {
       method: "POST",
       headers: {
         "X-API-Key": stirlingApiKey || "",
@@ -79,7 +81,6 @@ export async function POST(req: NextRequest) {
       url: downloadUrl,
       filename: "converted.xml",
     });
-
   } catch (error: any) {
     console.error("PDF to XML error:", error);
     return NextResponse.json(

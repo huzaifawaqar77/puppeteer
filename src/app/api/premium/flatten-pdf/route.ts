@@ -1,0 +1,49 @@
+import { NextRequest } from "next/server";
+import {
+  GotenbergClient,
+  createErrorResponse,
+  createPdfResponse,
+} from "@/lib/gotenberg";
+
+const gotenbergConfig = {
+  url: process.env.GOTENBERG_URL || "https://gotenberg.uiflexer.com",
+  username: process.env.GOTENBERG_USERNAME || "Znlz6EqYM09GmcJB",
+  password:
+    process.env.GOTENBERG_PASSWORD || "l1neT52mJSFRbiopVzEZLz6K0HrB6uqG",
+};
+
+const client = new GotenbergClient(gotenbergConfig);
+
+export async function POST(request: NextRequest) {
+  try {
+    const formData = await request.formData();
+
+    const file = formData.get("file") as File;
+
+    if (!file) {
+      return createErrorResponse("PDF file is required", 400);
+    }
+
+    if (!file.name.endsWith(".pdf") && file.type !== "application/pdf") {
+      return createErrorResponse("File must be a PDF", 400);
+    }
+
+    const flattenFormData = new FormData();
+    flattenFormData.append("files", file);
+
+    const blob = await client.sendRequest(
+      "/forms/pdfengines/flatten",
+      flattenFormData,
+      120000
+    );
+
+    const buffer = await blob.arrayBuffer();
+    return createPdfResponse(buffer, "flattened.pdf");
+  } catch (error: any) {
+    console.error("Flatten PDF Error:", error);
+    return createErrorResponse(
+      error.message || "Failed to flatten PDF",
+      error.message?.includes("timeout") ? 408 : 500
+    );
+  }
+}

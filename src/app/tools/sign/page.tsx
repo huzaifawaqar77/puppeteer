@@ -11,7 +11,8 @@ import { Loader2, Download, PenTool } from "lucide-react";
 export default function SignToolPage() {
   const { user } = useAuth();
   const [file, setFile] = useState<File | null>(null);
-  const [signatureImage, setSignatureImage] = useState<File | null>(null);
+  const [certificateFile, setCertificateFile] = useState<File | null>(null);
+  const [password, setPassword] = useState<string>("");
   const [processing, setProcessing] = useState(false);
   const [result, setResult] = useState<{ url: string; filename: string } | null>(null);
   const [error, setError] = useState<string>("");
@@ -22,8 +23,8 @@ export default function SignToolPage() {
     setResult(null);
   };
 
-  const handleSignatureSelected = (files: File[]) => {
-    setSignatureImage(files[0] ?? null);
+  const handleCertificateSelected = (files: File[]) => {
+    setCertificateFile(files[0] ?? null);
     setError("");
     setResult(null);
   };
@@ -34,26 +35,41 @@ export default function SignToolPage() {
       return;
     }
 
+    if (!certificateFile) {
+      setError("Please select a certificate file (.p12)");
+      return;
+    }
+
+    if (!password) {
+      setError("Please enter the certificate password");
+      return;
+    }
+
     setProcessing(true);
     setError("");
     setResult(null);
 
     try {
       const uploadedPdf = await storage.createFile(appwriteConfig.buckets.input, ID.unique(), file);
-      const uploadedSignature = signatureImage ? await storage.createFile(appwriteConfig.buckets.input, ID.unique(), signatureImage) : null;
+      const uploadedCert = await storage.createFile(appwriteConfig.buckets.input, ID.unique(), certificateFile);
       
       const job = await databases.createDocument(appwriteConfig.databaseId, appwriteConfig.collections.processingJobs, ID.unique(), {
         userId: user?.$id,
         operationType: "COMPRESS",
         status: "PENDING",
-        inputFileIds: JSON.stringify([uploadedPdf.$id, ...(uploadedSignature ? [uploadedSignature.$id] : [])]),
+        inputFileIds: JSON.stringify([uploadedPdf.$id, uploadedCert.$id]),
         startedAt: new Date().toISOString(),
       });
 
       const response = await fetch("/api/sign", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fileId: uploadedPdf.$id, signatureFileId: uploadedSignature?.$id, jobId: job.$id }),
+        body: JSON.stringify({ 
+          fileId: uploadedPdf.$id, 
+          certFileId: uploadedCert.$id, 
+          jobId: job.$id,
+          password: password
+        }),
       });
 
       const data = await response.json();
@@ -81,9 +97,20 @@ export default function SignToolPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">Signature Image (Optional)</label>
-            <FileUploader onFilesSelected={handleSignatureSelected} accept={[".jpg", ".jpeg", ".png"]} maxSize={5 * 1024 * 1024} />
-            <p className="mt-1 text-xs text-secondary">Upload a signature image to add to the PDF</p>
+            <label className="block text-sm font-medium text-foreground mb-2">Certificate File (.p12)</label>
+            <FileUploader onFilesSelected={handleCertificateSelected} accept={[".p12", ".pfx"]} maxSize={5 * 1024 * 1024} />
+            <p className="mt-1 text-xs text-secondary">Upload a PKCS12/PFX certificate file for digital signing</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2">Certificate Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter certificate password"
+              className="w-full px-4 py-2 border border-border bg-card text-foreground rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-secondary/50"
+            />
           </div>
 
           {error && (<div className="bg-red-50 border border-red-200 rounded-lg p-4"><p className="text-sm text-red-700">{error}</p></div>)}
@@ -97,13 +124,13 @@ export default function SignToolPage() {
             </div>
           )}
 
-          <button onClick={handleSign} disabled={!file || processing} className="w-full bg-primary hover:bg-primary/90 disabled:bg-secondary/30 disabled:cursor-not-allowed text-white font-semibold py-3.5 px-6 rounded-lg transition-all hover:shadow-glow-orange flex items-center justify-center gap-2">
+          <button onClick={handleSign} disabled={!file || !certificateFile || !password || processing} className="w-full bg-primary hover:bg-primary/90 disabled:bg-secondary/30 disabled:cursor-not-allowed text-white font-semibold py-3.5 px-6 rounded-lg transition-all hover:shadow-glow-orange flex items-center justify-center gap-2">
             {processing ? (<><Loader2 className="h-5 w-5 animate-spin" />Signing PDF...</>) : (<><PenTool className="h-5 w-5" />Sign PDF</>)}
           </button>
         </div>
 
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-sm text-blue-900"><strong>Tip:</strong> Digital signatures provide authentication and ensure document integrity.</p>
+          <p className="text-sm text-blue-900"><strong>Note:</strong> Digital signatures use a certificate (.p12 or .pfx file) to authenticate and ensure document integrity. The signature will be visible on page 1 of the PDF.</p>
         </div>
       </div>
     </div>
