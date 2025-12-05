@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { gotenbergConfig } from "@/lib/config";
-import { requirePremiumApiKey } from "@/middleware/require-premium-api-key";
+import {
+  requirePremiumApiKey,
+  incrementApiKeyRequestCount,
+} from "@/middleware/require-premium-api-key";
 
 export async function POST(request: NextRequest) {
   const apiKeyValidation = await requirePremiumApiKey(request);
@@ -74,12 +77,21 @@ export async function POST(request: NextRequest) {
 
     const pdfBuffer = await response.arrayBuffer();
 
-    return new NextResponse(pdfBuffer, {
+    const pdfResponse = new NextResponse(pdfBuffer, {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": 'attachment; filename="converted.pdf"',
       },
     });
+
+    // Track API usage
+    if (apiKeyValidation.keyId) {
+      incrementApiKeyRequestCount(apiKeyValidation.keyId).catch((err) => {
+        console.error("Failed to track usage:", err);
+      });
+    }
+
+    return pdfResponse;
   } catch (error) {
     console.error("HTML to PDF Error:", error);
     return NextResponse.json(

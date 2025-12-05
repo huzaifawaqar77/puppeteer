@@ -10,6 +10,7 @@ import {
   validateKeyMetadata,
 } from "@/lib/api-keys";
 import { getClientIp } from "@/middleware/validate-api-key";
+import { ENDPOINT_CONFIG, DEFAULT_API_KEY_CONFIG } from "@/lib/endpoint-config";
 
 interface GenerateKeyRequest {
   name: string;
@@ -63,6 +64,18 @@ export async function POST(request: NextRequest) {
     // 4. Determine user tier (from request body or default to free)
     const userTier = body.tier || "free";
 
+    // Only free tier is available for now
+    if (userTier === "premium") {
+      return NextResponse.json(
+        {
+          error: "Premium API keys are not yet available",
+          message:
+            "Premium keys will be available once billing and dashboard are set up",
+        },
+        { status: 403 }
+      );
+    }
+
     // Check if API key is configured
     if (!process.env.APPWRITE_API_KEY) {
       console.error("APPWRITE_API_KEY environment variable not set");
@@ -76,10 +89,8 @@ export async function POST(request: NextRequest) {
     }
 
     // 5. Check if user already has max keys for their tier
-    const maxKeys =
-      userTier === "premium"
-        ? parseInt(process.env.PREMIUM_TIER_KEY_LIMIT || "5")
-        : parseInt(process.env.FREE_TIER_KEY_LIMIT || "1");
+    // At this point userTier is guaranteed to be "free" due to premium check above
+    const maxKeys = parseInt(process.env.FREE_TIER_KEY_LIMIT || "1");
 
     // Create admin client for server-side access
     const adminClient = new Client()
@@ -165,9 +176,10 @@ export async function POST(request: NextRequest) {
         tier: userTier,
         status: "active",
         requestCount: 0,
-        dailyLimit: body.dailyLimit || null,
+        dailyLimit:
+          body.dailyLimit || DEFAULT_API_KEY_CONFIG[userTier].dailyLimit,
         monthlyLimit: null,
-        allowedEndpoints: JSON.stringify([]),
+        allowedEndpoints: JSON.stringify(ENDPOINT_CONFIG[userTier]),
         allowedOrigins: JSON.stringify([]),
         createdAt: now,
         updatedAt: now,

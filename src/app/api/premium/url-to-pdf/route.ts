@@ -6,7 +6,10 @@ import {
   createPdfResponse,
 } from "@/lib/gotenberg";
 import { gotenbergConfig } from "@/lib/config";
-import { requirePremiumApiKey } from "@/middleware/require-premium-api-key";
+import {
+  requirePremiumApiKey,
+  incrementApiKeyRequestCount,
+} from "@/middleware/require-premium-api-key";
 
 const client = new GotenbergClient(gotenbergConfig);
 
@@ -90,7 +93,16 @@ export async function POST(request: NextRequest) {
     );
 
     const buffer = await blob.arrayBuffer();
-    return createPdfResponse(buffer, "url-to-pdf.pdf");
+    const response = createPdfResponse(buffer, "url-to-pdf.pdf");
+
+    // Increment request count for this API key
+    if (apiKeyValidation.keyId) {
+      incrementApiKeyRequestCount(apiKeyValidation.keyId).catch((err) => {
+        console.error("Failed to track usage:", err);
+      });
+    }
+
+    return response;
   } catch (error: any) {
     console.error("URL to PDF Error:", error);
     return createErrorResponse(

@@ -4,6 +4,7 @@ import {
   isValidApiKeyFormat,
   validateApiKey,
   getUserPremiumApiKey,
+  incrementApiKeyRequestCount,
 } from "@/lib/api-keys";
 
 /**
@@ -82,7 +83,8 @@ export async function requirePremiumApiKey(
             {
               success: false,
               error: "Invalid or inactive API key",
-              message: validation.message || "The provided API key is not valid",
+              message:
+                validation.message || "The provided API key is not valid",
             },
             { status: 401 }
           ),
@@ -184,32 +186,11 @@ export async function requirePremiumApiKey(
       }
     }
 
-    // Check daily limit
-    if (validation.dailyLimit && validation.dailyLimit > 0) {
-      if (
-        validation.requestCountToday !== undefined &&
-        validation.requestCountToday >= validation.dailyLimit
-      ) {
-        return {
-          valid: false,
-          response: NextResponse.json(
-            {
-              success: false,
-              error: "Daily request limit exceeded",
-              dailyLimit: validation.dailyLimit,
-              requestsToday: validation.requestCountToday,
-            },
-            { status: 429 }
-          ),
-        };
-      }
-    }
-
     // Check monthly limit
     if (validation.monthlyLimit && validation.monthlyLimit > 0) {
       if (
-        validation.requestCountMonth !== undefined &&
-        validation.requestCountMonth >= validation.monthlyLimit
+        validation.requestCount !== undefined &&
+        validation.requestCount >= validation.monthlyLimit
       ) {
         return {
           valid: false,
@@ -218,7 +199,7 @@ export async function requirePremiumApiKey(
               success: false,
               error: "Monthly request limit exceeded",
               monthlyLimit: validation.monthlyLimit,
-              requestsMonth: validation.requestCountMonth,
+              requestsUsed: validation.requestCount,
             },
             { status: 429 }
           ),
@@ -338,3 +319,8 @@ export async function requireApiKey(
     };
   }
 }
+
+/**
+ * Re-export incrementApiKeyRequestCount for use in endpoints
+ */
+export { incrementApiKeyRequestCount };

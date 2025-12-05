@@ -277,7 +277,7 @@ export async function validateApiKey(plainKey: string): Promise<any> {
       dailyLimit: keyDoc.dailyLimit,
       monthlyLimit: keyDoc.monthlyLimit,
       allowedEndpoints,
-      requestCountToday: keyDoc.requestCountToday || 0,
+      requestCount: keyDoc.requestCount || 0,
       message: null,
     };
   } catch (error) {
@@ -296,8 +296,13 @@ export async function getUserPremiumApiKey(userId: string): Promise<any> {
     const { appwriteConfig } = await import("@/lib/config");
 
     const client = new Client()
-      .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || "https://appwrite.uiflexer.com/v1")
-      .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || "68c77b650020a2e5fa47")
+      .setEndpoint(
+        process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT ||
+          "https://appwrite.uiflexer.com/v1"
+      )
+      .setProject(
+        process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || "68c77b650020a2e5fa47"
+      )
       .setKey(process.env.APPWRITE_API_KEY || "");
 
     if (!process.env.APPWRITE_API_KEY) {
@@ -344,11 +349,81 @@ export async function getUserPremiumApiKey(userId: string): Promise<any> {
       dailyLimit: keyDoc.dailyLimit,
       monthlyLimit: keyDoc.monthlyLimit,
       allowedEndpoints,
-      requestCountToday: keyDoc.requestCountToday || 0,
+      requestCount: keyDoc.requestCount || 0,
       message: null,
     };
   } catch (error) {
     console.error("Error getting user premium API key:", error);
     return { valid: false };
   }
+}
+
+/**
+ * Increment request count for an API key
+ * Updates the overall request count
+ */
+export async function incrementApiKeyRequestCount(
+  keyId: string
+): Promise<{ success: boolean; message?: string }> {
+  try {
+    const { Client, Databases } = await import("node-appwrite");
+    const { appwriteConfig } = await import("@/lib/config");
+
+    const client = new Client()
+      .setEndpoint(
+        process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT ||
+          "https://appwrite.uiflexer.com/v1"
+      )
+      .setProject(
+        process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || "68c77b650020a2e5fa47"
+      )
+      .setKey(process.env.APPWRITE_API_KEY || "");
+
+    if (!process.env.APPWRITE_API_KEY) {
+      console.error("APPWRITE_API_KEY not configured");
+      return { success: false, message: "Server configuration error" };
+    }
+
+    const databases = new Databases(client);
+
+    // Get current document
+    const keyDoc = await databases.getDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.collections.apiKeys,
+      keyId
+    );
+
+    // Update the document with new request count
+    await databases.updateDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.collections.apiKeys,
+      keyId,
+      {
+        requestCount: (keyDoc.requestCount || 0) + 1,
+      }
+    );
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error incrementing API key request count:", error);
+    return { success: false, message: "Failed to update request count" };
+  }
+}
+
+/**
+ * Middleware wrapper to increment request count after successful API call
+ * Usage: after your API logic completes successfully, call this before returning response
+ */
+export async function trackApiKeyUsage(
+  keyId: string | undefined,
+  response: any
+): Promise<any> {
+  // Only track if we have a keyId and response is successful (2xx status)
+  if (keyId && response?.status >= 200 && response?.status < 300) {
+    // Don't wait for this to complete - fire and forget to not slow down response
+    incrementApiKeyRequestCount(keyId).catch((err) => {
+      console.error("Failed to track usage:", err);
+    });
+  }
+  return response;
 }

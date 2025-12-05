@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
+import { ApiKeyManagement } from "@/components/ApiKeyManagement";
 import {
   Copy,
   Check,
@@ -188,9 +189,7 @@ export default function ApiDocsPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedTier, setSelectedTier] = useState<"free" | "premium">(
-    "premium"
-  );
+  const [selectedTier, setSelectedTier] = useState<"free" | "premium">("free");
   const baseUrl = getBaseUrl();
 
   // Fetch existing keys on component mount
@@ -530,13 +529,11 @@ export default function ApiDocsPage() {
                   </button>
                   <button
                     onClick={() => setSelectedTier("premium")}
-                    className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors border ${
-                      selectedTier === "premium"
-                        ? "bg-amber-500 text-white border-amber-500"
-                        : "bg-background border-border hover:border-primary"
-                    }`}
+                    disabled
+                    className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors border opacity-50 cursor-not-allowed bg-gray-100 border-gray-300 text-gray-500`}
+                    title="Premium API keys coming soon with billing integration"
                   >
-                    Premium Tier
+                    Premium Tier (Coming Soon)
                   </button>
                 </div>
                 <button
@@ -549,39 +546,22 @@ export default function ApiDocsPage() {
                   ) : (
                     <RefreshCw className="h-4 w-4" />
                   )}
-                  Generate API Key
+                  Generate Free API Key
                 </button>
               </div>
             )}
 
-            {keysList.length > 1 && (
+            {/* API Key Management Component */}
+            {keysList.length > 0 && (
               <div className="mt-6">
                 <h3 className="text-sm font-semibold text-foreground mb-3">
-                  Other Keys
+                  Your API Keys
                 </h3>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {keysList.map((key) => (
-                    <div
-                      key={key.id}
-                      className={`bg-card border rounded-lg p-3 flex items-center justify-between text-sm cursor-pointer hover:border-primary transition ${
-                        currentKey?.id === key.id
-                          ? "border-primary"
-                          : "border-border"
-                      }`}
-                      onClick={() => setCurrentKey(key)}
-                    >
-                      <div>
-                        <p className="text-foreground font-medium">
-                          {key.keyPrefix}****
-                        </p>
-                        <p className="text-xs text-secondary">{key.name}</p>
-                      </div>
-                      <div className="text-right text-xs text-secondary">
-                        <p>{key.requestCount} requests</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <ApiKeyManagement
+                  keys={keysList}
+                  onDelete={deleteApiKey}
+                  loading={loading}
+                />
               </div>
             )}
           </div>

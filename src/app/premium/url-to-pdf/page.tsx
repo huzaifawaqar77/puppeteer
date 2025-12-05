@@ -7,7 +7,11 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export default function UrlToPdfPage() {
   const { user } = useAuth();
-  const { apiKey, isLoading: isLoadingApiKey, error: apiKeyError } = useApiKey();
+  const {
+    apiKey,
+    isLoading: isLoadingApiKey,
+    error: apiKeyError,
+  } = useApiKey();
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -121,9 +125,7 @@ export default function UrlToPdfPage() {
 
       {!isLoadingApiKey && !apiKey && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800 font-medium">
-            Premium API key not found
-          </p>
+          <p className="text-red-800 font-medium">Premium API key not found</p>
           <p className="text-red-700 text-sm mt-1">
             Go to{" "}
             <a href="/api-docs" className="underline hover:text-red-900">
@@ -137,7 +139,10 @@ export default function UrlToPdfPage() {
       {!isLoadingApiKey && apiKey && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
           <p className="text-green-800 text-sm">
-            ✓ Using premium API key: <span className="font-mono font-semibold">{apiKey.keyPrefix}...</span>
+            ✓ Using premium API key:{" "}
+            <span className="font-mono font-semibold">
+              {apiKey.keyPrefix}...
+            </span>
           </p>
         </div>
       )}
@@ -456,8 +461,8 @@ export default function UrlToPdfPage() {
             {loading
               ? "Converting..."
               : !apiKey || isLoadingApiKey
-                ? "Loading API key..."
-                : "Convert URL to PDF"}
+              ? "Loading API key..."
+              : "Convert URL to PDF"}
           </span>
         </button>
       </form>

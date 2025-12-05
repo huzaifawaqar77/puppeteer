@@ -7,7 +7,10 @@ import {
   createJsonResponse,
 } from "@/lib/gotenberg";
 import { gotenbergConfig } from "@/lib/config";
-import { requirePremiumApiKey } from "@/middleware/require-premium-api-key";
+import {
+  requirePremiumApiKey,
+  incrementApiKeyRequestCount,
+} from "@/middleware/require-premium-api-key";
 
 const client = new GotenbergClient(gotenbergConfig);
 
@@ -47,7 +50,16 @@ export async function POST(request: NextRequest) {
         120000
       );
 
-      return createJsonResponse(result);
+      const response = createJsonResponse(result);
+
+      // Track API usage
+      if (apiKeyValidation.keyId) {
+        incrementApiKeyRequestCount(apiKeyValidation.keyId).catch((err) => {
+          console.error("Failed to track usage:", err);
+        });
+      }
+
+      return response;
     } else if (action === "write") {
       // Write metadata
       const metadata = formData.get("metadata") as string;
@@ -95,6 +107,14 @@ export async function POST(request: NextRequest) {
         "Content-Disposition",
         `attachment; filename="${outputName}"`
       );
+
+      // Track API usage
+      if (apiKeyValidation.keyId) {
+        incrementApiKeyRequestCount(apiKeyValidation.keyId).catch((err) => {
+          console.error("Failed to track usage:", err);
+        });
+      }
+
       return response;
     } else {
       return createErrorResponse("Invalid action. Use 'read' or 'write'", 400);

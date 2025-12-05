@@ -5,7 +5,10 @@ import {
   createErrorResponse,
 } from "@/lib/gotenberg";
 import { gotenbergConfig } from "@/lib/config";
-import { requirePremiumApiKey } from "@/middleware/require-premium-api-key";
+import {
+  requirePremiumApiKey,
+  incrementApiKeyRequestCount,
+} from "@/middleware/require-premium-api-key";
 
 const client = new GotenbergClient(gotenbergConfig);
 

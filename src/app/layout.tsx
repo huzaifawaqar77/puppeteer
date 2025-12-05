@@ -16,14 +16,15 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: "OmniPDF - Master Your PDFs with Intelligent Workflows",
-  description: "Process PDFs with intelligent workflows. Visual pipeline builder, OCR, redaction, and 50+ powerful tools.",
+  description:
+    "Process PDFs with intelligent workflows. Visual pipeline builder, OCR, redaction, and 50+ powerful tools.",
   icons: {
     icon: [
-      { url: '/favicon.svg', type: 'image/svg+xml' },
-      { url: '/favicon.png', type: 'image/png', sizes: '32x32' },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.png", type: "image/png", sizes: "32x32" },
     ],
-    shortcut: '/favicon.svg',
-    apple: '/favicon.png',
+    shortcut: "/favicon.svg",
+    apple: "/favicon.png",
   },
 };
 
@@ -38,9 +39,7 @@ export default function RootLayout({
         className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}
       >
         <AuthProvider>
-          <ApiKeyProvider>
-            {children}
-          </ApiKeyProvider>
+          <ApiKeyProvider>{children}</ApiKeyProvider>
         </AuthProvider>
       </body>
     </html>

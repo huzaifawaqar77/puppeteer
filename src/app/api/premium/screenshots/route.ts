@@ -1,7 +1,10 @@
 import { GotenbergClient } from "@/lib/gotenberg";
 import { gotenbergConfig } from "@/lib/config";
 import { NextRequest } from "next/server";
-import { requirePremiumApiKey } from "@/middleware/require-premium-api-key";
+import {
+  requirePremiumApiKey,
+  incrementApiKeyRequestCount,
+} from "@/middleware/require-premium-api-key";
 
 const client = new GotenbergClient(gotenbergConfig);
 
@@ -77,6 +80,14 @@ export async function POST(request: NextRequest) {
       "Content-Disposition",
       `attachment; filename="${filename}"`
     );
+
+    // Track API usage
+    if (apiKeyValidation.keyId) {
+      incrementApiKeyRequestCount(apiKeyValidation.keyId).catch((err) => {
+        console.error("Failed to track usage:", err);
+      });
+    }
+
     return response;
   } catch (error: any) {
     console.error("Screenshot Error:", error);

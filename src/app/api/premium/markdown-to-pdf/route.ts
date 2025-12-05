@@ -6,7 +6,10 @@ import {
   createPdfResponse,
 } from "@/lib/gotenberg";
 import { gotenbergConfig } from "@/lib/config";
-import { requirePremiumApiKey } from "@/middleware/require-premium-api-key";
+import {
+  requirePremiumApiKey,
+  incrementApiKeyRequestCount,
+} from "@/middleware/require-premium-api-key";
 
 const client = new GotenbergClient(gotenbergConfig);
 
@@ -27,6 +30,12 @@ interface MarkdownToPdfRequest {
 }
 
 export async function POST(request: NextRequest) {
+  // Validate API key and check tier
+  const apiKeyValidation = await requirePremiumApiKey(request);
+  if (!apiKeyValidation.valid) {
+    return apiKeyValidation.response!;
+  }
+
   try {
     const data = (await request.json()) as MarkdownToPdfRequest;
 
@@ -191,7 +200,16 @@ export async function POST(request: NextRequest) {
     );
 
     const buffer = await blob.arrayBuffer();
-    return createPdfResponse(buffer, "markdown-to-pdf.pdf");
+    const response = createPdfResponse(buffer, "markdown-to-pdf.pdf");
+
+    // Track API usage
+    if (apiKeyValidation.keyId) {
+      incrementApiKeyRequestCount(apiKeyValidation.keyId).catch((err) => {
+        console.error("Failed to track usage:", err);
+      });
+    }
+
+    return response;
   } catch (error: any) {
     console.error("Markdown to PDF Error:", error);
     return createErrorResponse(
