@@ -108,57 +108,57 @@ export default function HistoryPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto max-w-6xl py-8 px-4">
-      <div className="space-y-6">
+    <div className="container mx-auto max-w-6xl py-4 sm:py-8 px-4 sm:px-6">
+      <div className="space-y-4 sm:space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">
             Processing History
           </h1>
-          <p className="mt-2 text-secondary">
+          <p className="mt-2 text-xs sm:text-sm lg:text-base text-secondary">
             View your recent PDF processing jobs
           </p>
         </div>
 
         {jobs.length === 0 ? (
-          <div className="bg-card border border-border rounded-xl p-12 text-center">
-            <FileText className="h-12 w-12 text-secondary/50 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-foreground mb-2">
+          <div className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-12 text-center">
+            <FileText className="h-10 w-10 sm:h-12 sm:w-12 text-secondary/50 mx-auto mb-3 sm:mb-4" />
+            <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2">
               No processing history
             </h3>
-            <p className="text-secondary">
+            <p className="text-xs sm:text-sm text-secondary">
               Your completed PDF operations will appear here
             </p>
           </div>
         ) : (
           <>
             {downloadError && (
-              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-4">
-                <p className="text-sm text-red-600">{downloadError}</p>
+              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 sm:p-4 mb-4">
+                <p className="text-xs sm:text-sm text-red-600">{downloadError}</p>
               </div>
             )}
-            <div className="bg-card border border-border rounded-xl overflow-hidden">
-              <table className="w-full">
+            <div className="bg-card border border-border rounded-lg sm:rounded-xl overflow-x-auto shadow-card">
+              <table className="w-full min-w-max">
                 <thead className="bg-secondary/5">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
                       Operation
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider hidden sm:table-cell">
                       Started
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider hidden md:table-cell">
                       Completed
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
                       Action
                     </th>
                   </tr>
@@ -169,44 +169,44 @@ export default function HistoryPage() {
                       key={job.$id}
                       className="hover:bg-secondary/5 transition-colors"
                     >
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <FileText className="h-5 w-5 text-primary mr-3" />
-                          <span className="text-sm font-medium text-foreground">
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
+                          <span className="text-xs sm:text-sm font-medium text-foreground">
                             {job.operationType}
                           </span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-1 sm:gap-2">
                           {getStatusIcon(job.status)}
-                          <span className="text-sm text-foreground">
+                          <span className="text-xs sm:text-sm text-foreground">
                             {job.status}
                           </span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary">
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-secondary hidden sm:table-cell">
                         {formatDate(job.startedAt)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary">
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-secondary hidden md:table-cell">
                         {job.completedAt ? formatDate(job.completedAt) : "-"}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                         {job.status === "COMPLETED" && job.outputFileId ? (
                           <button
                             onClick={() => handleDownload(job)}
                             disabled={downloading === job.$id}
-                            className="inline-flex items-center gap-2 px-3 py-2 bg-primary hover:bg-primary/90 disabled:bg-primary/50 text-white rounded-lg text-sm font-medium transition-colors"
+                            className="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-primary hover:bg-primary/90 disabled:bg-primary/50 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors"
                           >
                             {downloading === job.$id ? (
                               <>
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                                Downloading...
+                                <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+                                <span className="hidden sm:inline">Downloading...</span>
                               </>
                             ) : (
                               <>
-                                <Download className="h-4 w-4" />
-                                Download
+                                <Download className="h-3 w-3 sm:h-4 sm:w-4" />
+                                <span className="hidden sm:inline">Download</span>
                               </>
                             )}
                           </button>

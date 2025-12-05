@@ -107,16 +107,16 @@ const recentActivity = [
 
 export default function DashboardPage() {
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
+    <div className="space-y-6 sm:space-y-8 max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
       {/* Search Bar - Full Width */}
       <SearchBar />
 
       {/* Popular Operations */}
       <section>
-        <h2 className="text-2xl font-bold text-foreground mb-6">
+        <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground mb-4 sm:mb-6">
           Popular Operations
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
           {popularOperations.map((tool) => (
             <ToolCard
               key={tool.name}
@@ -133,26 +133,26 @@ export default function DashboardPage() {
 
       {/* Recent Activity */}
       <section>
-        <h2 className="text-2xl font-bold text-foreground mb-6">
+        <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground mb-4 sm:mb-6">
           Recent Activity
         </h2>
-        <div className="bg-card border border-border rounded-xl overflow-hidden shadow-card">
-          <table className="w-full">
+        <div className="bg-card border border-border rounded-xl overflow-x-auto shadow-card">
+          <table className="w-full min-w-max">
             <thead className="bg-sidebar border-b border-border">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs sm:text-xs font-medium text-secondary uppercase tracking-wider">
                   Operation
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs sm:text-xs font-medium text-secondary uppercase tracking-wider hidden sm:table-cell">
                   Data
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs sm:text-xs font-medium text-secondary uppercase tracking-wider hidden md:table-cell">
                   Last Update
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs sm:text-xs font-medium text-secondary uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs sm:text-xs font-medium text-secondary uppercase tracking-wider hidden lg:table-cell">
                   Actions
                 </th>
               </tr>
@@ -163,34 +163,34 @@ export default function DashboardPage() {
                   key={index}
                   className="hover:bg-sidebar/50 transition-colors"
                 >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-foreground">
                     {activity.operation}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary">
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-secondary hidden sm:table-cell">
                     {activity.data}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary">
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-secondary hidden md:table-cell">
                     {activity.lastUpdate}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                     <StatusPill status={activity.status} />
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <div className="flex items-center gap-2">
+                  <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm hidden lg:table-cell">
+                    <div className="flex items-center gap-1 sm:gap-2">
                       <button
-                        className="p-1.5 hover:bg-black/5 rounded transition-colors"
+                        className="p-1 sm:p-1.5 hover:bg-black/5 rounded transition-colors"
                         title="Download"
                       >
                         <Download className="h-4 w-4 text-secondary hover:text-primary" />
                       </button>
                       <button
-                        className="p-1.5 hover:bg-black/5 rounded transition-colors"
+                        className="p-1 sm:p-1.5 hover:bg-black/5 rounded transition-colors"
                         title="View Log"
                       >
                         <Eye className="h-4 w-4 text-secondary hover:text-primary" />
                       </button>
                       <button
-                        className="p-1.5 hover:bg-black/5 rounded transition-colors"
+                        className="p-1 sm:p-1.5 hover:bg-black/5 rounded transition-colors"
                         title="Rerun"
                       >
                         <RotateCcw className="h-4 w-4 text-secondary hover:text-primary" />

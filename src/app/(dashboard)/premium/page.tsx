@@ -132,43 +132,43 @@ const premiumTools = [
 
 export default function PremiumPage() {
   return (
-    <div className="container mx-auto py-8 space-y-12">
-      <div className="flex items-center gap-4">
-        <div className="p-3 rounded-xl bg-linear-to-br from-yellow-400 to-orange-500 shadow-lg">
-          <Crown className="w-8 h-8 text-white" />
+    <div className="container mx-auto py-6 sm:py-8 lg:py-12 px-4 sm:px-6 space-y-8 sm:space-y-12">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+        <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-linear-to-br from-yellow-400 to-orange-500 shadow-lg shrink-0">
+          <Crown className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Premium Tools</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">Premium Tools</h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
             Advanced PDF operations powered by Gotenberg.
           </p>
         </div>
       </div>
 
       {premiumTools.map((category) => (
-        <div key={category.category} className="space-y-4">
-          <h2 className="text-2xl font-bold text-foreground">
+        <div key={category.category} className="space-y-3 sm:space-y-4 lg:space-y-6">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">
             {category.category}
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
             {category.tools.map((tool) => (
               <Link
                 key={tool.href}
                 href={tool.href}
-                className="group relative overflow-hidden rounded-xl border border-border bg-card p-6 hover:shadow-lg transition-all hover:-translate-y-1"
+                className="group relative overflow-hidden rounded-lg sm:rounded-xl border border-border bg-card p-4 sm:p-6 hover:shadow-lg transition-all hover:-translate-y-1"
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className={`p-3 rounded-lg ${tool.bgColor}`}>
-                    <tool.icon className={`w-6 h-6 ${tool.color}`} />
+                <div className="flex items-start justify-between mb-3 sm:mb-4">
+                  <div className={`p-2 sm:p-3 rounded-lg ${tool.bgColor}`}>
+                    <tool.icon className={`w-5 h-5 sm:w-6 sm:h-6 ${tool.color}`} />
                   </div>
-                  <div className="px-2 py-1 rounded-full bg-yellow-500/10 text-yellow-600 text-xs font-medium border border-yellow-200">
+                  <div className="px-2 py-0.5 sm:py-1 rounded-full bg-yellow-500/10 text-yellow-600 text-xs font-medium border border-yellow-200">
                     Premium
                   </div>
                 </div>
-                <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors">
+                <h3 className="text-base sm:text-lg font-semibold mb-1 sm:mb-2 group-hover:text-primary transition-colors">
                   {tool.name}
                 </h3>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                   {tool.description}
                 </p>
               </Link>

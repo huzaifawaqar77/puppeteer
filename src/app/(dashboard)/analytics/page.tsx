@@ -5,6 +5,7 @@ import { databases } from "@/lib/appwrite";
 import { appwriteConfig } from "@/lib/config";
 import { useAuth } from "@/contexts/AuthContext";
 import { Query } from "appwrite";
+import { ApiKeyAnalytics } from "@/components/ApiKeyAnalytics";
 import {
   BarChart,
   Bar,
@@ -188,6 +189,9 @@ export default function AnalyticsPage() {
           Track your PDF processing statistics and insights
         </p>
       </div>
+
+      {/* API Key Analytics Component */}
+      <ApiKeyAnalytics />
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

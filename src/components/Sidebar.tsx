@@ -12,6 +12,7 @@ import {
   Settings,
   LogOut,
   Crown,
+  X,
 } from "lucide-react";
 
 const navigation = [
@@ -24,11 +25,14 @@ const navigation = [
   { name: "Premium", href: "/premium", icon: Crown },
 ];
 
-const bottomNav = [
-  { name: "Settings", href: "/settings", icon: Settings },
-];
+const bottomNav = [{ name: "Settings", href: "/settings", icon: Settings }];
 
-export default function Sidebar() {
+interface SidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
   const pathname = usePathname();
 
   const isActive = (href: string) => {
@@ -44,18 +48,27 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-60 bg-sidebar border-r border-border flex flex-col">
+    <aside className="w-60 h-full bg-sidebar border-r border-border flex flex-col">
       {/* Logo */}
-      <div className="p-6 border-b border-border">
-        <Link href="/dashboard" className="flex items-center gap-3">
-          <div className="relative w-10 h-10">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary via-orange-400 to-primary opacity-80 rounded-lg blur-sm"></div>
-            <div className="relative bg-gradient-to-br from-primary to-orange-500 rounded-lg w-full h-full flex items-center justify-center text-white font-bold text-xl shadow-glow-orange">
+      <div className="p-4 sm:p-6 border-b border-border flex items-center justify-between">
+        <Link href="/dashboard" className="flex items-center gap-3 flex-1">
+          <div className="relative w-10 h-10 shrink-0">
+            <div className="absolute inset-0 bg-linear-to-br from-primary via-orange-400 to-primary opacity-80 rounded-lg blur-sm"></div>
+            <div className="relative bg-linear-to-br from-primary to-orange-500 rounded-lg w-full h-full flex items-center justify-center text-white font-bold text-xl shadow-glow-orange">
               O
             </div>
           </div>
           <span className="text-xl font-bold text-foreground">OmniPDF</span>
         </Link>
+        {/* Close button for mobile */}
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="md:hidden p-2 hover:bg-black/5 rounded-lg transition-colors"
+          >
+            <X className="h-5 w-5 text-secondary" />
+          </button>
+        )}
       </div>
 
       {/* Main Navigation */}
@@ -81,7 +94,9 @@ export default function Sidebar() {
                   )}
                   <item.icon
                     className={`h-5 w-5 ${
-                      active ? "text-primary" : "text-secondary group-hover:text-foreground"
+                      active
+                        ? "text-primary"
+                        : "text-secondary group-hover:text-foreground"
                     }`}
                   />
                   <span>{item.name}</span>
@@ -114,14 +129,16 @@ export default function Sidebar() {
             >
               <item.icon
                 className={`h-5 w-5 ${
-                  active ? "text-primary" : "text-secondary group-hover:text-foreground"
+                  active
+                    ? "text-primary"
+                    : "text-secondary group-hover:text-foreground"
                 }`}
               />
               <span>{item.name}</span>
             </Link>
           );
         })}
-        
+
         <button
           onClick={handleLogout}
           className="w-full group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-secondary hover:text-foreground hover:bg-black/5 transition-all"
