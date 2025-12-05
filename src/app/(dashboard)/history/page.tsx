@@ -114,7 +114,7 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-6xl py-4 sm:py-8 px-4 sm:px-6">
+    <div className="container mx-auto max-w-7xl px-4 sm:px-6 py-4 sm:py-8">
       <div className="space-y-4 sm:space-y-6">
         <div>
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">
@@ -139,7 +139,9 @@ export default function HistoryPage() {
           <>
             {downloadError && (
               <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 sm:p-4 mb-4">
-                <p className="text-xs sm:text-sm text-red-600">{downloadError}</p>
+                <p className="text-xs sm:text-sm text-red-600">
+                  {downloadError}
+                </p>
               </div>
             )}
             <div className="bg-card border border-border rounded-lg sm:rounded-xl overflow-x-auto shadow-card">
@@ -201,12 +203,16 @@ export default function HistoryPage() {
                             {downloading === job.$id ? (
                               <>
                                 <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
-                                <span className="hidden sm:inline">Downloading...</span>
+                                <span className="hidden sm:inline">
+                                  Downloading...
+                                </span>
                               </>
                             ) : (
                               <>
                                 <Download className="h-3 w-3 sm:h-4 sm:w-4" />
-                                <span className="hidden sm:inline">Download</span>
+                                <span className="hidden sm:inline">
+                                  Download
+                                </span>
                               </>
                             )}
                           </button>

@@ -132,13 +132,15 @@ const premiumTools = [
 
 export default function PremiumPage() {
   return (
-    <div className="container mx-auto py-6 sm:py-8 lg:py-12 px-4 sm:px-6 space-y-8 sm:space-y-12">
+    <div className="container mx-auto max-w-7xl px-4 sm:px-6 py-4 sm:py-8 space-y-8 sm:space-y-12">
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
         <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-linear-to-br from-yellow-400 to-orange-500 shadow-lg shrink-0">
           <Crown className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
         </div>
         <div>
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">Premium Tools</h1>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">
+            Premium Tools
+          </h1>
           <p className="text-sm sm:text-base text-muted-foreground mt-1">
             Advanced PDF operations powered by Gotenberg.
           </p>
@@ -146,7 +148,10 @@ export default function PremiumPage() {
       </div>
 
       {premiumTools.map((category) => (
-        <div key={category.category} className="space-y-3 sm:space-y-4 lg:space-y-6">
+        <div
+          key={category.category}
+          className="space-y-3 sm:space-y-4 lg:space-y-6"
+        >
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">
             {category.category}
           </h2>
@@ -159,7 +164,9 @@ export default function PremiumPage() {
               >
                 <div className="flex items-start justify-between mb-3 sm:mb-4">
                   <div className={`p-2 sm:p-3 rounded-lg ${tool.bgColor}`}>
-                    <tool.icon className={`w-5 h-5 sm:w-6 sm:h-6 ${tool.color}`} />
+                    <tool.icon
+                      className={`w-5 h-5 sm:w-6 sm:h-6 ${tool.color}`}
+                    />
                   </div>
                   <div className="px-2 py-0.5 sm:py-1 rounded-full bg-yellow-500/10 text-yellow-600 text-xs font-medium border border-yellow-200">
                     Premium

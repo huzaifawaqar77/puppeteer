@@ -181,7 +181,7 @@ export default function AnalyticsPage() {
       : 0;
 
   return (
-    <div className="container mx-auto max-w-7xl py-8 px-4 space-y-8">
+    <div className="container mx-auto max-w-7xl px-4 sm:px-6 py-4 sm:py-8 space-y-8">
       {/* Header */}
       <div>
         <h1 className="text-4xl font-bold text-foreground mb-2">Analytics</h1>

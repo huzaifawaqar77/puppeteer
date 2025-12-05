@@ -22,11 +22,13 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-4xl py-4 sm:py-8 px-4 sm:px-6">
+    <div className="container mx-auto max-w-7xl px-4 sm:px-6 py-4 sm:py-8">
       <div className="space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">Settings</h1>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">
+            Settings
+          </h1>
           <p className="mt-2 text-sm sm:text-base text-secondary">
             Manage your account preferences
           </p>
@@ -34,7 +36,9 @@ export default function SettingsPage() {
 
         {/* Profile Section */}
         <div className="bg-card border border-border rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-card">
-          <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-4">Profile</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-4">
+            Profile
+          </h2>
           <div className="space-y-3 sm:space-y-4">
             <div>
               <label className="block text-xs sm:text-sm font-medium text-foreground mb-2">
@@ -65,11 +69,15 @@ export default function SettingsPage() {
 
         {/* Preferences */}
         <div className="bg-card border border-border rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-card">
-          <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-4">Preferences</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-4">
+            Preferences
+          </h2>
           <div className="space-y-3 sm:space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 gap-3">
               <div className="flex-1">
-                <p className="text-xs sm:text-sm font-medium text-foreground">Auto-delete files</p>
+                <p className="text-xs sm:text-sm font-medium text-foreground">
+                  Auto-delete files
+                </p>
                 <p className="text-xs text-secondary">
                   Automatically delete processed files after 24 hours
                 </p>
@@ -82,7 +90,9 @@ export default function SettingsPage() {
             </div>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 sm:py-3 border-t border-border gap-3">
               <div className="flex-1">
-                <p className="text-xs sm:text-sm font-medium text-foreground">Email notifications</p>
+                <p className="text-xs sm:text-sm font-medium text-foreground">
+                  Email notifications
+                </p>
                 <p className="text-xs text-secondary">
                   Receive email when processing is complete
                 </p>
@@ -97,8 +107,12 @@ export default function SettingsPage() {
 
         {/* Plan Info */}
         <div className="bg-gradient-to-r from-primary/10 to-orange-500/10 border border-primary/30 rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-card">
-          <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-2">Current Plan</h2>
-          <p className="text-2xl sm:text-3xl font-bold text-primary mb-1">FREE</p>
+          <h2 className="text-lg sm:text-xl font-semibold text-foreground mb-2">
+            Current Plan
+          </h2>
+          <p className="text-2xl sm:text-3xl font-bold text-primary mb-1">
+            FREE
+          </p>
           <p className="text-xs sm:text-sm text-secondary mb-4">
             30MB max file size • Basic features
           </p>
@@ -109,7 +123,9 @@ export default function SettingsPage() {
 
         {success && (
           <div className="bg-green-50 border border-green-200 rounded-lg p-3 sm:p-4">
-            <p className="text-xs sm:text-sm text-green-700 font-medium">Settings saved successfully!</p>
+            <p className="text-xs sm:text-sm text-green-700 font-medium">
+              Settings saved successfully!
+            </p>
           </div>
         )}
 
@@ -134,4 +150,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-
