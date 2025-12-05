@@ -63,6 +63,15 @@ export async function POST(request: NextRequest) {
     // 4. Determine user tier (from request body or default to free)
     const userTier = body.tier || "free";
 
+    // Check if API key is configured
+    if (!process.env.APPWRITE_API_KEY) {
+      console.error("APPWRITE_API_KEY environment variable not set");
+      return NextResponse.json(
+        { error: "Server configuration error", details: "Missing APPWRITE_API_KEY" },
+        { status: 500 }
+      );
+    }
+
     // 5. Check if user already has max keys for their tier
     const maxKeys =
       userTier === "premium"
@@ -72,8 +81,13 @@ export async function POST(request: NextRequest) {
     // Create admin client for server-side access
     const adminClient = new Client()
       .setEndpoint(appwriteConfig.endpoint)
-      .setProject(appwriteConfig.projectId)
-      .setKey(process.env.APPWRITE_API_KEY || "");
+      .setProject(appwriteConfig.projectId);
+
+    // Use the API key for authentication
+    adminClient.headers = {
+      ...adminClient.headers,
+      "X-Appwrite-Key": process.env.APPWRITE_API_KEY,
+    };
 
     const databases = new Databases(adminClient);
 

@@ -27,11 +27,25 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Check if API key is configured
+    if (!process.env.APPWRITE_API_KEY) {
+      console.error("APPWRITE_API_KEY environment variable not set");
+      return NextResponse.json(
+        { error: "Server configuration error", details: "Missing APPWRITE_API_KEY" },
+        { status: 500 }
+      );
+    }
+
     // 2. Create an admin Appwrite client for server-side access
     const adminClient = new Client()
       .setEndpoint(appwriteConfig.endpoint)
-      .setProject(appwriteConfig.projectId)
-      .setKey(process.env.APPWRITE_API_KEY || "");
+      .setProject(appwriteConfig.projectId);
+
+    // Use the API key for authentication
+    adminClient.headers = {
+      ...adminClient.headers,
+      "X-Appwrite-Key": process.env.APPWRITE_API_KEY,
+    };
 
     const databases = new Databases(adminClient);
 
