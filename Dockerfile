@@ -1,6 +1,26 @@
-# Lightweight production Dockerfile optimized for Next.js with Coolify
-# Simple, reliable build for maximum compatibility
+# Multi-stage Dockerfile optimized for Next.js with Coolify
+# Builder stage: includes dev dependencies for build
+FROM node:20-alpine AS builder
 
+WORKDIR /app
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies (including dev for build)
+RUN npm ci && npm cache clean --force
+
+# Copy source code
+COPY . .
+
+# Build the Next.js application
+RUN npm run build
+
+# Runtime stage: minimal image with only production dependencies
 FROM node:20-alpine
 
 WORKDIR /app
@@ -16,14 +36,12 @@ RUN apk add --no-cache curl
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+# Install production dependencies only
+RUN npm ci --omit=dev && npm cache clean --force
 
-# Copy source code
-COPY . .
-
-# Build the Next.js application
-RUN npm run build
+# Copy built application from builder stage
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
 
 # Create non-root user for security
 RUN addgroup --system --gid 1001 nodejs && \
