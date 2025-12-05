@@ -6,6 +6,7 @@ import {
   createPdfResponse,
 } from "@/lib/gotenberg";
 import { gotenbergConfig } from "@/lib/config";
+import { requirePremiumApiKey } from "@/middleware/require-premium-api-key";
 
 const client = new GotenbergClient(gotenbergConfig);
 
@@ -42,6 +43,12 @@ function isValidUrl(urlString: string): boolean {
 }
 
 export async function POST(request: NextRequest) {
+  // Validate API key and check tier
+  const apiKeyValidation = await requirePremiumApiKey(request);
+  if (!apiKeyValidation.valid) {
+    return apiKeyValidation.response!;
+  }
+
   try {
     const data = (await request.json()) as UrlToPdfRequest;
 
