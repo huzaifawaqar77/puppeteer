@@ -4,13 +4,7 @@ import {
   appendFormField,
   createErrorResponse,
 } from "@/lib/gotenberg";
-
-const gotenbergConfig = {
-  url: process.env.GOTENBERG_URL || "https://gotenberg.uiflexer.com",
-  username: process.env.GOTENBERG_USERNAME || "Znlz6EqYM09GmcJB",
-  password:
-    process.env.GOTENBERG_PASSWORD || "l1neT52mJSFRbiopVzEZLz6K0HrB6uqG",
-};
+import { gotenbergConfig } from "@/lib/config";
 
 const client = new GotenbergClient(gotenbergConfig);
 

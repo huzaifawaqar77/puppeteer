@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { gotenbergConfig } from "@/lib/config";
 
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const type = formData.get("type") as string;
-    const gotenbergUrl = "https://gotenberg.uiflexer.com";
-    const username = "Znlz6EqYM09GmcJB";
-    const password = "l1neT52mJSFRbiopVzEZLz6K0HrB6uqG";
+    const gotenbergUrl = gotenbergConfig.url;
+    const username = gotenbergConfig.username;
+    const password = gotenbergConfig.password;
 
     // Create Basic Auth header
     const credentials = Buffer.from(`${username}:${password}`).toString(
