@@ -285,3 +285,70 @@ export async function validateApiKey(plainKey: string): Promise<any> {
     return null;
   }
 }
+
+/**
+ * Get user's premium API key by user ID
+ * Used for frontend app authentication
+ */
+export async function getUserPremiumApiKey(userId: string): Promise<any> {
+  try {
+    const { Client, Databases, Query } = await import("node-appwrite");
+    const { appwriteConfig } = await import("@/lib/config");
+
+    const client = new Client()
+      .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || "https://appwrite.uiflexer.com/v1")
+      .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || "68c77b650020a2e5fa47")
+      .setKey(process.env.APPWRITE_API_KEY || "");
+
+    if (!process.env.APPWRITE_API_KEY) {
+      console.error("APPWRITE_API_KEY not configured");
+      return { valid: false };
+    }
+
+    const databases = new Databases(client);
+
+    // Query for user's premium API keys that are active
+    const response = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.collections.apiKeys,
+      [
+        Query.equal("userId", userId),
+        Query.equal("tier", "premium"),
+        Query.equal("status", "active"),
+      ]
+    );
+
+    if (!response.documents || response.documents.length === 0) {
+      return { valid: false };
+    }
+
+    const keyDoc = response.documents[0];
+
+    // Parse allowedEndpoints if it's a JSON string
+    let allowedEndpoints: string[] = [];
+    if (keyDoc.allowedEndpoints) {
+      try {
+        allowedEndpoints = JSON.parse(keyDoc.allowedEndpoints);
+      } catch (e) {
+        allowedEndpoints = [];
+      }
+    }
+
+    return {
+      valid: true,
+      keyId: keyDoc.$id,
+      userId: keyDoc.userId,
+      tier: keyDoc.tier,
+      status: keyDoc.status,
+      expiresAt: keyDoc.expiresAt,
+      dailyLimit: keyDoc.dailyLimit,
+      monthlyLimit: keyDoc.monthlyLimit,
+      allowedEndpoints,
+      requestCountToday: keyDoc.requestCountToday || 0,
+      message: null,
+    };
+  } catch (error) {
+    console.error("Error getting user premium API key:", error);
+    return { valid: false };
+  }
+}

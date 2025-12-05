@@ -1,9 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Download } from "lucide-react";
+import { useApiKey } from "@/contexts/ApiKeyContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function UrlToPdfPage() {
+  const { user } = useAuth();
+  const { apiKey, isLoading: isLoadingApiKey, error: apiKeyError } = useApiKey();
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -41,9 +45,16 @@ export default function UrlToPdfPage() {
     try {
       setLoading(true);
 
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
       const response = await fetch("/api/premium/url-to-pdf", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.$id}`,
+        },
         body: JSON.stringify({
           url,
           paperWidth: paperWidth || undefined,
@@ -100,6 +111,36 @@ export default function UrlToPdfPage() {
           </p>
         </div>
       </div>
+
+      {/* API Key Status */}
+      {isLoadingApiKey && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <p className="text-blue-800">Loading your API key...</p>
+        </div>
+      )}
+
+      {!isLoadingApiKey && !apiKey && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-800 font-medium">
+            Premium API key not found
+          </p>
+          <p className="text-red-700 text-sm mt-1">
+            Go to{" "}
+            <a href="/api-docs" className="underline hover:text-red-900">
+              API Docs
+            </a>{" "}
+            to generate a premium API key first.
+          </p>
+        </div>
+      )}
+
+      {!isLoadingApiKey && apiKey && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <p className="text-green-800 text-sm">
+            ✓ Using premium API key: <span className="font-mono font-semibold">{apiKey.keyPrefix}...</span>
+          </p>
+        </div>
+      )}
 
       <form onSubmit={handleConvert} className="space-y-6">
         {/* URL Input */}
@@ -407,11 +448,17 @@ export default function UrlToPdfPage() {
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !apiKey || isLoadingApiKey}
           className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center space-x-2"
         >
           <Download size={20} />
-          <span>{loading ? "Converting..." : "Convert URL to PDF"}</span>
+          <span>
+            {loading
+              ? "Converting..."
+              : !apiKey || isLoadingApiKey
+                ? "Loading API key..."
+                : "Convert URL to PDF"}
+          </span>
         </button>
       </form>
     </div>

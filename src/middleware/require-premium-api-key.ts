@@ -3,6 +3,7 @@ import {
   hashApiKey,
   isValidApiKeyFormat,
   validateApiKey,
+  getUserPremiumApiKey,
 } from "@/lib/api-keys";
 
 /**
@@ -43,44 +44,66 @@ export async function requirePremiumApiKey(
             success: false,
             error: "Missing or invalid authorization header",
             message:
-              'Authorization header required in format: "Bearer YOUR_API_KEY"',
+              'Authorization header required in format: "Bearer YOUR_API_KEY_OR_USER_ID"',
           },
           { status: 401 }
         ),
       };
     }
 
-    // Extract API key
-    const apiKey = authHeader.substring(7); // Remove "Bearer "
+    // Extract credential (API key or user ID)
+    const credential = authHeader.substring(7); // Remove "Bearer "
 
-    if (!apiKey) {
+    if (!credential) {
       return {
         valid: false,
         response: NextResponse.json(
           {
             success: false,
-            error: "API key is required",
+            error: "API key or user ID is required",
           },
           { status: 401 }
         ),
       };
     }
 
-    // Validate API key
-    const validation = await validateApiKey(apiKey);
+    let validation;
 
-    if (!validation.valid) {
-      return {
-        valid: false,
-        response: NextResponse.json(
-          {
-            success: false,
-            error: "Invalid or inactive API key",
-            message: validation.message || "The provided API key is not valid",
-          },
-          { status: 401 }
-        ),
-      };
+    // Check if credential is a user ID (format: appwrite user ID pattern)
+    // User IDs typically look like: "8da11a9b-a4ba-4ffb-8698-9e6342a1685f"
+    // API keys look like: "pk_XXXXX..."
+    if (credential.startsWith("pk_")) {
+      // Direct API key authentication
+      validation = await validateApiKey(credential);
+      if (!validation.valid) {
+        return {
+          valid: false,
+          response: NextResponse.json(
+            {
+              success: false,
+              error: "Invalid or inactive API key",
+              message: validation.message || "The provided API key is not valid",
+            },
+            { status: 401 }
+          ),
+        };
+      }
+    } else {
+      // User ID authentication - look up their premium API key
+      validation = await getUserPremiumApiKey(credential);
+      if (!validation.valid) {
+        return {
+          valid: false,
+          response: NextResponse.json(
+            {
+              success: false,
+              error: "Premium API key not found for this user",
+              message: "Please generate a premium API key first",
+            },
+            { status: 401 }
+          ),
+        };
+      }
     }
 
     // Check if key is active and not expired
