@@ -205,6 +205,7 @@ export default function ApiDocsPage() {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${user?.$id}`,
         },
       });
 
@@ -236,6 +237,7 @@ export default function ApiDocsPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${user?.$id}`,
         },
         body: JSON.stringify({
           name: "Generated Key",
@@ -268,6 +270,9 @@ export default function ApiDocsPage() {
       setError(null);
       const response = await fetch(`/api/user/api-keys/${keyId}`, {
         method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${user?.$id}`,
+        },
       });
 
       if (!response.ok) {
@@ -328,10 +333,12 @@ export default function ApiDocsPage() {
       <div className="bg-gradient-to-r from-primary/20 to-primary/10 border border-primary/30 rounded-xl p-8">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <h2 className="text-2xl font-bold text-foreground mb-2">API Keys</h2>
+            <h2 className="text-2xl font-bold text-foreground mb-2">
+              API Keys
+            </h2>
             <p className="text-secondary mb-4">
-              Manage your API keys for secure access to premium features. Keep them
-              private and rotate regularly.
+              Manage your API keys for secure access to premium features. Keep
+              them private and rotate regularly.
             </p>
 
             {!user ? (
@@ -342,7 +349,9 @@ export default function ApiDocsPage() {
               </div>
             ) : error ? (
               <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-4">
-                <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
+                <p className="text-sm text-red-700 dark:text-red-400">
+                  {error}
+                </p>
               </div>
             ) : null}
 
@@ -350,10 +359,14 @@ export default function ApiDocsPage() {
               <div className="bg-card border border-border rounded-lg p-4 space-y-3 mb-4">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <p className="text-xs text-secondary mb-1">Your Current API Key</p>
+                    <p className="text-xs text-secondary mb-1">
+                      Your Current API Key
+                    </p>
                     <div className="flex items-center gap-2">
                       <code className="text-sm font-mono text-foreground bg-secondary/10 px-3 py-2 rounded flex-1 truncate">
-                        {showApiKey ? currentKey.key : "•".repeat(currentKey.key.length)}
+                        {showApiKey
+                          ? currentKey.key
+                          : "•".repeat(currentKey.key.length)}
                       </code>
                       <button
                         onClick={() => setShowApiKey(!showApiKey)}
@@ -383,11 +396,15 @@ export default function ApiDocsPage() {
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="text-xs text-secondary">Tier</p>
-                    <p className="text-foreground font-medium capitalize">{currentKey.tier}</p>
+                    <p className="text-foreground font-medium capitalize">
+                      {currentKey.tier}
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs text-secondary">Status</p>
-                    <p className="text-foreground font-medium capitalize">{currentKey.status}</p>
+                    <p className="text-foreground font-medium capitalize">
+                      {currentKey.status}
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs text-secondary">Created</p>
@@ -397,7 +414,9 @@ export default function ApiDocsPage() {
                   </div>
                   <div>
                     <p className="text-xs text-secondary">Requests</p>
-                    <p className="text-foreground font-medium">{currentKey.requestCount}</p>
+                    <p className="text-foreground font-medium">
+                      {currentKey.requestCount}
+                    </p>
                   </div>
                 </div>
                 <div className="flex gap-2 pt-2">
@@ -441,11 +460,15 @@ export default function ApiDocsPage() {
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="text-xs text-secondary">Tier</p>
-                    <p className="text-foreground font-medium capitalize">{currentKey.tier}</p>
+                    <p className="text-foreground font-medium capitalize">
+                      {currentKey.tier}
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs text-secondary">Status</p>
-                    <p className="text-foreground font-medium capitalize">{currentKey.status}</p>
+                    <p className="text-foreground font-medium capitalize">
+                      {currentKey.status}
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs text-secondary">Created</p>
@@ -455,7 +478,9 @@ export default function ApiDocsPage() {
                   </div>
                   <div>
                     <p className="text-xs text-secondary">Requests</p>
-                    <p className="text-foreground font-medium">{currentKey.requestCount}</p>
+                    <p className="text-foreground font-medium">
+                      {currentKey.requestCount}
+                    </p>
                   </div>
                 </div>
                 <div className="flex gap-2 pt-2">
@@ -502,18 +527,24 @@ export default function ApiDocsPage() {
 
             {keysList.length > 1 && (
               <div className="mt-6">
-                <h3 className="text-sm font-semibold text-foreground mb-3">Other Keys</h3>
+                <h3 className="text-sm font-semibold text-foreground mb-3">
+                  Other Keys
+                </h3>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {keysList.map((key) => (
                     <div
                       key={key.id}
                       className={`bg-card border rounded-lg p-3 flex items-center justify-between text-sm cursor-pointer hover:border-primary transition ${
-                        currentKey?.id === key.id ? "border-primary" : "border-border"
+                        currentKey?.id === key.id
+                          ? "border-primary"
+                          : "border-border"
                       }`}
                       onClick={() => setCurrentKey(key)}
                     >
                       <div>
-                        <p className="text-foreground font-medium">{key.keyPrefix}****</p>
+                        <p className="text-foreground font-medium">
+                          {key.keyPrefix}****
+                        </p>
                         <p className="text-xs text-secondary">{key.name}</p>
                       </div>
                       <div className="text-right text-xs text-secondary">

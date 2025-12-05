@@ -4,7 +4,7 @@ import { validateApiKey } from "@/lib/api-keys";
 /**
  * Middleware to protect premium endpoints
  * Requires valid API key with appropriate tier
- * 
+ *
  * Usage:
  * export async function POST(request: NextRequest) {
  *   const validation = await requirePremiumApiKey(request);
@@ -38,7 +38,8 @@ export async function requirePremiumApiKey(
           {
             success: false,
             error: "Missing or invalid authorization header",
-            message: 'Authorization header required in format: "Bearer YOUR_API_KEY"',
+            message:
+              'Authorization header required in format: "Bearer YOUR_API_KEY"',
           },
           { status: 401 }
         ),
@@ -227,7 +228,9 @@ export async function requirePremiumApiKey(
  * Simpler version for endpoints that only need basic API key validation
  * without tier or endpoint restrictions
  */
-export async function requireApiKey(request: NextRequest): Promise<ApiKeyValidation> {
+export async function requireApiKey(
+  request: NextRequest
+): Promise<ApiKeyValidation> {
   try {
     const authHeader = request.headers.get("authorization");
 
