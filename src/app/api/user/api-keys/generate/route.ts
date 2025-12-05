@@ -1,22 +1,22 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { databases } from '@/lib/appwrite';
-import { appwriteConfig } from '@/lib/config';
-import { Query } from 'appwrite';
+import { NextRequest, NextResponse } from "next/server";
+import { databases } from "@/lib/appwrite";
+import { appwriteConfig } from "@/lib/config";
+import { Query } from "appwrite";
 import {
   generateApiKey,
   hashApiKey,
   getKeyPrefix,
   isValidApiKeyFormat,
   validateKeyMetadata,
-} from '@/lib/api-keys';
-import { getClientIp } from '@/middleware/validate-api-key';
+} from "@/lib/api-keys";
+import { getClientIp } from "@/middleware/validate-api-key";
 
 interface GenerateKeyRequest {
   name: string;
   description?: string;
   dailyLimit?: number;
   expiresAt?: string;
-  tier?: 'free' | 'premium';
+  tier?: "free" | "premium";
 }
 
 /**
@@ -26,19 +26,19 @@ interface GenerateKeyRequest {
 export async function POST(request: NextRequest) {
   try {
     // 1. Authenticate user from Authorization header
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
+    const authHeader = request.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
       return NextResponse.json(
-        { error: 'Missing or invalid Authorization header' },
+        { error: "Missing or invalid Authorization header" },
         { status: 401 }
       );
     }
 
-    const userId = authHeader.replace('Bearer ', '').trim();
+    const userId = authHeader.replace("Bearer ", "").trim();
 
     if (!userId || userId.length === 0) {
       return NextResponse.json(
-        { error: 'Invalid user ID in Authorization header' },
+        { error: "Invalid user ID in Authorization header" },
         { status: 401 }
       );
     }
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
       body = await request.json();
     } catch {
       return NextResponse.json(
-        { error: 'Invalid JSON in request body' },
+        { error: "Invalid JSON in request body" },
         { status: 400 }
       );
     }
@@ -57,27 +57,25 @@ export async function POST(request: NextRequest) {
     // Validate metadata
     const validationError = validateKeyMetadata(body);
     if (validationError) {
-      return NextResponse.json(
-        { error: validationError },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: validationError }, { status: 400 });
     }
 
     // 4. Determine user tier (from request body or default to free)
-    const userTier = body.tier || 'free';
+    const userTier = body.tier || "free";
 
     // 5. Check if user already has max keys for their tier
-    const maxKeys = userTier === 'premium'
-      ? parseInt(process.env.PREMIUM_TIER_KEY_LIMIT || '5')
-      : parseInt(process.env.FREE_TIER_KEY_LIMIT || '1');
+    const maxKeys =
+      userTier === "premium"
+        ? parseInt(process.env.PREMIUM_TIER_KEY_LIMIT || "5")
+        : parseInt(process.env.FREE_TIER_KEY_LIMIT || "1");
 
     const existingKeys = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.collections.apiKeys,
       [
-        Query.equal('userId', userId),
-        Query.notEqual('status', 'revoked'),
-        Query.notEqual('status', 'expired'),
+        Query.equal("userId", userId),
+        Query.notEqual("status", "revoked"),
+        Query.notEqual("status", "expired"),
       ]
     );
 
@@ -100,9 +98,9 @@ export async function POST(request: NextRequest) {
 
     // Validate format
     if (!isValidApiKeyFormat(plainKey)) {
-      console.error('Failed to generate valid API key format');
+      console.error("Failed to generate valid API key format");
       return NextResponse.json(
-        { error: 'Failed to generate valid API key' },
+        { error: "Failed to generate valid API key" },
         { status: 500 }
       );
     }
@@ -111,8 +109,10 @@ export async function POST(request: NextRequest) {
     const now = new Date().toISOString();
     let expiresAt = null;
 
-    if (process.env.ENABLE_API_KEY_EXPIRATION === 'true') {
-      const expirationDays = parseInt(process.env.API_KEY_EXPIRATION_DAYS || '365');
+    if (process.env.ENABLE_API_KEY_EXPIRATION === "true") {
+      const expirationDays = parseInt(
+        process.env.API_KEY_EXPIRATION_DAYS || "365"
+      );
       const expirationDate = new Date();
       expirationDate.setDate(expirationDate.getDate() + expirationDays);
       expiresAt = expirationDate.toISOString();
@@ -121,15 +121,15 @@ export async function POST(request: NextRequest) {
     const response = await databases.createDocument(
       appwriteConfig.databaseId,
       appwriteConfig.collections.apiKeys,
-      'unique()',
+      "unique()",
       {
         userId,
         keyHash,
         keyPrefix,
         name: body.name,
-        description: body.description || '',
+        description: body.description || "",
         tier: userTier,
-        status: 'active',
+        status: "active",
         requestCount: 0,
         dailyLimit: body.dailyLimit || null,
         monthlyLimit: null,
@@ -152,14 +152,18 @@ export async function POST(request: NextRequest) {
         tier: userTier,
         createdAt: response.createdAt,
         expiresAt: response.expiresAt || null,
-        message: 'Save this key somewhere safe. You won\'t be able to see it again!',
+        message:
+          "Save this key somewhere safe. You won't be able to see it again!",
       },
       { status: 201 }
     );
   } catch (error) {
-    console.error('API Key Generation Error:', error);
+    console.error("API Key Generation Error:", error);
     return NextResponse.json(
-      { error: 'Failed to generate API key', details: error instanceof Error ? error.message : String(error) },
+      {
+        error: "Failed to generate API key",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }

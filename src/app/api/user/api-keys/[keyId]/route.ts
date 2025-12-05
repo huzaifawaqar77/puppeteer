@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { databases } from '@/lib/appwrite';
-import { appwriteConfig } from '@/lib/config';
+import { NextRequest, NextResponse } from "next/server";
+import { databases } from "@/lib/appwrite";
+import { appwriteConfig } from "@/lib/config";
 
 /**
  * DELETE /api/user/api-keys/:keyId
@@ -12,19 +12,19 @@ export async function DELETE(
 ) {
   try {
     // 1. Authenticate user from Authorization header
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
+    const authHeader = request.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
       return NextResponse.json(
-        { error: 'Missing or invalid Authorization header' },
+        { error: "Missing or invalid Authorization header" },
         { status: 401 }
       );
     }
 
-    const userId = authHeader.replace('Bearer ', '').trim();
+    const userId = authHeader.replace("Bearer ", "").trim();
 
     if (!userId || userId.length === 0) {
       return NextResponse.json(
-        { error: 'Invalid user ID in Authorization header' },
+        { error: "Invalid user ID in Authorization header" },
         { status: 401 }
       );
     }
@@ -32,10 +32,7 @@ export async function DELETE(
     const { keyId } = params;
 
     if (!keyId || keyId.length === 0) {
-      return NextResponse.json(
-        { error: 'Invalid key ID' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid key ID" }, { status: 400 });
     }
 
     // 2. Verify user owns this key
@@ -47,7 +44,7 @@ export async function DELETE(
 
     if (key.userId !== userId) {
       return NextResponse.json(
-        { error: 'Unauthorized to delete this key' },
+        { error: "Unauthorized to delete this key" },
         { status: 403 }
       );
     }
@@ -58,18 +55,22 @@ export async function DELETE(
       appwriteConfig.collections.apiKeys,
       keyId,
       {
-        status: 'revoked',
+        status: "revoked",
         updatedAt: new Date().toISOString(),
       }
     );
 
-    return NextResponse.json(
-      { message: 'API key revoked successfully', id: keyId }
-    );
+    return NextResponse.json({
+      message: "API key revoked successfully",
+      id: keyId,
+    });
   } catch (error) {
-    console.error('Delete API Key Error:', error);
+    console.error("Delete API Key Error:", error);
     return NextResponse.json(
-      { error: 'Failed to delete API key', details: error instanceof Error ? error.message : String(error) },
+      {
+        error: "Failed to delete API key",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }

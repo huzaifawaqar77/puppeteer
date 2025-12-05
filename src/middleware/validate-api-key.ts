@@ -1,19 +1,19 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { databases } from '@/lib/appwrite';
-import { appwriteConfig } from '@/lib/config';
-import { Query } from 'appwrite';
+import { NextRequest, NextResponse } from "next/server";
+import { databases } from "@/lib/appwrite";
+import { appwriteConfig } from "@/lib/config";
+import { Query } from "appwrite";
 import {
   hashApiKey,
   isKeyExpired,
   isDailyLimitExceeded,
   isValidApiKeyFormat,
   canAccessEndpoint,
-} from '@/lib/api-keys';
+} from "@/lib/api-keys";
 
 export interface ValidatedApiKey {
   id: string;
   userId: string;
-  tier: 'free' | 'premium';
+  tier: "free" | "premium";
   requestCount: number;
   dailyLimit: number | null;
   monthlyLimit: number | null;
@@ -26,10 +26,10 @@ export interface ValidatedApiKey {
  * Expected format: "Bearer pk_xxxxx..."
  */
 function extractApiKeyFromHeader(authHeader: string | null): string | null {
-  if (!authHeader?.startsWith('Bearer ')) {
+  if (!authHeader?.startsWith("Bearer ")) {
     return null;
   }
-  return authHeader.replace('Bearer ', '').trim();
+  return authHeader.replace("Bearer ", "").trim();
 }
 
 /**
@@ -47,11 +47,11 @@ export async function validateApiKey(
 ): Promise<ValidatedApiKey | null> {
   try {
     // Extract API key from header
-    const authHeader = request.headers.get('Authorization');
+    const authHeader = request.headers.get("Authorization");
     const apiKey = extractApiKeyFromHeader(authHeader);
 
     if (!apiKey) {
-      console.debug('No API key found in Authorization header');
+      console.debug("No API key found in Authorization header");
       return null;
     }
 
@@ -68,14 +68,13 @@ export async function validateApiKey(
     const response = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.collections.apiKeys,
-      [
-        Query.equal('keyHash', keyHash),
-        Query.equal('status', 'active'),
-      ]
+      [Query.equal("keyHash", keyHash), Query.equal("status", "active")]
     );
 
     if (response.documents.length === 0) {
-      console.debug(`API key not found in database: ${keyHash.substring(0, 8)}...`);
+      console.debug(
+        `API key not found in database: ${keyHash.substring(0, 8)}...`
+      );
       return null;
     }
 
@@ -90,10 +89,10 @@ export async function validateApiKey(
           appwriteConfig.databaseId,
           appwriteConfig.collections.apiKeys,
           keyDoc.$id,
-          { status: 'expired' }
+          { status: "expired" }
         );
       } catch (error) {
-        console.error('Failed to mark key as expired:', error);
+        console.error("Failed to mark key as expired:", error);
       }
       return null;
     }
@@ -122,7 +121,7 @@ export async function validateApiKey(
       keyPrefix: keyDoc.keyPrefix,
     };
   } catch (error) {
-    console.error('API Key Validation Error:', error);
+    console.error("API Key Validation Error:", error);
     return null;
   }
 }
@@ -148,11 +147,11 @@ export async function incrementKeyUsage(
       {
         requestCount: (key.requestCount || 0) + 1,
         lastUsedAt: new Date().toISOString(),
-        lastUsedFromIP: ip || 'unknown',
+        lastUsedFromIP: ip || "unknown",
       }
     );
   } catch (error) {
-    console.error('Failed to increment key usage:', error);
+    console.error("Failed to increment key usage:", error);
     // Don't throw - let request succeed even if tracking fails
   }
 }
@@ -160,35 +159,36 @@ export async function incrementKeyUsage(
 /**
  * Create a 401 Unauthorized response
  */
-export function unauthorizedResponse(message: string = 'Invalid or missing API key'): NextResponse {
-  return NextResponse.json(
-    { error: message },
-    { status: 401 }
-  );
+export function unauthorizedResponse(
+  message: string = "Invalid or missing API key"
+): NextResponse {
+  return NextResponse.json({ error: message }, { status: 401 });
 }
 
 /**
  * Create a 403 Forbidden response
  */
-export function forbiddenResponse(message: string = 'Access forbidden'): NextResponse {
-  return NextResponse.json(
-    { error: message },
-    { status: 403 }
-  );
+export function forbiddenResponse(
+  message: string = "Access forbidden"
+): NextResponse {
+  return NextResponse.json({ error: message }, { status: 403 });
 }
 
 /**
  * Create a 429 Too Many Requests response
  */
 export function rateLimitResponse(
-  message: string = 'API rate limit exceeded',
+  message: string = "API rate limit exceeded",
   remaining?: number
 ): NextResponse {
   const response = NextResponse.json(
-    { error: message, ...(remaining !== undefined && { requestsRemaining: remaining }) },
+    {
+      error: message,
+      ...(remaining !== undefined && { requestsRemaining: remaining }),
+    },
     { status: 429 }
   );
-  response.headers.set('Retry-After', '3600'); // 1 hour
+  response.headers.set("Retry-After", "3600"); // 1 hour
   return response;
 }
 
@@ -197,9 +197,9 @@ export function rateLimitResponse(
  */
 export function getClientIp(request: NextRequest): string {
   return (
-    request.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
-    request.headers.get('x-real-ip') ||
-    'unknown'
+    request.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+    request.headers.get("x-real-ip") ||
+    "unknown"
   );
 }
 
@@ -219,7 +219,7 @@ export function getClientIp(request: NextRequest): string {
 export async function validateAndAuthorizeApiKey(
   request: NextRequest,
   endpoint: string,
-  requiredTier?: 'free' | 'premium'
+  requiredTier?: "free" | "premium"
 ): Promise<{
   isValid: boolean;
   validatedKey?: ValidatedApiKey;
@@ -231,7 +231,7 @@ export async function validateAndAuthorizeApiKey(
   if (!validatedKey) {
     return {
       isValid: false,
-      response: unauthorizedResponse('Invalid or missing API key'),
+      response: unauthorizedResponse("Invalid or missing API key"),
     };
   }
 
@@ -239,16 +239,24 @@ export async function validateAndAuthorizeApiKey(
   if (requiredTier && validatedKey.tier !== requiredTier) {
     return {
       isValid: false,
-      response: forbiddenResponse(`${requiredTier} API key required for this endpoint`),
+      response: forbiddenResponse(
+        `${requiredTier} API key required for this endpoint`
+      ),
     };
   }
 
   // Check rate limit
-  if (validatedKey.dailyLimit && isDailyLimitExceeded(validatedKey.requestCount, validatedKey.dailyLimit)) {
-    const remaining = Math.max(0, validatedKey.dailyLimit - validatedKey.requestCount);
+  if (
+    validatedKey.dailyLimit &&
+    isDailyLimitExceeded(validatedKey.requestCount, validatedKey.dailyLimit)
+  ) {
+    const remaining = Math.max(
+      0,
+      validatedKey.dailyLimit - validatedKey.requestCount
+    );
     return {
       isValid: false,
-      response: rateLimitResponse('Daily API quota exceeded', remaining),
+      response: rateLimitResponse("Daily API quota exceeded", remaining),
     };
   }
 

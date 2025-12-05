@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 import {
   Copy,
   Check,
@@ -13,6 +14,8 @@ import {
   Globe,
   Lock,
   Zap,
+  Loader,
+  Trash2,
 } from "lucide-react";
 
 // Get base URL from environment or use current location
@@ -163,27 +166,150 @@ const API_ENDPOINTS = [
   },
 ];
 
+interface ApiKeyRecord {
+  id: string;
+  key?: string; // Only returned on generation
+  keyPrefix: string;
+  name: string;
+  tier: string;
+  createdAt: string;
+  expiresAt: string;
+  status: string;
+  requestCount: number;
+}
+
 export default function ApiDocsPage() {
   const { user } = useAuth();
-  const [apiKey, setApiKey] = useState<string | null>(null);
+  const router = useRouter();
+  const [currentKey, setCurrentKey] = useState<ApiKeyRecord | null>(null);
+  const [keysList, setKeysList] = useState<ApiKeyRecord[]>([]);
   const [showApiKey, setShowApiKey] = useState(false);
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const baseUrl = getBaseUrl();
 
-  const generateApiKey = () => {
-    const key = `pk_${Math.random().toString(36).substr(2, 32).toUpperCase()}`;
-    setApiKey(key);
+  // Fetch existing keys on component mount
+  useEffect(() => {
+    if (user) {
+      fetchKeys();
+    }
+  }, [user]);
+
+  const fetchKeys = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetch("/api/user/api-keys", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch API keys");
+      }
+
+      const data = await response.json();
+      setKeysList(data.keys || []);
+      // Set the first key as current, or null if no keys exist
+      if (data.keys && data.keys.length > 0) {
+        setCurrentKey(data.keys[0]);
+      } else {
+        setCurrentKey(null);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+      console.error("Failed to fetch keys:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const generateApiKey = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetch("/api/user/api-keys/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: "Generated Key",
+          tier: "free",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate API key");
+      }
+
+      const data = await response.json();
+      setCurrentKey(data);
+      await fetchKeys(); // Refresh the list
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+      console.error("Failed to generate key:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteApiKey = async (keyId: string) => {
+    if (!confirm("Are you sure you want to delete this API key?")) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetch(`/api/user/api-keys/${keyId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete API key");
+      }
+
+      await fetchKeys(); // Refresh the list
+      if (currentKey?.id === keyId) {
+        setCurrentKey(null);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+      console.error("Failed to delete key:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const regenerateApiKey = async () => {
+    if (!currentKey) {
+      await generateApiKey();
+      return;
+    }
+
+    // Delete old key and generate new one
+    try {
+      setLoading(true);
+      await deleteApiKey(currentKey.id);
+      // Generate new key after deletion
+      setTimeout(() => generateApiKey(), 500);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+      console.error("Failed to regenerate key:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  };
-
-  const regenerateApiKey = () => {
-    generateApiKey();
   };
 
   return (
@@ -201,25 +327,38 @@ export default function ApiDocsPage() {
       {/* API Key Section */}
       <div className="bg-gradient-to-r from-primary/20 to-primary/10 border border-primary/30 rounded-xl p-8">
         <div className="flex items-start justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-foreground mb-2">API Key</h2>
+          <div className="flex-1">
+            <h2 className="text-2xl font-bold text-foreground mb-2">API Keys</h2>
             <p className="text-secondary mb-4">
-              Your API key is required for all API requests. Keep it secure and
-              never share it publicly.
+              Manage your API keys for secure access to premium features. Keep them
+              private and rotate regularly.
             </p>
 
-            {apiKey ? (
-              <div className="bg-card border border-border rounded-lg p-4 space-y-3">
+            {!user ? (
+              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+                <p className="text-sm text-yellow-700 dark:text-yellow-400">
+                  Please log in to manage your API keys
+                </p>
+              </div>
+            ) : error ? (
+              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-4">
+                <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
+              </div>
+            ) : null}
+
+            {currentKey && currentKey.key ? (
+              <div className="bg-card border border-border rounded-lg p-4 space-y-3 mb-4">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <p className="text-xs text-secondary mb-1">Your API Key</p>
+                    <p className="text-xs text-secondary mb-1">Your Current API Key</p>
                     <div className="flex items-center gap-2">
                       <code className="text-sm font-mono text-foreground bg-secondary/10 px-3 py-2 rounded flex-1 truncate">
-                        {showApiKey ? apiKey : "•".repeat(apiKey.length)}
+                        {showApiKey ? currentKey.key : "•".repeat(currentKey.key.length)}
                       </code>
                       <button
                         onClick={() => setShowApiKey(!showApiKey)}
                         className="p-2 hover:bg-secondary/10 rounded transition"
+                        disabled={loading}
                       >
                         {showApiKey ? (
                           <EyeOff className="h-4 w-4 text-secondary" />
@@ -228,8 +367,9 @@ export default function ApiDocsPage() {
                         )}
                       </button>
                       <button
-                        onClick={() => copyToClipboard(apiKey)}
+                        onClick={() => copyToClipboard(currentKey.key!)}
                         className="p-2 hover:bg-secondary/10 rounded transition"
+                        disabled={loading}
                       >
                         {copied ? (
                           <Check className="h-4 w-4 text-green-500" />
@@ -239,22 +379,150 @@ export default function ApiDocsPage() {
                       </button>
                     </div>
                   </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-xs text-secondary">Tier</p>
+                    <p className="text-foreground font-medium capitalize">{currentKey.tier}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-secondary">Status</p>
+                    <p className="text-foreground font-medium capitalize">{currentKey.status}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-secondary">Created</p>
+                    <p className="text-foreground text-sm">
+                      {new Date(currentKey.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-secondary">Requests</p>
+                    <p className="text-foreground font-medium">{currentKey.requestCount}</p>
+                  </div>
+                </div>
+                <div className="flex gap-2 pt-2">
                   <button
                     onClick={regenerateApiKey}
-                    className="ml-4 px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                    className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
+                    disabled={loading}
                   >
-                    <RefreshCw className="h-4 w-4" />
+                    {loading ? (
+                      <Loader className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-4 w-4" />
+                    )}
                     Regenerate
+                  </button>
+                  <button
+                    onClick={() => deleteApiKey(currentKey.id)}
+                    className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50 border border-red-500/30"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <Loader className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ) : currentKey && !currentKey.key ? (
+              <div className="bg-card border border-border rounded-lg p-4 space-y-3 mb-4">
+                <div>
+                  <p className="text-xs text-secondary mb-1">API Key Prefix</p>
+                  <code className="text-sm font-mono text-foreground bg-secondary/10 px-3 py-2 rounded">
+                    {currentKey.keyPrefix}****
+                  </code>
+                  <p className="text-xs text-secondary mt-2">
+                    The full key is only displayed when created
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-xs text-secondary">Tier</p>
+                    <p className="text-foreground font-medium capitalize">{currentKey.tier}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-secondary">Status</p>
+                    <p className="text-foreground font-medium capitalize">{currentKey.status}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-secondary">Created</p>
+                    <p className="text-foreground text-sm">
+                      {new Date(currentKey.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-secondary">Requests</p>
+                    <p className="text-foreground font-medium">{currentKey.requestCount}</p>
+                  </div>
+                </div>
+                <div className="flex gap-2 pt-2">
+                  <button
+                    onClick={regenerateApiKey}
+                    className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <Loader className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-4 w-4" />
+                    )}
+                    Regenerate
+                  </button>
+                  <button
+                    onClick={() => deleteApiKey(currentKey.id)}
+                    className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50 border border-red-500/30"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <Loader className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4" />
+                    )}
+                    Delete
                   </button>
                 </div>
               </div>
             ) : (
               <button
                 onClick={generateApiKey}
-                className="px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition-colors"
+                className="px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
+                disabled={loading}
               >
+                {loading ? (
+                  <Loader className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4" />
+                )}
                 Generate API Key
               </button>
+            )}
+
+            {keysList.length > 1 && (
+              <div className="mt-6">
+                <h3 className="text-sm font-semibold text-foreground mb-3">Other Keys</h3>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {keysList.map((key) => (
+                    <div
+                      key={key.id}
+                      className={`bg-card border rounded-lg p-3 flex items-center justify-between text-sm cursor-pointer hover:border-primary transition ${
+                        currentKey?.id === key.id ? "border-primary" : "border-border"
+                      }`}
+                      onClick={() => setCurrentKey(key)}
+                    >
+                      <div>
+                        <p className="text-foreground font-medium">{key.keyPrefix}****</p>
+                        <p className="text-xs text-secondary">{key.name}</p>
+                      </div>
+                      <div className="text-right text-xs text-secondary">
+                        <p>{key.requestCount} requests</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
         </div>

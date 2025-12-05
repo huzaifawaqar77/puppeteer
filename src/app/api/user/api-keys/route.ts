@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { databases } from '@/lib/appwrite';
-import { appwriteConfig } from '@/lib/config';
-import { Query } from 'appwrite';
+import { NextRequest, NextResponse } from "next/server";
+import { databases } from "@/lib/appwrite";
+import { appwriteConfig } from "@/lib/config";
+import { Query } from "appwrite";
 
 /**
  * GET /api/user/api-keys
@@ -10,19 +10,19 @@ import { Query } from 'appwrite';
 export async function GET(request: NextRequest) {
   try {
     // 1. Authenticate user from Authorization header
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
+    const authHeader = request.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
       return NextResponse.json(
-        { error: 'Missing or invalid Authorization header' },
+        { error: "Missing or invalid Authorization header" },
         { status: 401 }
       );
     }
 
-    const userId = authHeader.replace('Bearer ', '').trim();
+    const userId = authHeader.replace("Bearer ", "").trim();
 
     if (!userId || userId.length === 0) {
       return NextResponse.json(
-        { error: 'Invalid user ID in Authorization header' },
+        { error: "Invalid user ID in Authorization header" },
         { status: 401 }
       );
     }
@@ -34,10 +34,7 @@ export async function GET(request: NextRequest) {
     const response = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.collections.apiKeys,
-      [
-        Query.equal('userId', userId),
-        Query.orderDesc('createdAt'),
-      ]
+      [Query.equal("userId", userId), Query.orderDesc("createdAt")]
     );
 
     // 4. Format response (never include keyHash!)
@@ -45,7 +42,7 @@ export async function GET(request: NextRequest) {
       id: key.$id,
       keyPrefix: key.keyPrefix,
       name: key.name,
-      description: key.description || '',
+      description: key.description || "",
       tier: key.tier,
       status: key.status,
       requestCount: key.requestCount,
@@ -61,9 +58,12 @@ export async function GET(request: NextRequest) {
       total: response.total,
     });
   } catch (error) {
-    console.error('List API Keys Error:', error);
+    console.error("List API Keys Error:", error);
     return NextResponse.json(
-      { error: 'Failed to list API keys', details: error instanceof Error ? error.message : String(error) },
+      {
+        error: "Failed to list API keys",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }
