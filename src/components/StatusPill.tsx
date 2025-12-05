@@ -2,7 +2,7 @@
 
 import { ReactNode } from "react";
 
-type StatusType = "processing" | "completed" | "failed";
+type StatusType = "processing" | "completed" | "failed" | "pending";
 
 interface StatusPillProps {
   status: StatusType;
@@ -28,11 +28,17 @@ const statusConfig = {
     border: "border-red-200",
     animation: "",
   },
+  pending: {
+    bg: "bg-yellow-50",
+    text: "text-yellow-700",
+    border: "border-yellow-200",
+    animation: "animate-pulse",
+  },
 };
 
 export default function StatusPill({ status, children }: StatusPillProps) {
   const config = statusConfig[status];
-  
+
   return (
     <span
       className={`
@@ -41,7 +47,17 @@ export default function StatusPill({ status, children }: StatusPillProps) {
       `}
     >
       {/* Status Dot */}
-      <span className={`w-1.5 h-1.5 rounded-full ${status === "processing" ? "bg-primary" : status === "completed" ? "bg-green-500" : "bg-red-500"}`}></span>
+      <span
+        className={`w-1.5 h-1.5 rounded-full ${
+          status === "processing"
+            ? "bg-primary"
+            : status === "completed"
+            ? "bg-green-500"
+            : status === "pending"
+            ? "bg-yellow-500"
+            : "bg-red-500"
+        }`}
+      ></span>
       {children || status.charAt(0).toUpperCase() + status.slice(1)}
     </span>
   );

@@ -15,7 +15,9 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<Models.User<Models.Preferences> | null>(null);
+  const [user, setUser] = useState<Models.User<Models.Preferences> | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,7 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function login(email: string, password: string) {
     try {
       console.log("📧 Creating session for:", email);
-      
+
       // Try to delete any existing session first
       try {
         await account.deleteSession("current");
@@ -49,7 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // No existing session, that's fine
         console.log("ℹ️ No existing session to delete");
       }
-      
+
       await account.createEmailPasswordSession(email, password);
       console.log("🔑 Session created, fetching user data...");
       const currentUser = await account.get();
@@ -62,8 +64,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function register(email: string, password: string, name: string) {
-    await account.create("unique()", email, password, name);
-    await login(email, password);
+    try {
+      console.log("📝 Creating new user account...");
+      const newUser = await account.create("unique()", email, password, name);
+      console.log("✅ Account created:", newUser.name);
+
+      // Login the user
+      await login(email, password);
+
+      // Create API key for the new user in FREE tier
+      console.log("🔑 Creating API key for new user...");
+      const apiKeyResponse = await fetch("/api/auth/create-api-key", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: newUser.$id,
+        }),
+      });
+
+      if (!apiKeyResponse.ok) {
+        console.error(
+          "⚠️ Failed to create API key, but user account is created"
+        );
+        // Don't throw error - user is already created and logged in
+      } else {
+        const apiKeyData = await apiKeyResponse.json();
+        console.log("✅ API key created successfully");
+        console.log("📦 API Key:", apiKeyData.apiKey);
+      }
+    } catch (error) {
+      console.error("❌ Registration failed:", error);
+      throw error;
+    }
   }
 
   async function logout() {
