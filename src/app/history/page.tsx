@@ -1,11 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { databases } from "@/lib/appwrite";
+import { databases, storage } from "@/lib/appwrite";
 import { appwriteConfig } from "@/lib/config";
 import { useAuth } from "@/contexts/AuthContext";
 import { Query } from "appwrite";
-import { FileText, Clock, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import {
+  FileText,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Loader2,
+  Download,
+} from "lucide-react";
 
 interface ProcessingJob {
   $id: string;
@@ -13,6 +20,7 @@ interface ProcessingJob {
   status: string;
   startedAt: string;
   completedAt?: string;
+  outputFileId?: string;
   errorLog?: string;
 }
 
@@ -20,6 +28,8 @@ export default function HistoryPage() {
   const { user } = useAuth();
   const [jobs, setJobs] = useState<ProcessingJob[]>([]);
   const [loading, setLoading] = useState(true);
+  const [downloading, setDownloading] = useState<string | null>(null);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -43,6 +53,38 @@ export default function HistoryPage() {
       console.error("Failed to load history:", error);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleDownload(job: ProcessingJob) {
+    if (!job.outputFileId) {
+      setDownloadError("No output file available for this job");
+      return;
+    }
+
+    try {
+      setDownloading(job.$id);
+      setDownloadError(null);
+
+      const downloadUrl = await storage.getFileDownload(
+        appwriteConfig.buckets.output,
+        job.outputFileId
+      );
+
+      // Create a link and trigger download
+      const link = document.createElement("a");
+      link.href = downloadUrl.toString();
+      link.download = `${job.operationType}-${new Date(
+        job.startedAt
+      ).getTime()}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Download failed:", error);
+      setDownloadError("Failed to download file");
+    } finally {
+      setDownloading(null);
     }
   }
 
@@ -94,57 +136,90 @@ export default function HistoryPage() {
             </p>
           </div>
         ) : (
-          <div className="bg-card border border-border rounded-xl overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-secondary/5">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
-                    Operation
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
-                    Started
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
-                    Completed
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {jobs.map((job) => (
-                  <tr
-                    key={job.$id}
-                    className="hover:bg-secondary/5 transition-colors"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <FileText className="h-5 w-5 text-primary mr-3" />
-                        <span className="text-sm font-medium text-foreground">
-                          {job.operationType}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        {getStatusIcon(job.status)}
-                        <span className="text-sm text-foreground">
-                          {job.status}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary">
-                      {formatDate(job.startedAt)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary">
-                      {job.completedAt ? formatDate(job.completedAt) : "-"}
-                    </td>
+          <>
+            {downloadError && (
+              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-4">
+                <p className="text-sm text-red-600">{downloadError}</p>
+              </div>
+            )}
+            <div className="bg-card border border-border rounded-xl overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-secondary/5">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                      Operation
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                      Started
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                      Completed
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">
+                      Action
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {jobs.map((job) => (
+                    <tr
+                      key={job.$id}
+                      className="hover:bg-secondary/5 transition-colors"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <FileText className="h-5 w-5 text-primary mr-3" />
+                          <span className="text-sm font-medium text-foreground">
+                            {job.operationType}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          {getStatusIcon(job.status)}
+                          <span className="text-sm text-foreground">
+                            {job.status}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary">
+                        {formatDate(job.startedAt)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary">
+                        {job.completedAt ? formatDate(job.completedAt) : "-"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {job.status === "COMPLETED" && job.outputFileId ? (
+                          <button
+                            onClick={() => handleDownload(job)}
+                            disabled={downloading === job.$id}
+                            className="inline-flex items-center gap-2 px-3 py-2 bg-primary hover:bg-primary/90 disabled:bg-primary/50 text-white rounded-lg text-sm font-medium transition-colors"
+                          >
+                            {downloading === job.$id ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                Downloading...
+                              </>
+                            ) : (
+                              <>
+                                <Download className="h-4 w-4" />
+                                Download
+                              </>
+                            )}
+                          </button>
+                        ) : (
+                          <span className="text-xs text-secondary">-</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
     </div>
