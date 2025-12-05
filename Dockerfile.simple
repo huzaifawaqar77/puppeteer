@@ -1,0 +1,45 @@
+# Lightweight production Dockerfile optimized for Next.js with Coolify
+# This version uses Next.js built-in server for better compatibility
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Install curl for healthcheck
+RUN apk add --no-cache curl
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies (production only)
+RUN npm ci --only=production && npm cache clean --force
+
+# Copy source code
+COPY . .
+
+# Build the application
+RUN npm run build
+
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
+
+# Change ownership
+RUN chown -R nextjs:nodejs /app
+
+# Switch user
+USER nextjs
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD curl -f http://localhost:3000/api/health || exit 1
+
+# Start next.js server
+CMD ["npm", "start"]
