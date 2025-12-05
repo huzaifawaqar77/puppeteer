@@ -13,6 +13,7 @@ export const appwriteConfig = {
     files: "files",
     processingJobs: "processingJobs",
     activityLogs: "activityLogs",
+    apiKeys: "apiKeys",
   },
 
   // Storage Buckets
