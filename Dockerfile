@@ -5,7 +5,6 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Set environment variables
-ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Copy package files
