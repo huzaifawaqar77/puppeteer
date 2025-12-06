@@ -42,7 +42,8 @@ RUN npm ci --omit=dev && npm cache clean --force
 # Copy built application from builder stage
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/scripts ./scripts
+# Copy scripts folder (ensure it exists in source)
+COPY scripts ./scripts
 
 # Create non-root user for security
 RUN addgroup --system --gid 1001 nodejs && \
