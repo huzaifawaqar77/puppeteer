@@ -20,10 +20,10 @@ async function extractTextFromPdf(buffer: Buffer): Promise<string> {
 function chunkText(text: string, chunkSize: number = 30000): string[] {
   const chunks: string[] = [];
   let currentChunk = "";
-  const sentences = text.split('. ');
+  const sentences = text.split(". ");
 
   for (const sentence of sentences) {
-    if ((currentChunk.length + sentence.length) < chunkSize) {
+    if (currentChunk.length + sentence.length < chunkSize) {
       currentChunk += sentence + ". ";
     } else {
       chunks.push(currentChunk);
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
       appwriteConfig.buckets.input,
       fileId
     );
-    
+
     const fileDownloadResponse = await fetch(fileUrl.toString());
     const arrayBuffer = await fileDownloadResponse.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
 
       // 3. Process with Gemini
       const genAI = new GoogleGenerativeAI(geminiApiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
       const results = [];
       for (let i = 0; i < chunks.length; i++) {
@@ -137,7 +137,6 @@ export async function POST(req: NextRequest) {
 
       processedBuffer = Buffer.from(mergedOutput);
       extension = "json";
-
     } else {
       // --- STANDARD STIRLING PDF PATH ---
       const formData = new FormData();

@@ -1,4 +1,11 @@
-const { Client, Databases, Storage, ID, Permission, Role } = require("node-appwrite");
+const {
+  Client,
+  Databases,
+  Storage,
+  ID,
+  Permission,
+  Role,
+} = require("node-appwrite");
 
 // Configuration
 const APPWRITE_ENDPOINT = "https://appwrite.uiflexer.com/v1";
@@ -10,7 +17,9 @@ const DATABASE_NAME = "PDF Flex Database";
 const INPUT_BUCKET_ID = "input-files";
 const OUTPUT_BUCKET_ID = "output-files";
 
-const APPWRITE_API_KEY = process.env.APPWRITE_API_KEY || "standard_ecc660d56ff6fcd01beabbcc65f0afe40ba76f8962c321d19f71c1ec46d9df3426374604df99cdf9bced5ddbde676334b037d5a2656e280f14470c9efaee19e08f0f6615e5d864c41bdf12d2f820ef5ac7062a3b39b3085785bd8f1c0554f4f9e5d7ffb9e5040eaaebbe311a9372168e3025cf2a83ecf3a1b684fb796c8ecfad";
+const APPWRITE_API_KEY =
+  process.env.APPWRITE_API_KEY ||
+  "standard_ecc660d56ff6fcd01beabbcc65f0afe40ba76f8962c321d19f71c1ec46d9df3426374604df99cdf9bced5ddbde676334b037d5a2656e280f14470c9efaee19e08f0f6615e5d864c41bdf12d2f820ef5ac7062a3b39b3085785bd8f1c0554f4f9e5d7ffb9e5040eaaebbe311a9372168e3025cf2a83ecf3a1b684fb796c8ecfad";
 
 const client = new Client()
   .setEndpoint(APPWRITE_ENDPOINT)
@@ -21,7 +30,7 @@ const databases = new Databases(client);
 const storage = new Storage(client);
 
 // Helper to wait between operations (Appwrite needs time to process)
-const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function createDatabase() {
   console.log("🗄️  Creating database...");
@@ -40,13 +49,40 @@ async function createDatabase() {
 
 async function createStorageBuckets() {
   console.log("📦 Creating storage buckets...");
-  
+
   try {
     await storage.createBucket(
       INPUT_BUCKET_ID,
       "Input Files",
-      [Permission.read(Role.users()), Permission.create(Role.users()), Permission.update(Role.users()), Permission.delete(Role.users())],
-      false, true, 30000000, ["pdf", "jpg", "jpeg", "png", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "odt", "ods", "odp", "rtf", "txt"], "none", true, false
+      [
+        Permission.read(Role.users()),
+        Permission.create(Role.users()),
+        Permission.update(Role.users()),
+        Permission.delete(Role.users()),
+      ],
+      false,
+      true,
+      30000000,
+      [
+        "pdf",
+        "jpg",
+        "jpeg",
+        "png",
+        "doc",
+        "docx",
+        "xls",
+        "xlsx",
+        "ppt",
+        "pptx",
+        "odt",
+        "ods",
+        "odp",
+        "rtf",
+        "txt",
+      ],
+      "none",
+      true,
+      false
     );
     console.log("✅ Input bucket created");
   } catch (error) {
@@ -58,8 +94,37 @@ async function createStorageBuckets() {
     await storage.createBucket(
       OUTPUT_BUCKET_ID,
       "Output Files",
-      [Permission.read(Role.users()), Permission.create(Role.users()), Permission.update(Role.users()), Permission.delete(Role.users())],
-      false, true, 30000000, ["pdf", "jpg", "jpeg", "png", "zip"], "none", true, false
+      [
+        Permission.read(Role.users()),
+        Permission.create(Role.users()),
+        Permission.update(Role.users()),
+        Permission.delete(Role.users()),
+      ],
+      false,
+      true,
+      30000000,
+      [
+        "pdf",
+        "jpg",
+        "jpeg",
+        "png",
+        "zip",
+        "txt",
+        "json",
+        "html",
+        "csv",
+        "xml",
+        "doc",
+        "docx",
+        "xls",
+        "xlsx",
+        "ppt",
+        "pptx",
+        "rtf",
+      ],
+      "none",
+      true,
+      false
     );
     console.log("✅ Output bucket created\n");
   } catch (error) {
@@ -68,16 +133,26 @@ async function createStorageBuckets() {
   }
 }
 
-async function createCollectionWithAttributes(collectionId, collectionName, attributes, indexes) {
+async function createCollectionWithAttributes(
+  collectionId,
+  collectionName,
+  attributes,
+  indexes
+) {
   console.log(`  → Creating '${collectionId}' collection...`);
-  
+
   // Step 1: Create collection
   try {
     await databases.createCollection(
       DATABASE_ID,
       collectionId,
       collectionName,
-      [Permission.read(Role.users()), Permission.create(Role.users()), Permission.update(Role.users()), Permission.delete(Role.users())]
+      [
+        Permission.read(Role.users()),
+        Permission.create(Role.users()),
+        Permission.update(Role.users()),
+        Permission.delete(Role.users()),
+      ]
     );
     console.log(`     Collection created`);
     await wait(1000); // Wait for collection to be ready
@@ -128,13 +203,43 @@ async function setupCollections() {
     "users",
     "Users",
     [
-      () => databases.createStringAttribute(DATABASE_ID, "users", "userId", 255, true),
-      () => databases.createEnumAttribute(DATABASE_ID, "users", "planTier", ["FREE", "PRO", "ENTERPRISE"], true),
-      () => databases.createIntegerAttribute(DATABASE_ID, "users", "usageCount", false, 0),
-      () => databases.createDatetimeAttribute(DATABASE_ID, "users", "createdAt", true),
+      () =>
+        databases.createStringAttribute(
+          DATABASE_ID,
+          "users",
+          "userId",
+          255,
+          true
+        ),
+      () =>
+        databases.createEnumAttribute(
+          DATABASE_ID,
+          "users",
+          "planTier",
+          ["FREE", "PRO", "ENTERPRISE"],
+          true
+        ),
+      () =>
+        databases.createIntegerAttribute(
+          DATABASE_ID,
+          "users",
+          "usageCount",
+          false,
+          0
+        ),
+      () =>
+        databases.createDatetimeAttribute(
+          DATABASE_ID,
+          "users",
+          "createdAt",
+          true
+        ),
     ],
     [
-      () => databases.createIndex(DATABASE_ID, "users", "userIdIndex", "key", ["userId"]),
+      () =>
+        databases.createIndex(DATABASE_ID, "users", "userIdIndex", "key", [
+          "userId",
+        ]),
     ]
   );
 
@@ -143,15 +248,59 @@ async function setupCollections() {
     "projects",
     "Projects",
     [
-      () => databases.createStringAttribute(DATABASE_ID, "projects", "ownerId", 255, true),
-      () => databases.createStringAttribute(DATABASE_ID, "projects", "name", 255, true),
-      () => databases.createStringAttribute(DATABASE_ID, "projects", "apiKey", 255, true),
-      () => databases.createStringAttribute(DATABASE_ID, "projects", "whitelistedDomains", 5000, false),
-      () => databases.createDatetimeAttribute(DATABASE_ID, "projects", "createdAt", true),
+      () =>
+        databases.createStringAttribute(
+          DATABASE_ID,
+          "projects",
+          "ownerId",
+          255,
+          true
+        ),
+      () =>
+        databases.createStringAttribute(
+          DATABASE_ID,
+          "projects",
+          "name",
+          255,
+          true
+        ),
+      () =>
+        databases.createStringAttribute(
+          DATABASE_ID,
+          "projects",
+          "apiKey",
+          255,
+          true
+        ),
+      () =>
+        databases.createStringAttribute(
+          DATABASE_ID,
+          "projects",
+          "whitelistedDomains",
+          5000,
+          false
+        ),
+      () =>
+        databases.createDatetimeAttribute(
+          DATABASE_ID,
+          "projects",
+          "createdAt",
+          true
+        ),
     ],
     [
-      () => databases.createIndex(DATABASE_ID, "projects", "ownerIdIndex", "key", ["ownerId"]),
-      () => databases.createIndex(DATABASE_ID, "projects", "apiKeyIndex", "unique", ["apiKey"]),
+      () =>
+        databases.createIndex(DATABASE_ID, "projects", "ownerIdIndex", "key", [
+          "ownerId",
+        ]),
+      () =>
+        databases.createIndex(
+          DATABASE_ID,
+          "projects",
+          "apiKeyIndex",
+          "unique",
+          ["apiKey"]
+        ),
     ]
   );
 
@@ -160,17 +309,68 @@ async function setupCollections() {
     "files",
     "Files",
     [
-      () => databases.createStringAttribute(DATABASE_ID, "files", "userId", 255, true),
-      () => databases.createStringAttribute(DATABASE_ID, "files", "bucketFileId", 255, true),
-      () => databases.createStringAttribute(DATABASE_ID, "files", "originalName", 255, true),
-      () => databases.createIntegerAttribute(DATABASE_ID, "files", "size", true),
-      () => databases.createStringAttribute(DATABASE_ID, "files", "mimeType", 100, true),
-      () => databases.createDatetimeAttribute(DATABASE_ID, "files", "uploadedAt", true),
-      () => databases.createDatetimeAttribute(DATABASE_ID, "files", "expiresAt", false),
+      () =>
+        databases.createStringAttribute(
+          DATABASE_ID,
+          "files",
+          "userId",
+          255,
+          true
+        ),
+      () =>
+        databases.createStringAttribute(
+          DATABASE_ID,
+          "files",
+          "bucketFileId",
+          255,
+          true
+        ),
+      () =>
+        databases.createStringAttribute(
+          DATABASE_ID,
+          "files",
+          "originalName",
+          255,
+          true
+        ),
+      () =>
+        databases.createIntegerAttribute(DATABASE_ID, "files", "size", true),
+      () =>
+        databases.createStringAttribute(
+          DATABASE_ID,
+          "files",
+          "mimeType",
+          100,
+          true
+        ),
+      () =>
+        databases.createDatetimeAttribute(
+          DATABASE_ID,
+          "files",
+          "uploadedAt",
+          true
+        ),
+      () =>
+        databases.createDatetimeAttribute(
+          DATABASE_ID,
+          "files",
+          "expiresAt",
+          false
+        ),
     ],
     [
-      () => databases.createIndex(DATABASE_ID, "files", "userIdIndex", "key", ["userId"]),
-      () => databases.createIndex(DATABASE_ID, "files", "bucketFileIdIndex", "key", ["bucketFileId"]),
+      () =>
+        databases.createIndex(DATABASE_ID, "files", "userIdIndex", "key", [
+          "userId",
+        ]),
+      () =>
+        databases.createIndex(
+          DATABASE_ID,
+          "files",
+          "bucketFileIdIndex",
+          "key",
+          ["bucketFileId"]
+        ),
     ]
   );
 
@@ -179,18 +379,86 @@ async function setupCollections() {
     "processingJobs",
     "Processing Jobs",
     [
-      () => databases.createStringAttribute(DATABASE_ID, "processingJobs", "userId", 255, true),
-      () => databases.createEnumAttribute(DATABASE_ID, "processingJobs", "operationType", ["MERGE", "SPLIT", "COMPRESS", "CONVERT", "OCR", "ROTATE"], true),
-      () => databases.createEnumAttribute(DATABASE_ID, "processingJobs", "status", ["PENDING", "PROCESSING", "COMPLETED", "FAILED"], true),
-      () => databases.createStringAttribute(DATABASE_ID, "processingJobs", "inputFileIds", 5000, true),
-      () => databases.createStringAttribute(DATABASE_ID, "processingJobs", "outputFileId", 255, false),
-      () => databases.createStringAttribute(DATABASE_ID, "processingJobs", "errorLog", 2000, false),
-      () => databases.createDatetimeAttribute(DATABASE_ID, "processingJobs", "startedAt", true),
-      () => databases.createDatetimeAttribute(DATABASE_ID, "processingJobs", "completedAt", false),
+      () =>
+        databases.createStringAttribute(
+          DATABASE_ID,
+          "processingJobs",
+          "userId",
+          255,
+          true
+        ),
+      () =>
+        databases.createEnumAttribute(
+          DATABASE_ID,
+          "processingJobs",
+          "operationType",
+          ["MERGE", "SPLIT", "COMPRESS", "CONVERT", "OCR", "ROTATE"],
+          true
+        ),
+      () =>
+        databases.createEnumAttribute(
+          DATABASE_ID,
+          "processingJobs",
+          "status",
+          ["PENDING", "PROCESSING", "COMPLETED", "FAILED"],
+          true
+        ),
+      () =>
+        databases.createStringAttribute(
+          DATABASE_ID,
+          "processingJobs",
+          "inputFileIds",
+          5000,
+          true
+        ),
+      () =>
+        databases.createStringAttribute(
+          DATABASE_ID,
+          "processingJobs",
+          "outputFileId",
+          255,
+          false
+        ),
+      () =>
+        databases.createStringAttribute(
+          DATABASE_ID,
+          "processingJobs",
+          "errorLog",
+          2000,
+          false
+        ),
+      () =>
+        databases.createDatetimeAttribute(
+          DATABASE_ID,
+          "processingJobs",
+          "startedAt",
+          true
+        ),
+      () =>
+        databases.createDatetimeAttribute(
+          DATABASE_ID,
+          "processingJobs",
+          "completedAt",
+          false
+        ),
     ],
     [
-      () => databases.createIndex(DATABASE_ID, "processingJobs", "userIdIndex", "key", ["userId"]),
-      () => databases.createIndex(DATABASE_ID, "processingJobs", "statusIndex", "key", ["status"]),
+      () =>
+        databases.createIndex(
+          DATABASE_ID,
+          "processingJobs",
+          "userIdIndex",
+          "key",
+          ["userId"]
+        ),
+      () =>
+        databases.createIndex(
+          DATABASE_ID,
+          "processingJobs",
+          "statusIndex",
+          "key",
+          ["status"]
+        ),
     ]
   );
 
@@ -199,14 +467,55 @@ async function setupCollections() {
     "activityLogs",
     "Activity Logs",
     [
-      () => databases.createStringAttribute(DATABASE_ID, "activityLogs", "userId", 255, true),
-      () => databases.createStringAttribute(DATABASE_ID, "activityLogs", "action", 255, true),
-      () => databases.createStringAttribute(DATABASE_ID, "activityLogs", "ipAddress", 50, false),
-      () => databases.createDatetimeAttribute(DATABASE_ID, "activityLogs", "timestamp", true),
+      () =>
+        databases.createStringAttribute(
+          DATABASE_ID,
+          "activityLogs",
+          "userId",
+          255,
+          true
+        ),
+      () =>
+        databases.createStringAttribute(
+          DATABASE_ID,
+          "activityLogs",
+          "action",
+          255,
+          true
+        ),
+      () =>
+        databases.createStringAttribute(
+          DATABASE_ID,
+          "activityLogs",
+          "ipAddress",
+          50,
+          false
+        ),
+      () =>
+        databases.createDatetimeAttribute(
+          DATABASE_ID,
+          "activityLogs",
+          "timestamp",
+          true
+        ),
     ],
     [
-      () => databases.createIndex(DATABASE_ID, "activityLogs", "userIdIndex", "key", ["userId"]),
-      () => databases.createIndex(DATABASE_ID, "activityLogs", "timestampIndex", "key", ["timestamp"]),
+      () =>
+        databases.createIndex(
+          DATABASE_ID,
+          "activityLogs",
+          "userIdIndex",
+          "key",
+          ["userId"]
+        ),
+      () =>
+        databases.createIndex(
+          DATABASE_ID,
+          "activityLogs",
+          "timestampIndex",
+          "key",
+          ["timestamp"]
+        ),
     ]
   );
 }
@@ -225,10 +534,11 @@ async function setupAppwrite() {
     console.log("📋 Summary:");
     console.log("  ✅ Database: pdf-flex-db");
     console.log("  ✅ Buckets: input-files, output-files (30MB max)");
-    console.log("  ✅ Collections: users, projects, files, processingJobs, activityLogs");
+    console.log(
+      "  ✅ Collections: users, projects, files, processingJobs, activityLogs"
+    );
     console.log("\n✨ Your Appwrite backend is ready!");
     console.log("   Visit http://localhost:3000\n");
-
   } catch (error) {
     console.error("\n❌ Setup error:", error.message);
     console.error("\n🔧 Check:");
