@@ -3,13 +3,48 @@ import { storage, databases } from "@/lib/appwrite";
 import { appwriteConfig } from "@/lib/config";
 import { ID } from "appwrite";
 import { InputFile } from "node-appwrite/file";
-import { writeFile, unlink } from "fs/promises";
-import { join } from "path";
-import { tmpdir } from "os";
-import { exec } from "child_process";
-import { promisify } from "util";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+// @ts-ignore
+import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
 
-const execAsync = promisify(exec);
+async function extractTextFromPdf(buffer: Buffer): Promise<string> {
+  const data = new Uint8Array(buffer);
+  const loadingTask = pdfjsLib.getDocument({ 
+    data, 
+    useSystemFonts: true,
+    disableFontFace: true 
+  });
+  
+  const pdfDocument = await loadingTask.promise;
+  let fullText = '';
+
+  for (let i = 1; i <= pdfDocument.numPages; i++) {
+    const page = await pdfDocument.getPage(i);
+    const textContent = await page.getTextContent();
+    const pageText = textContent.items.map((item: any) => item.str).join(' ');
+    fullText += pageText + '\n\n';
+  }
+  return fullText;
+}
+
+function chunkText(text: string, chunkSize: number = 30000): string[] {
+  const chunks: string[] = [];
+  let currentChunk = "";
+  const sentences = text.split('. ');
+
+  for (const sentence of sentences) {
+    if ((currentChunk.length + sentence.length) < chunkSize) {
+      currentChunk += sentence + ". ";
+    } else {
+      chunks.push(currentChunk);
+      currentChunk = sentence + ". ";
+    }
+  }
+  if (currentChunk) {
+    chunks.push(currentChunk);
+  }
+  return chunks;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -27,7 +62,7 @@ export async function POST(req: NextRequest) {
       appwriteConfig.buckets.input,
       fileId
     );
-
+    
     const fileDownloadResponse = await fetch(fileUrl.toString());
     const arrayBuffer = await fileDownloadResponse.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
@@ -36,44 +71,83 @@ export async function POST(req: NextRequest) {
     let extension = outputFormat === "html" ? "html" : "txt";
 
     if (aiPrompt) {
-      // --- AI PROCESSING PATH ---
+      // --- AI PROCESSING PATH (Node.js) ---
       const geminiApiKey = process.env.GEMINI_API_KEY;
       if (!geminiApiKey) {
         throw new Error("GEMINI_API_KEY is not configured");
       }
 
-      // Save to temp file
-      const tempFilePath = join(tmpdir(), `input-${ID.unique()}.pdf`);
-      await writeFile(tempFilePath, buffer);
+      // 1. Extract Text
+      const text = await extractTextFromPdf(buffer);
 
+      // 2. Chunk Text
+      const chunks = chunkText(text);
+
+      // 3. Process with Gemini
+      const genAI = new GoogleGenerativeAI(geminiApiKey);
+      const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+      const results = [];
+      for (let i = 0; i < chunks.length; i++) {
+        const chunk = chunks[i];
+        const prompt = `
+          You are a helpful assistant that extracts information from text.
+          
+          USER INSTRUCTION: ${aiPrompt}
+          
+          DATA TO PROCESS (Chunk ${i + 1}/${chunks.length}):
+          ${chunk}
+          
+          OUTPUT FORMAT:
+          Please provide the output in valid JSON format. 
+          If the user asked for a list, return a JSON object with a key "items" containing the list.
+          Do not include markdown formatting (like \`\`\`json). Just return the raw JSON string.
+        `;
+
+        try {
+          const result = await model.generateContent(prompt);
+          const response = await result.response;
+          results.push(response.text());
+        } catch (e: any) {
+          console.error(`Error processing chunk ${i}:`, e);
+          results.push(JSON.stringify({ error: e.message }));
+        }
+      }
+
+      // 4. Merge Results (Simple merge)
+      let mergedOutput = "";
       try {
-        const scriptPath = join(
-          process.cwd(),
-          "scripts",
-          "process_pdf_with_gemini.py"
-        );
+        // Try to parse and merge if they are JSON arrays
+        const allItems: any[] = [];
+        let isArrayMerge = true;
 
-        // Escape quotes in prompt to avoid shell issues (basic sanitization)
-        const safePrompt = aiPrompt.replace(/"/g, '\\"');
-
-        // Execute Python script
-        // Note: In Docker, python3 is used. Locally might be python.
-        const pythonCommand =
-          process.platform === "win32" ? "python" : "python3";
-        const { stdout, stderr } = await execAsync(
-          `${pythonCommand} "${scriptPath}" "${tempFilePath}" "${safePrompt}" "${geminiApiKey}"`
-        );
-
-        if (stderr && stderr.trim().length > 0) {
-          console.warn("Python script stderr:", stderr);
+        for (const res of results) {
+          try {
+            const parsed = JSON.parse(res);
+            if (parsed.items && Array.isArray(parsed.items)) {
+              allItems.push(...parsed.items);
+            } else if (Array.isArray(parsed)) {
+              allItems.push(...parsed);
+            } else {
+              isArrayMerge = false;
+            }
+          } catch {
+            isArrayMerge = false;
+          }
         }
 
-        processedBuffer = Buffer.from(stdout);
-        extension = "json"; // AI output is usually JSON/Text
-      } finally {
-        // Cleanup temp file
-        await unlink(tempFilePath).catch(() => {});
+        if (isArrayMerge && allItems.length > 0) {
+          mergedOutput = JSON.stringify(allItems, null, 2);
+        } else {
+          mergedOutput = results.join("\n\n");
+        }
+      } catch {
+        mergedOutput = results.join("\n\n");
       }
+
+      processedBuffer = Buffer.from(mergedOutput);
+      extension = "json";
+
     } else {
       // --- STANDARD STIRLING PDF PATH ---
       const formData = new FormData();

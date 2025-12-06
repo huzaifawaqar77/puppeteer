@@ -29,9 +29,8 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 
-# Install curl for healthcheck and python for AI processing
-RUN apk add --no-cache curl python3 py3-pip && \
-    pip3 install google-generativeai pypdf --break-system-packages
+# Install curl for healthcheck
+RUN apk add --no-cache curl
 
 # Copy package files
 COPY package*.json ./
@@ -42,8 +41,6 @@ RUN npm ci --omit=dev && npm cache clean --force
 # Copy built application from builder stage
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
-# Copy scripts folder (ensure it exists in source)
-COPY scripts ./scripts
 
 # Create non-root user for security
 RUN addgroup --system --gid 1001 nodejs && \
