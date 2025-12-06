@@ -12,9 +12,13 @@ export default function PdfToTextToolPage() {
   const { user } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [processing, setProcessing] = useState(false);
-  const [result, setResult] = useState<{ url: string; filename: string } | null>(null);
+  const [result, setResult] = useState<{
+    url: string;
+    filename: string;
+  } | null>(null);
   const [error, setError] = useState<string>("");
   const [outputFormat, setOutputFormat] = useState<string>("txt");
+  const [aiPrompt, setAiPrompt] = useState<string>("");
 
   const handleFilesSelected = (files: File[]) => {
     setFile(files[0] ?? null);
@@ -59,6 +63,7 @@ export default function PdfToTextToolPage() {
           fileId: uploadedFile.$id,
           jobId: job.$id,
           outputFormat,
+          aiPrompt,
         }),
       });
 
@@ -81,7 +86,9 @@ export default function PdfToTextToolPage() {
       <div className="space-y-6">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">PDF to Text</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            PDF to Text
+          </h1>
           <p className="text-secondary">
             Extract text content from your PDF document
           </p>
@@ -101,6 +108,23 @@ export default function PdfToTextToolPage() {
             />
           </div>
 
+          {/* AI Prompt Input */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-foreground mb-2">
+              AI Formatting Instructions (Optional)
+            </label>
+            <textarea
+              value={aiPrompt}
+              onChange={(e) => setAiPrompt(e.target.value)}
+              placeholder="e.g., Extract all diseases as a JSON list, or separate procedures and methods..."
+              className="w-full h-32 px-4 py-3 border border-border bg-card text-foreground rounded-lg focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all resize-none"
+            />
+            <p className="mt-2 text-xs text-secondary">
+              Leave empty for standard text extraction. If provided, AI will
+              process the text.
+            </p>
+          </div>
+
           {/* Output Format Selection */}
           {file && (
             <div className="mb-6">
@@ -116,7 +140,8 @@ export default function PdfToTextToolPage() {
                 <option value="html">HTML (.html)</option>
               </select>
               <p className="mt-2 text-xs text-secondary">
-                Choose between plain text or HTML format with preserved formatting
+                Choose between plain text or HTML format with preserved
+                formatting
               </p>
             </div>
           )}
@@ -171,7 +196,8 @@ export default function PdfToTextToolPage() {
         {/* Info Card */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <p className="text-sm text-blue-900">
-            <strong>Note:</strong> Text extraction works best with selectable PDF text. For scanned documents, use the OCR tool first.
+            <strong>Note:</strong> Text extraction works best with selectable
+            PDF text. For scanned documents, use the OCR tool first.
           </p>
         </div>
       </div>
