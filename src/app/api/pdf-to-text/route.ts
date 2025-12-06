@@ -5,26 +5,16 @@ import { ID } from "appwrite";
 import { InputFile } from "node-appwrite/file";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 // @ts-ignore
-import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
+import pdf from "pdf-parse";
 
 async function extractTextFromPdf(buffer: Buffer): Promise<string> {
-  const data = new Uint8Array(buffer);
-  const loadingTask = pdfjsLib.getDocument({ 
-    data, 
-    useSystemFonts: true,
-    disableFontFace: true 
-  });
-  
-  const pdfDocument = await loadingTask.promise;
-  let fullText = '';
-
-  for (let i = 1; i <= pdfDocument.numPages; i++) {
-    const page = await pdfDocument.getPage(i);
-    const textContent = await page.getTextContent();
-    const pageText = textContent.items.map((item: any) => item.str).join(' ');
-    fullText += pageText + '\n\n';
+  try {
+    const data = await pdf(buffer);
+    return data.text;
+  } catch (error) {
+    console.error("Error extracting text with pdf-parse:", error);
+    throw new Error("Failed to extract text from PDF");
   }
-  return fullText;
 }
 
 function chunkText(text: string, chunkSize: number = 30000): string[] {
