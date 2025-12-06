@@ -13,6 +13,7 @@ import {
   LogOut,
   Crown,
   X,
+  Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -20,6 +21,7 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Tools", href: "/tools", icon: Wrench },
   { name: "History", href: "/history", icon: Clock },
+  { name: "Miscellaneous", href: "/miscellaneous", icon: Sparkles },
   { name: "API", href: "/api-docs", icon: Code },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },
   { name: "Premium", href: "/premium", icon: Crown },
